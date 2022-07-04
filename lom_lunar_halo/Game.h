@@ -7,6 +7,9 @@
 #include "DeviceResources.h"
 #include "StepTimer.h"
 #include "../DirectXTK-main/Inc/SpriteBatch.h"
+#include "Sprite.h"
+#include "Canvas.h"
+#include "Image.h"
 
 using Microsoft::WRL::ComPtr;
 using DX::ThrowIfFailed;
@@ -64,6 +67,5 @@ private:
     DX::StepTimer                           m_timer;
     std::unique_ptr<DirectX::SpriteBatch> _batch;
 
-    ComPtr<ID3D11Texture2D> _testMir3Tex;
-    ComPtr<ID3D11ShaderResourceView> _testMir3TexSRV;
+    std::shared_ptr<YX::GUI::Canvas> _testMir3;
 };

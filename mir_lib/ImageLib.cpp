@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ImageLib.h"
 #include <cassert>
+#include <iostream>
 
 const unsigned char ImageLib::KeyNone = 0xc0;// Í¸Ã÷
 const unsigned char ImageLib::KeyConst = 0xc1;

@@ -81,7 +81,7 @@ void Game::Render()
 
     // TODO: Add your rendering code here.
     _batch->Begin();
-    _batch->Draw(_testMir3TexSRV.Get(), RECT{0,0,800,600});
+    _testMir3->Draw(_batch.get());
     _batch->End();
 
     m_deviceResources->PIXEndEvent();
@@ -179,15 +179,17 @@ void Game::CreateDeviceDependentResources()
     auto info = imgLib.GetImageInfo(0);
     auto rgba32 = imgLib.GetImageRGBA32(0);
     imgLib.Close();
-    D3D11_SUBRESOURCE_DATA subData{ 0 };
-    subData.pSysMem = rgba32.data();
-    subData.SysMemPitch = info.Width*4;
-    ThrowIfFailed(DirectX::CreateTextureFromMemory(
-        device,
-        info.Width, info.Height,
-        DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
-        (const D3D11_SUBRESOURCE_DATA)subData,
-        _testMir3Tex.GetAddressOf(), _testMir3TexSRV.GetAddressOf()));
+    auto sprite = YX::Sprite::CreateFromWIL(device, info, std::move(rgba32));
+    _testMir3 = std::make_shared<YX::GUI::Canvas>();
+    _testMir3->Pivot.x = 0;
+    _testMir3->Pivot.y = 0;
+    _testMir3->Width = 640;
+    _testMir3->Height = 380;
+    auto img = new YX::GUI::Image();
+    img->SetSprite(sprite);
+    img->SetParent(_testMir3);
+    img->SetPivot(0.5f, 0.5f);
+    img->FillParent();
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
