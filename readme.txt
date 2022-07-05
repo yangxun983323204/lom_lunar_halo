@@ -5,3 +5,6 @@
 
 	DirectXTK
 	https://github.com/microsoft/DirectXTK
+
+	nlohmann json
+	https://github.com/nlohmann/json

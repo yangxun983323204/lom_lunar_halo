@@ -10,9 +10,11 @@
 #include "Sprite.h"
 #include "Canvas.h"
 #include "Image.h"
+#include "Setting.h"
 
 using Microsoft::WRL::ComPtr;
 using DX::ThrowIfFailed;
+
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -65,6 +67,8 @@ private:
 
     // Rendering loop timer.
     DX::StepTimer                           m_timer;
+    
+    std::shared_ptr<Setting> _setting;
     std::unique_ptr<DirectX::SpriteBatch> _batch;
 
     std::shared_ptr<YX::GUI::Canvas> _testMir3;

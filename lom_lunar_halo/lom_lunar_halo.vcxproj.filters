@@ -34,6 +34,9 @@
     <ClInclude Include="Canvas.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="json.hpp" />
+    <ClInclude Include="Setting.h" />
+    <ClInclude Include="StringCodec.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -51,12 +54,11 @@
     <ClCompile Include="GUIBase.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
     <ClCompile Include="Canvas.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Setting.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

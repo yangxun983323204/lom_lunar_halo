@@ -12,13 +12,21 @@ using DirectX::SpriteBatch;
 
 namespace YX {
 	namespace GUI {
-		class Canvas:public GUIElement
+		class Canvas final:public GUIElement
 		{
 		public:
+			int RenderOrder;
+			Canvas();
+			~Canvas();
 			void Update(float deltaSec) override;
 			void Draw(SpriteBatch* batch);
 			void Foreach(function<void(shared_ptr<GUIElement>)> func);
 			static shared_ptr<Canvas> CreateFromXml(wstring path);
+
+			static void UpdateAll(float deltaSec);
+			static void DrawAll(SpriteBatch* batch);
+		private:
+			static std::vector<Canvas*> _canvasList;
 		};
 	}
 }

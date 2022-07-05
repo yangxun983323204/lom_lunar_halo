@@ -8,6 +8,7 @@ namespace YX {
 		class GUIElement
 		{
 		public:
+			bool Interactable;
 			bool SelfVisiable;
 			bool SelfActive;
 			int Width;
@@ -16,6 +17,7 @@ namespace YX {
 			DirectX::XMFLOAT2 Pivot;
 			
 			inline GUIElement():
+				Interactable{ true },
 				SelfVisiable{ true },
 				SelfActive{ true },
 				Width{4},
@@ -37,8 +39,9 @@ namespace YX {
 			void SetParent(std::shared_ptr<GUIElement> e);
 			DirectX::XMINT2 GetWorldPos();
 			RECT GetLocalRect();
-			RECT GetWorldRect();
+			RECT GetScreenRect();
 			bool FillParent();
+			virtual bool HitTest(int sx, int sy);
 		protected:
 			
 			std::weak_ptr<GUIElement> _parent;

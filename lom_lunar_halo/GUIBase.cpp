@@ -63,7 +63,7 @@ RECT GUIElement::GetLocalRect()
 	return RECT{ xOffset, yOffset, Width + xOffset, yOffset + Height };
 }
 
-RECT GUIElement::GetWorldRect()
+RECT GUIElement::GetScreenRect()
 {
 	auto rect = GetLocalRect();
 	auto wpos = GetWorldPos();
@@ -85,4 +85,16 @@ bool GUIElement::FillParent()
 		LocalPos.x = Pivot.x * Width;
 		LocalPos.y = Pivot.y * Height;
 	}
+}
+
+bool GUIElement::HitTest(int sx, int sy)
+{
+	if (!(Interactable && IsVisiable() && IsActive()))
+		return false;
+
+	RECT sRect = GetScreenRect();
+	return sx > sRect.left &&
+		sx<sRect.right&&
+		sy>sRect.bottom &&
+		sy < sRect.top;
 }

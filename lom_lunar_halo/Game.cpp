@@ -4,8 +4,10 @@
 
 #include "pch.h"
 #include "Game.h"
+#include <sys/stat.h>
 #include "../DirectXTK-main/Inc/BufferHelpers.h"
 #include "../mir_lib/ImageLib.h"
+#include <string>
 
 extern void ExitGame() noexcept;
 
@@ -26,6 +28,9 @@ Game::Game() noexcept(false):
 // Initialize the Direct3D resources required to run.
 void Game::Initialize(HWND window, int width, int height)
 {
+    _setting = std::make_shared<Setting>();
+    _setting->Load();
+
     m_deviceResources->SetWindow(window, width, height);
 
     m_deviceResources->CreateDeviceResources();
@@ -81,7 +86,7 @@ void Game::Render()
 
     // TODO: Add your rendering code here.
     _batch->Begin();
-    _testMir3->Draw(_batch.get());
+    YX::GUI::Canvas::DrawAll(_batch.get());
     _batch->End();
 
     m_deviceResources->PIXEndEvent();
@@ -175,7 +180,8 @@ void Game::CreateDeviceDependentResources()
     // TODO: Initialize device dependent objects here (independent of window size).
     _batch.reset(new SpriteBatch{ m_deviceResources->GetD3DDeviceContext()});
     ImageLib imgLib{};
-    imgLib.Open(L"D:/YangXun/games/mir3/Data/Interface1c.wil");
+    imgLib.Open(_setting->GetDataDir() + L"Interface1c.wil");
+    assert(imgLib.IsOpened());
     auto info = imgLib.GetImageInfo(0);
     auto rgba32 = imgLib.GetImageRGBA32(0);
     imgLib.Close();
