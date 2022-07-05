@@ -98,3 +98,9 @@ bool GUIElement::HitTest(int sx, int sy)
 		sy>sRect.bottom &&
 		sy < sRect.top;
 }
+
+
+void Graphic::Draw(SpriteBatch* batch)
+{
+	batch->Draw(this->GetSprite()->SRV().Get(), this->GetScreenRect());
+}

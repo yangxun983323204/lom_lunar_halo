@@ -2,6 +2,9 @@
 #include <memory>
 #include <vector>
 #include "Sprite.h"
+#include "../DirectXTK-main/Inc/SpriteBatch.h"
+
+using DirectX::SpriteBatch;
 
 namespace YX {
 	namespace GUI {
@@ -53,6 +56,7 @@ namespace YX {
 		public:
 			inline void Update(float deltaSec) override {}
 			inline Sprite* GetSprite() { return _sprite.get(); }
+			virtual void Draw(SpriteBatch* batch);
 		protected:
 			std::shared_ptr<Sprite> _sprite;
 		};
