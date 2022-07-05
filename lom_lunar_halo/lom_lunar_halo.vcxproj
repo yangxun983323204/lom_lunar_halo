@@ -190,6 +190,7 @@
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="StringCodec.hpp" />
     <ClInclude Include="Text.h" />
+    <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Canvas.cpp" />
@@ -207,6 +208,7 @@
     <ClCompile Include="Setting.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Text.cpp" />
+    <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

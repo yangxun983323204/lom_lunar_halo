@@ -8,3 +8,6 @@
 
 	nlohmann json
 	https://github.com/nlohmann/json
+
+	tinyxml2
+	https://github.com/leethomason/tinyxml2

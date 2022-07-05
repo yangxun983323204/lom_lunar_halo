@@ -37,6 +37,7 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Setting.h" />
     <ClInclude Include="StringCodec.hpp" />
+    <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -59,6 +60,7 @@
     </ClCompile>
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Setting.cpp" />
+    <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
