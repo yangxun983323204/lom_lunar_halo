@@ -42,12 +42,11 @@ void Canvas::Draw(SpriteBatch* batch)
 			if (!n->IsVisiable())
 				return;
 
-			if(typeid(*n) == typeid(Control)) {
-				;
+			if(!n->Drawable()) {
+				return;
 			}
 			else {
-				auto g = dynamic_cast<Graphic*>(n.get());
-				g->Draw(batch);
+				n->Draw(batch);
 			}
 		}
 	);
@@ -69,8 +68,8 @@ void Canvas::Foreach(function<void(shared_ptr<GUIElement>)> func)
 		if (func)
 			func(n);
 
-		if (typeid(*n) == typeid(Canvas))
-			;// 子canvas不由父canvas驱动更新
+		if (n->IsRoot())
+			return;// 子canvas不由父canvas驱动更新
 		else
 		{
 			children = n->Children();

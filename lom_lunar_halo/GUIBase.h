@@ -29,9 +29,10 @@ namespace YX {
 				Pivot{0,0}
 			{
 			};
-
+			inline bool IsRoot() { return false; }
 			bool IsVisiable();
 			bool IsActive();
+			virtual bool Drawable() = 0;
 			inline void SetSize(int w, int h) { Width = w; Height = h; }
 			inline void SetPivot(float px, float py) { Pivot.x = px; Pivot.y = py; }
 			inline void SetLocalPos(int x, int y) { LocalPos.x = x; LocalPos.y = y; }
@@ -39,6 +40,7 @@ namespace YX {
 			inline std::vector<std::shared_ptr<GUIElement>> Children() { return _children; }
 
 			virtual void Update(float deltaSec) = 0;
+			inline virtual void Draw(SpriteBatch* batch){}
 			void SetParent(std::shared_ptr<GUIElement> e);
 			DirectX::XMINT2 GetWorldPos();
 			RECT GetLocalRect();
@@ -54,9 +56,10 @@ namespace YX {
 		class Graphic :public GUIElement
 		{
 		public:
-			inline void Update(float deltaSec) override {}
+			inline virtual bool Drawable() override { return true; }
+			inline virtual void Update(float deltaSec) override {}
 			inline Sprite* GetSprite() { return _sprite.get(); }
-			virtual void Draw(SpriteBatch* batch);
+			virtual void Draw(SpriteBatch* batch) override;
 		protected:
 			std::shared_ptr<Sprite> _sprite;
 		};
@@ -64,7 +67,8 @@ namespace YX {
 		class Control : public GUIElement
 		{
 		public:
-			inline void Update(float deltaSec) override {}
+			inline virtual bool Drawable() override { return false; }
+			inline virtual void Update(float deltaSec) override {}
 		};
 	}
 }

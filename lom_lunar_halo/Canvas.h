@@ -18,6 +18,8 @@ namespace YX {
 			int RenderOrder;
 			Canvas();
 			~Canvas();
+			inline bool IsRoot() { return true; }
+			inline bool Drawable() { return false; }
 			void Update(float deltaSec) override;
 			void Draw(SpriteBatch* batch);
 			void Foreach(function<void(shared_ptr<GUIElement>)> func);
