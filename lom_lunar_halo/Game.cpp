@@ -8,6 +8,8 @@
 #include "../DirectXTK-main/Inc/BufferHelpers.h"
 #include "../mir_lib/ImageLib.h"
 #include <string>
+#include "Image.h"
+#include "Text.h"
 
 extern void ExitGame() noexcept;
 
@@ -179,23 +181,36 @@ void Game::CreateDeviceDependentResources()
 
     // TODO: Initialize device dependent objects here (independent of window size).
     _batch.reset(new SpriteBatch{ m_deviceResources->GetD3DDeviceContext()});
-    ImageLib imgLib{};
-    imgLib.Open(_setting->GetDataDir() + L"Interface1c.wil");
-    assert(imgLib.IsOpened());
-    auto info = imgLib.GetImageInfo(0);
-    auto rgba32 = imgLib.GetImageRGBA32(0);
-    imgLib.Close();
-    auto sprite = YX::Sprite::CreateFromWIL(device, info, std::move(rgba32));
+
     _testMir3 = std::make_shared<YX::GUI::Canvas>();
     _testMir3->Pivot.x = 0;
     _testMir3->Pivot.y = 0;
     _testMir3->Width = 640;
     _testMir3->Height = 380;
-    auto img = new YX::GUI::Image();
-    img->SetSprite(sprite);
-    img->SetParent(_testMir3);
-    img->SetPivot(0.5f, 0.5f);
-    img->FillParent();
+
+    ImageLib imgLib{};
+    imgLib.Open(_setting->GetDataDir() + L"Interface1c.wil");
+    //assert(imgLib.IsOpened());
+    if (imgLib.IsOpened())
+    {
+        auto info = imgLib.GetImageInfo(0);
+        auto rgba32 = imgLib.GetImageRGBA32(0);
+        imgLib.Close();
+        auto sprite = YX::Sprite::CreateFromWIL(device, info, std::move(rgba32));
+        
+        auto img = new YX::GUI::Image();
+        img->SetSprite(sprite);
+        img->SetParent(_testMir3);
+        img->SetPivot(0.5f, 0.5f);
+        img->FillParent();
+    }
+    //
+    auto text = new YX::GUI::Text(m_deviceResources.get());
+    text->SetParent(_testMir3);
+    text->SetPivot(0, 0);
+    text->SetLocalPos(0, 0);
+    text->SetSize(200, 40);
+    text->Set(L"不会吧不会吧？");
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

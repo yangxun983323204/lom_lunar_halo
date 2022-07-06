@@ -9,7 +9,6 @@
 #include "../DirectXTK-main/Inc/SpriteBatch.h"
 #include "Sprite.h"
 #include "Canvas.h"
-#include "Image.h"
 #include "Setting.h"
 
 using Microsoft::WRL::ComPtr;

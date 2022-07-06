@@ -18,8 +18,11 @@ namespace YX {
 		inline bool HasShadow() { return _hasShadow; }
 		inline int16_t ShadowPosX() { return _shadowPosX; }
 		inline int16_t ShadowPosY() { return _shadowPosY; }
+		inline ComPtr<ID3D11Texture2D> Texture() { return _tex; }
 		inline ComPtr<ID3D11ShaderResourceView> SRV() { return _texSRV; }
+		inline ComPtr<ID3D11RenderTargetView> RTV() { return _texRTV; }// todo
 
+		static shared_ptr<Sprite> CreateRenderTarget(ID3D11Device* device, int16_t w, int16_t h, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 		static shared_ptr<Sprite> CreateFromWIL(ID3D11Device* device, ImageLib::ImageInfo& info, std::vector<uint32_t>&& rgba32);
 	protected:
 		int16_t _w, _h;
@@ -30,5 +33,6 @@ namespace YX {
 
 		ComPtr<ID3D11Texture2D> _tex;
 		ComPtr<ID3D11ShaderResourceView> _texSRV;
+		ComPtr<ID3D11RenderTargetView> _texRTV;
 	};
 }

@@ -56,7 +56,7 @@ void Canvas::Foreach(function<void(shared_ptr<GUIElement>)> func)
 {
 	stack<shared_ptr<GUIElement>> s;
 	auto children = Children();
-	for (auto i = children.begin(); i != children.end(); i++)
+	for (auto i = children.rbegin(); i != children.rend(); i++)
 	{
 		s.push(*i);
 	}
@@ -69,11 +69,11 @@ void Canvas::Foreach(function<void(shared_ptr<GUIElement>)> func)
 			func(n);
 
 		if (n->IsRoot())
-			return;// 子canvas不由父canvas驱动更新
+			continue;// 子canvas不由父canvas驱动更新
 		else
 		{
 			children = n->Children();
-			for (auto i = children.begin(); i != children.end(); i++)
+			for (auto i = children.rbegin(); i != children.rend(); i++)
 			{
 				s.push(*i);
 			}
