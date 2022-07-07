@@ -56,8 +56,21 @@
 #endif
 
 // 注意，除非发生设备丢失，不重新生成窗口相关的资源。因为素材和机制不支持渲染区间变化。
-const int LayoutW = 800;
-const int LayoutH = 600;
+const int LoginLayoutW = 640;
+const int LoginLayoutH = 360;
+const int GameLayoutW = 800;
+const int GameLayoutH = 600;
+
+extern float DpiScale;
+
+/// <summary>
+/// 获取DPI缩放后的值
+/// </summary>
+template<typename T>
+inline T DPI_S(T v)
+{
+    return v * DpiScale;
+}
 
 namespace DX
 {

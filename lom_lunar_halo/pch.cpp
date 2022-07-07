@@ -4,3 +4,4 @@
 //
 
 #include "pch.h"
+float DpiScale = 1;

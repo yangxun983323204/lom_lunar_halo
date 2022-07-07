@@ -8,6 +8,9 @@ using YX::Sprite;
 
 shared_ptr<Sprite> Sprite::CreateFromWIL(ID3D11Device* device, ImageLib::ImageInfo& info, std::vector<uint32_t>&& rgba32)
 {
+	if (rgba32.size() <= 0)
+		return {};
+
 	auto sprite = std::make_shared<Sprite>();
 
 	sprite->_w = info.Width;

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GUIBase.h"
 #include <algorithm>
+#include "../StringCodec.hpp"
 
 using namespace YX::GUI;
 using namespace DirectX;
@@ -27,21 +28,34 @@ bool GUIElement::IsActive()
 		return SelfActive;
 }
 
-void GUIElement::SetParent(std::shared_ptr<GUIElement> e)
+void GUIElement::SetParent(std::shared_ptr<GUIElement> self, std::shared_ptr<GUIElement> parent)
 {
+	if (self!=0 && self.get()!=this)
+	{
+		throw "GUIElement::SetParent的self参数请传入0或者自身的shared_ptr";
+	}
 	if (!_parent.expired())
 	{
 		auto parent = _parent.lock();
 		auto children = parent->_children;
-		std::remove_if(children.begin(), children.end(), [&e](shared_ptr<GUIElement> n)
+		std::remove_if(children.begin(), children.end(), [&parent](shared_ptr<GUIElement> n)
 			{
-				return n.get() == e.get();
+				return n.get() == parent.get();
 			}
 		);
 	}
 
-	_parent = e;
-	e->_children.push_back(std::shared_ptr<GUIElement>(this));
+	_parent = parent;
+	if (self != 0)
+		parent->_children.push_back(self);
+	else
+		parent->_children.push_back(std::shared_ptr<GUIElement>(this));
+
+	if (_delayFill)
+	{
+		FillParent();
+		_delayFill = false;
+	}
 }
 
 DirectX::XMINT2 GUIElement::GetWorldPos()
@@ -99,8 +113,37 @@ bool GUIElement::HitTest(int sx, int sy)
 		sy < sRect.top;
 }
 
-
-void Graphic::Draw(SpriteBatch* batch)
+void GUIElement::LoadXml(tinyxml2::XMLElement* e)
 {
-	batch->Draw(this->GetSprite()->SRV().Get(), this->GetScreenRect());
+	char* pbuffer;
+	if(e->QueryStringAttribute("Id", (const char**)&pbuffer) == tinyxml2::XML_SUCCESS)
+		Id = Utf8ToWString(pbuffer);
+
+	Interactable = e->BoolAttribute("Interactable", true);
+	SelfVisiable = e->BoolAttribute("SelfVisiable", true);
+	SelfActive = e->BoolAttribute("SelfActive", true);
+	Width = e->IntAttribute("Width", 0);
+	Height = e->IntAttribute("Height", 0);
+	LocalPos.x = e->IntAttribute("LocalPos.x", 0);
+	LocalPos.y = e->IntAttribute("LocalPos.y", 0);
+	Pivot.x = e->FloatAttribute("Pivot.x", 0);
+	Pivot.y = e->FloatAttribute("Pivot.x", 0);
+	bool fillParent = e->BoolAttribute("FillParent", false);
+	if (fillParent && !_parent.expired())
+	{
+		FillParent();
+	}
+	else if(fillParent) {
+		_delayFill = true;
+	}
+}
+
+extern void DrawTexture(ID3D11ShaderResourceView* srv, RECT rect);
+
+void Graphic::Draw()
+{
+	if (!_sprite)
+		return;
+
+	DrawTexture(this->GetSprite()->SRV().Get(), this->GetScreenRect());
 }

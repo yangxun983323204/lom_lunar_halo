@@ -1,0 +1,6 @@
+<Canvas Id="Login" Width="640" Height="360">
+	<Image Id="Bg" FillParent="true" Type="wil" File="Interface1c.wil" Index="0">
+		<Text Id="Test" Width="200" Height="40" FontSize="10">不是吧不是吧</Text>
+		<Image Id="tex2" LocalPos.x="300" LocalPos.y="150" UseNativeSize="false" Width="300" Height="200" Type="wil" File="Interface1c.wil" Index="80"/>
+	</Image>
+</Canvas>

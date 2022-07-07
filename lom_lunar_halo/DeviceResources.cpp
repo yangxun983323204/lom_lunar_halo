@@ -272,8 +272,8 @@ void DeviceResources::CreateWindowSizeDependentResources()
     m_d3dContext->Flush();
 
     // Determine the render target size in pixels.
-    const UINT backBufferWidth = std::max<UINT>(static_cast<UINT>(m_outputSize.right - m_outputSize.left), 1u);
-    const UINT backBufferHeight = std::max<UINT>(static_cast<UINT>(m_outputSize.bottom - m_outputSize.top), 1u);
+    const UINT backBufferWidth = DPI_S(std::max<UINT>(static_cast<UINT>(m_outputSize.right - m_outputSize.left), 1u));
+    const UINT backBufferHeight = DPI_S(std::max<UINT>(static_cast<UINT>(m_outputSize.bottom - m_outputSize.top), 1u));
     const DXGI_FORMAT backBufferFormat = (m_options & (c_FlipPresent | c_AllowTearing | c_EnableHDR)) ? NoSRGB(m_backBufferFormat) : m_backBufferFormat;
 
     if (m_swapChain)

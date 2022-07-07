@@ -7,6 +7,7 @@ namespace YX {
 		{
 		public:
 			void SetSprite(std::shared_ptr<Sprite> sprite);
+			virtual void LoadXml(tinyxml2::XMLElement* e) override;
 		};
 	}
 }

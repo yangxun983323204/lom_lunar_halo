@@ -1,16 +1,16 @@
 #pragma once
+#include <string>
 #include <memory>
 #include <vector>
 #include "Sprite.h"
-#include "../DirectXTK-main/Inc/SpriteBatch.h"
-
-using DirectX::SpriteBatch;
+#include "../tinyxml2.h"
 
 namespace YX {
 	namespace GUI {
 		class GUIElement
 		{
 		public:
+			std::wstring Id;
 			bool Interactable;
 			bool SelfVisiable;
 			bool SelfActive;
@@ -20,13 +20,15 @@ namespace YX {
 			DirectX::XMFLOAT2 Pivot;
 			
 			inline GUIElement():
+				Id{},
 				Interactable{ true },
 				SelfVisiable{ true },
 				SelfActive{ true },
 				Width{4},
 				Height{4},
 				LocalPos{0,0},
-				Pivot{0,0}
+				Pivot{0,0},
+				_delayFill{false}
 			{
 			};
 			inline bool IsRoot() { return false; }
@@ -40,15 +42,16 @@ namespace YX {
 			inline std::vector<std::shared_ptr<GUIElement>> Children() { return _children; }
 
 			virtual void Update(float deltaSec) = 0;
-			inline virtual void Draw(SpriteBatch* batch){}
-			void SetParent(std::shared_ptr<GUIElement> e);
+			inline virtual void Draw(){}
+			void SetParent(std::shared_ptr<GUIElement> self,std::shared_ptr<GUIElement> parent);
 			DirectX::XMINT2 GetWorldPos();
 			RECT GetLocalRect();
 			RECT GetScreenRect();
 			bool FillParent();
 			virtual bool HitTest(int sx, int sy);
+			virtual void LoadXml(tinyxml2::XMLElement* e);
 		protected:
-			
+			bool _delayFill;
 			std::weak_ptr<GUIElement> _parent;
 			std::vector<std::shared_ptr<GUIElement>> _children;
 		};
@@ -59,7 +62,7 @@ namespace YX {
 			inline virtual bool Drawable() override { return true; }
 			inline virtual void Update(float deltaSec) override {}
 			inline Sprite* GetSprite() { return _sprite.get(); }
-			virtual void Draw(SpriteBatch* batch) override;
+			virtual void Draw() override;
 		protected:
 			std::shared_ptr<Sprite> _sprite;
 		};

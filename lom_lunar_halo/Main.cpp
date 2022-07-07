@@ -4,6 +4,7 @@
 
 #include "pch.h"
 #include "Game.h"
+#include <d2d1.h>
 
 using namespace DirectX;
 
@@ -23,6 +24,7 @@ LPCWSTR g_szAppName = L"传奇:月辉";
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void ExitGame() noexcept;
+void GetDpiScale();
 
 // Indicates to hybrid graphics systems to prefer the discrete part by default
 extern "C"
@@ -65,12 +67,12 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         // Create window
         int w, h;
         g_game->GetDefaultSize(w, h);
+        GetDpiScale();
+        RECT rc = { 0, 0, static_cast<LONG>(DPI_S(w)), static_cast<LONG>(DPI_S(h)) };
+        auto style = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME/*不允许缩放*/;
+        AdjustWindowRect(&rc, style, FALSE);
 
-        RECT rc = { 0, 0, static_cast<LONG>(w), static_cast<LONG>(h) };
-
-        AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-
-        HWND hwnd = CreateWindowExW(0, L"lom_lunar_haloWindowClass", g_szAppName, WS_OVERLAPPEDWINDOW^WS_THICKFRAME/*不允许缩放*/,
+        HWND hwnd = CreateWindowExW(0, L"lom_lunar_haloWindowClass", g_szAppName, style,
             CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
             nullptr);
         // TODO: Change to CreateWindowExW(WS_EX_TOPMOST, L"lom_lunar_haloWindowClass", g_szAppName, WS_POPUP,
@@ -83,10 +85,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         // TODO: Change nCmdShow to SW_SHOWMAXIMIZED to default to fullscreen.
 
         SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(g_game.get()));
-
-        GetClientRect(hwnd, &rc);
-
-        g_game->Initialize(hwnd, rc.right - rc.left, rc.bottom - rc.top);
+        g_game->Initialize(hwnd, w, h);
     }
 
     // Main message loop
@@ -171,7 +170,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         else if (!s_in_sizemove && game)
         {
-            game->OnWindowSizeChanged(LayoutW, LayoutH);
+            //game->OnWindowSizeChanged(GameLayoutW, GameLayoutH);
         }
         break;
 
@@ -183,17 +182,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         s_in_sizemove = false;
         if (game)
         {
-            game->OnWindowSizeChanged(LayoutW, LayoutH);
+            //game->OnWindowSizeChanged(GameLayoutW, GameLayoutH);
         }
         break;
 
     case WM_GETMINMAXINFO:
-        if (lParam)
-        {
-            auto info = reinterpret_cast<MINMAXINFO*>(lParam);
-            info->ptMinTrackSize.x = LayoutW;
-            info->ptMinTrackSize.y = LayoutH;
-        }
+        //if (lParam)
+        //{
+        //    int width = LoginLayoutW;
+        //    int height = LoginLayoutH;
+        //    if (game)
+        //        game->GetCurrSize(width, height);
+
+        //    auto info = reinterpret_cast<MINMAXINFO*>(lParam);
+        //    info->ptMinTrackSize.x = DPI_S(width);
+        //    info->ptMinTrackSize.y = DPI_S(height);
+        //}
         break;
 
     case WM_ACTIVATEAPP:
@@ -243,14 +247,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 SetWindowLongPtr(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
                 SetWindowLongPtr(hWnd, GWL_EXSTYLE, 0);
 
-                int width = LayoutW;
-                int height = LayoutH;
+                int width = LoginLayoutW;
+                int height = LoginLayoutH;
                 if (game)
-                    game->GetDefaultSize(width, height);
+                    game->GetCurrSize(width, height);
 
                 ShowWindow(hWnd, SW_SHOWNORMAL);
 
-                SetWindowPos(hWnd, HWND_TOP, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
+                SetWindowPos(hWnd, HWND_TOP, 0, 0,DPI_S(width), DPI_S(height), SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
             }
             else
             {
@@ -270,6 +274,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // A menu is active and the user presses a key that does not correspond
         // to any mnemonic or accelerator key. Ignore so we don't produce an error beep.
         return MAKELRESULT(0, MNC_CLOSE);
+
+    case WM_DPICHANGED:
+        auto dpi = HIWORD(wParam);
+        DpiScale = dpi / 96.0f;
+        break;
     }
 
     return DefWindowProc(hWnd, message, wParam, lParam);
@@ -279,4 +288,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 void ExitGame() noexcept
 {
     PostQuitMessage(0);
+}
+
+DX::DeviceResources* GetDeviceResource()
+{
+    return g_game->GetDeviceResource();
+}
+
+std::shared_ptr<Setting> GetSetting()
+{
+    return g_game->GetSetting();
+}
+
+void DrawTexture(ID3D11ShaderResourceView* srv, RECT rect)
+{
+    g_game->DrawTexture(srv, rect);
+}
+
+void SetWindowSize(int w,int h)
+{
+    // todo
+}
+
+void GetDpiScale() 
+{
+    ID2D1Factory* m_pDirect2dFactory;
+    D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pDirect2dFactory);
+    FLOAT dpiX, dpiY;
+    m_pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
+    DpiScale = dpiX / 96.0f;
 }

@@ -4,6 +4,9 @@
 #include <streambuf>
 #include "StringCodec.hpp"
 
+string KEY_ORIGIN_DATA = "OriginDataDir";
+string KEY_UILAYOUT = "UILayoutDir";
+
 bool Setting::Load()
 {
     struct _stat buffer;
@@ -15,6 +18,7 @@ bool Setting::Load()
 
         _setting = json::parse(str);
         cfg.close();
+        Read();
         return true;
     }
 
@@ -23,12 +27,38 @@ bool Setting::Load()
 
 wstring Setting::GetDataDir()
 {
-    if (_setting.contains("DataDir"))
+    return _originDataDir + L"./Data/";
+}
+
+wstring Setting::GetMapDir()
+{
+    return _originDataDir + L"./Map/";
+}
+
+wstring Setting::GetSoundDir()
+{
+    return _originDataDir + L"./Sound/";
+}
+
+wstring Setting::GetUILayoutDir()
+{
+    return _uiLayoutDir;
+}
+
+void Setting::Read()
+{
+    ReadKey(KEY_ORIGIN_DATA, _originDataDir, L"./");
+    ReadKey(KEY_UILAYOUT, _uiLayoutDir, L"./UILayout/");
+}
+
+void Setting::ReadKey(string key, wstring& val, wstring defaultVal)
+{
+    if (_setting.contains(key))
     {
-        std::string s = _setting.at("DataDir");
-        return YX::Utf8ToWString(s);
+        std::string s = _setting.at(key);
+        val = YX::Utf8ToWString(s);
     }
     else {
-        return L"./Data/";
+        val = defaultVal;
     }
 }

@@ -8,7 +8,7 @@
 #include "StepTimer.h"
 #include "../DirectXTK-main/Inc/SpriteBatch.h"
 #include "Sprite.h"
-#include "Canvas.h"
+#include "./GUI/Canvas.h"
 #include "Setting.h"
 
 using Microsoft::WRL::ComPtr;
@@ -50,7 +50,11 @@ public:
 
     // Properties
     void GetDefaultSize( int& width, int& height ) const noexcept;
+    void GetCurrSize(int& width, int& height) const noexcept;
 
+    inline std::shared_ptr<Setting> GetSetting() { return _setting; }
+    inline DX::DeviceResources* GetDeviceResource() { return m_deviceResources.get(); }
+    void DrawTexture(ID3D11ShaderResourceView* srv, RECT rect);
 private:
 
     void Update(DX::StepTimer const& timer);

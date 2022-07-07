@@ -16,13 +16,14 @@ namespace YX {
 		class Text :public Graphic
 		{
 		public:
-			Text(DX::DeviceResources* dev);
-			void Set(wstring val);
+			Text();
+			void Set(wstring val,uint8_t fontSize = 15);
 			inline wstring Get() { return _text; }
-			virtual void Draw(SpriteBatch* batch) override;
+			virtual void Draw() override;
+			virtual void LoadXml(tinyxml2::XMLElement* e) override;
 		private:
-			DX::DeviceResources* _dev;
 			wstring _text;
+			uint8_t _fontSize;
 			ComPtr<ID2D1RenderTarget> _d2dRT;
 
 			bool _textDirty;

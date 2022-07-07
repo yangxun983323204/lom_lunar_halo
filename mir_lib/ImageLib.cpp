@@ -171,6 +171,9 @@ void ImageLib::Impl::Close()
 vector<uint16_t> ImageLib::Impl::GetImageRaw(int idx)
 {
 	auto address = _blockAddress[idx];
+	if (address == 0)
+		return {};
+
 	auto info = _infos[idx];
 	fseek(_wil.get(), address, SEEK_SET);
 	fseek(_wil.get(), WilOffset(_version), SEEK_CUR);
@@ -184,6 +187,9 @@ vector<uint16_t> ImageLib::Impl::GetImageRGB565(int idx)
 	auto address = _blockAddress[idx];
 	auto info = _infos[idx];
 	vector<uint16_t> rawbuffer(GetImageRaw(idx));
+	if (rawbuffer.size() <= 0)
+		return {};
+
 	auto w = info.Width;
 	auto h = info.Height;
 	size_t rawBeginAt = 0;
@@ -242,6 +248,9 @@ vector<uint32_t> ImageLib::Impl::GetImageRGBA32(int idx)
 	auto address = _blockAddress[idx];
 	auto info = _infos[idx];
 	vector<uint16_t> rawbuffer(GetImageRaw(idx));
+	if (rawbuffer.size() <= 0)
+		return {};
+
 	auto w = info.Width;
 	auto h = info.Height;
 	size_t rawBeginAt = 0;

@@ -1,11 +1,16 @@
 #include "pch.h"
 #include "Text.h"
+#include "DeviceResources.h"
+#include "../StringCodec.hpp"
 
+using std::string;
 using namespace YX::GUI;
 
-Text::Text(DX::DeviceResources* dev):
-	_dev{ dev },
+extern DX::DeviceResources* GetDeviceResource();
+
+Text::Text():
 	_text{},
+	_fontSize{15},
 	_textDirty{ false },
 	_rectDirty{ true },
 	_preWidth{ Width },
@@ -14,13 +19,18 @@ Text::Text(DX::DeviceResources* dev):
 
 }
 
-void Text::Set(wstring val)
+void Text::Set(wstring val, uint8_t fontSize)
 {
 	_text = val;
+	if (_fontSize!= fontSize)
+	{
+		_rectDirty = true;
+	}
+	_fontSize = fontSize;
 	_textDirty = true;
 }
 
-void Text::Draw(SpriteBatch* batch)
+void Text::Draw()
 {
 	CheckRectDirty();
 	if (_textDirty || _rectDirty)
@@ -30,7 +40,7 @@ void Text::Draw(SpriteBatch* batch)
 		_rectDirty = false;
 	}
 
-	Graphic::Draw(batch);
+	Graphic::Draw();
 }
 
 void Text::CheckRectDirty()
@@ -50,7 +60,7 @@ void Text::UpdateSprite()
 	{
 		// 先重建精灵，再渲染文本
 		_sprite.reset();
-		_sprite = Sprite::CreateRenderTarget(_dev->GetD3DDevice(), Width, Height, 0, 0, 0, 0);
+		_sprite = Sprite::CreateRenderTarget(GetDeviceResource()->GetD3DDevice(), DPI_S(Width), DPI_S(Height), 0, 0, 0, 0);
 	}
 
 	ComPtr<ID2D1Factory> pD2DFactory{};
@@ -82,7 +92,7 @@ void Text::UpdateSprite()
 
 	// Create a DirectWrite factory.
 	static const WCHAR msc_fontName[] = L"Verdana";
-	static const FLOAT msc_fontSize = 15;
+	static const FLOAT msc_fontSize = DPI_S(_fontSize);
 	ComPtr<IDWriteFactory> m_pDWriteFactory{};
 	DWriteCreateFactory(
 		DWRITE_FACTORY_TYPE_SHARED,
@@ -131,4 +141,12 @@ void Text::UpdateSprite()
 	);
 
 	DX::ThrowIfFailed(_d2dRT->EndDraw());
+}
+
+void Text::LoadXml(tinyxml2::XMLElement* e)
+{
+	Graphic::LoadXml(e);
+	string val = e->GetText();
+	uint8_t fsize = e->IntAttribute("FontSize", 15);
+	Set(Utf8ToWString(val), fsize);
 }

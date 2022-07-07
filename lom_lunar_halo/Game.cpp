@@ -8,8 +8,9 @@
 #include "../DirectXTK-main/Inc/BufferHelpers.h"
 #include "../mir_lib/ImageLib.h"
 #include <string>
-#include "Image.h"
-#include "Text.h"
+#include "./GUI/Image.h"
+#include "./GUI/Text.h"
+#include "./GUI/LayoutLoader.h"
 
 extern void ExitGame() noexcept;
 
@@ -88,7 +89,7 @@ void Game::Render()
 
     // TODO: Add your rendering code here.
     _batch->Begin();
-    YX::GUI::Canvas::DrawAll(_batch.get());
+    YX::GUI::Canvas::DrawAll();
     _batch->End();
 
     m_deviceResources->PIXEndEvent();
@@ -167,9 +168,15 @@ void Game::OnWindowSizeChanged(int width, int height)
 // Properties
 void Game::GetDefaultSize(int& width, int& height) const noexcept
 {
-    // TODO: Change to desired default window size (note minimum size is 320x200).
-    width = LayoutW;
-    height = LayoutH;
+    width = LoginLayoutW;
+    height = LoginLayoutH;
+}
+
+void Game::GetCurrSize(int& width, int& height) const noexcept
+{
+    // todo 根据当前游戏状态，返回登陆布局大小或游戏布局大小
+    width = GameLayoutW;
+    height = GameLayoutW;
 }
 #pragma endregion
 
@@ -182,35 +189,7 @@ void Game::CreateDeviceDependentResources()
     // TODO: Initialize device dependent objects here (independent of window size).
     _batch.reset(new SpriteBatch{ m_deviceResources->GetD3DDeviceContext()});
 
-    _testMir3 = std::make_shared<YX::GUI::Canvas>();
-    _testMir3->Pivot.x = 0;
-    _testMir3->Pivot.y = 0;
-    _testMir3->Width = 640;
-    _testMir3->Height = 380;
-
-    ImageLib imgLib{};
-    imgLib.Open(_setting->GetDataDir() + L"Interface1c.wil");
-    //assert(imgLib.IsOpened());
-    if (imgLib.IsOpened())
-    {
-        auto info = imgLib.GetImageInfo(0);
-        auto rgba32 = imgLib.GetImageRGBA32(0);
-        imgLib.Close();
-        auto sprite = YX::Sprite::CreateFromWIL(device, info, std::move(rgba32));
-        
-        auto img = new YX::GUI::Image();
-        img->SetSprite(sprite);
-        img->SetParent(_testMir3);
-        img->SetPivot(0.5f, 0.5f);
-        img->FillParent();
-    }
-    //
-    auto text = new YX::GUI::Text(m_deviceResources.get());
-    text->SetParent(_testMir3);
-    text->SetPivot(0, 0);
-    text->SetLocalPos(0, 0);
-    text->SetSize(200, 40);
-    text->Set(L"不会吧不会吧？");
+    _testMir3 = YX::GUI::LayoutLoader::Parse(_setting->GetUILayoutDir() + L"login.xml");
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -231,3 +210,12 @@ void Game::OnDeviceRestored()
     CreateWindowSizeDependentResources();
 }
 #pragma endregion
+
+void Game::DrawTexture(ID3D11ShaderResourceView* srv, RECT rect)
+{
+    rect.left = DPI_S(rect.left);
+    rect.right = DPI_S(rect.right);
+    rect.bottom = DPI_S(rect.bottom);
+    rect.top = DPI_S(rect.top);
+    _batch->Draw(srv, rect);
+}

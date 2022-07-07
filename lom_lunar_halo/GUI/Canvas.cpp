@@ -35,9 +35,9 @@ void Canvas::Update(float deltaSec)
 	);
 }
 
-void Canvas::Draw(SpriteBatch* batch)
+void Canvas::Draw()
 {
-	Foreach([batch](shared_ptr<GUIElement> n) 
+	Foreach([](shared_ptr<GUIElement> n) 
 		{
 			if (!n->IsVisiable())
 				return;
@@ -46,7 +46,7 @@ void Canvas::Draw(SpriteBatch* batch)
 				return;
 			}
 			else {
-				n->Draw(batch);
+				n->Draw();
 			}
 		}
 	);
@@ -89,10 +89,10 @@ void Canvas::UpdateAll(float deltaSec)
 	}
 }
 
-void Canvas::DrawAll(SpriteBatch* batch)
+void Canvas::DrawAll()
 {
 	for (auto canvas : _canvasList)
 	{
-		canvas->Draw(batch);
+		canvas->Draw();
 	}
 }
