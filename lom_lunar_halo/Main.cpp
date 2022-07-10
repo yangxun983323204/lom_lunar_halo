@@ -33,6 +33,8 @@ extern "C"
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
+long style{ 0 };
+
 // Entry point
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
@@ -69,7 +71,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         g_game->GetDefaultSize(w, h);
         GetDpiScale();
         RECT rc = { 0, 0, static_cast<LONG>(DPI_S(w)), static_cast<LONG>(DPI_S(h)) };
-        auto style = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME/*不允许缩放*/;
+        style = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME/*不允许缩放*/;
         AdjustWindowRect(&rc, style, FALSE);
 
         HWND hwnd = CreateWindowExW(0, L"lom_lunar_haloWindowClass", g_szAppName, style,
@@ -244,7 +246,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Implements the classic ALT+ENTER fullscreen toggle
             if (s_fullscreen)
             {
-                SetWindowLongPtr(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+                SetWindowLongPtr(hWnd, GWL_STYLE, style);
                 SetWindowLongPtr(hWnd, GWL_EXSTYLE, 0);
 
                 int width = LoginLayoutW;

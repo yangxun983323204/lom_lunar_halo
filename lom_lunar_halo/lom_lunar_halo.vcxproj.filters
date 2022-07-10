@@ -41,6 +41,7 @@
     <ClInclude Include="GUI\LayoutLoader.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="EventSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -67,6 +68,7 @@
     <ClCompile Include="GUI\LayoutLoader.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="EventSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

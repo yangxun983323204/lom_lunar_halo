@@ -176,7 +176,7 @@ void Game::GetCurrSize(int& width, int& height) const noexcept
 {
     // todo 根据当前游戏状态，返回登陆布局大小或游戏布局大小
     width = GameLayoutW;
-    height = GameLayoutW;
+    height = GameLayoutH;
 }
 #pragma endregion
 

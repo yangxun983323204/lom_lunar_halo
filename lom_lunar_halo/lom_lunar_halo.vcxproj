@@ -179,6 +179,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DeviceResources.h" />
+    <ClInclude Include="EventSystem.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GUI\Canvas.h" />
     <ClInclude Include="GUI\GUIBase.h" />
@@ -195,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DeviceResources.cpp" />
+    <ClCompile Include="EventSystem.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GUI\Canvas.cpp" />
     <ClCompile Include="GUI\GUIBase.cpp" />
