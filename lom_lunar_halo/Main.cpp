@@ -20,7 +20,7 @@ namespace
     std::unique_ptr<Game> g_game;
 }
 
-LPCWSTR g_szAppName = L"¥´∆Ê:‘¬ª‘";
+LPCWSTR g_szAppName = L"‰º†Â•á:ÊúàËæâ";
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void ExitGame() noexcept;
@@ -71,7 +71,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         g_game->GetDefaultSize(w, h);
         GetDpiScale();
         RECT rc = { 0, 0, static_cast<LONG>(DPI_S(w)), static_cast<LONG>(DPI_S(h)) };
-        style = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME/*≤ª‘ –ÌÀı∑≈*/;
+        style = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME/* ‰∏çÂÖÅËÆ∏Áº©Êîæ */;
         AdjustWindowRect(&rc, style, FALSE);
 
         HWND hwnd = CreateWindowExW(0, L"lom_lunar_haloWindowClass", g_szAppName, style,
@@ -87,6 +87,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         // TODO: Change nCmdShow to SW_SHOWMAXIMIZED to default to fullscreen.
 
         SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(g_game.get()));
+        gMouse.SetWindow(hwnd);
         g_game->Initialize(hwnd, w, h);
     }
 
@@ -203,6 +204,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_ACTIVATEAPP:
+        Mouse::ProcessMessage(message, wParam, lParam);
         if (game)
         {
             if (wParam)
@@ -277,10 +279,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // to any mnemonic or accelerator key. Ignore so we don't produce an error beep.
         return MAKELRESULT(0, MNC_CLOSE);
 
-    case WM_DPICHANGED:
+    case WM_DPICHANGED: 
+    {
         auto dpi = HIWORD(wParam);
         DpiScale = dpi / 96.0f;
+        break; 
+    }
+
+    case WM_ACTIVATE:
+    case WM_INPUT:
+    case WM_MOUSEMOVE:
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONDOWN:
+    case WM_MBUTTONUP:
+    case WM_MOUSEWHEEL:
+    case WM_XBUTTONDOWN:
+    case WM_XBUTTONUP:
+    case WM_MOUSEHOVER:
+        Mouse::ProcessMessage(message, wParam, lParam);
         break;
+    case WM_MOUSEACTIVATE:
+        // When you click to activate the window, we want Mouse to ignore that event.
+        return MA_ACTIVATEANDEAT;
     }
 
     return DefWindowProc(hWnd, message, wParam, lParam);

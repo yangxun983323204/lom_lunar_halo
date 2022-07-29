@@ -55,7 +55,8 @@
 #include <dxgidebug.h>
 #endif
 
-// ×¢Òâ£¬³ı·Ç·¢ÉúÉè±¸¶ªÊ§£¬²»ÖØĞÂÉú³É´°¿ÚÏà¹ØµÄ×ÊÔ´¡£ÒòÎªËØ²ÄºÍ»úÖÆ²»Ö§³ÖäÖÈ¾Çø¼ä±ä»¯¡£
+#include "../DirectXTK-main//Inc/Mouse.h"
+
 const int LoginLayoutW = 640;
 const int LoginLayoutH = 360;
 const int GameLayoutW = 800;
@@ -63,8 +64,10 @@ const int GameLayoutH = 600;
 
 extern float DpiScale;
 
+extern DirectX::Mouse gMouse;
+
 /// <summary>
-/// »ñÈ¡DPIËõ·ÅºóµÄÖµ
+/// è·å–DPIç¼©æ”¾åçš„å€¼
 /// </summary>
 template<typename T>
 inline T DPI_S(T v)

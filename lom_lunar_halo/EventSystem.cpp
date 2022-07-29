@@ -1,19 +1,138 @@
+#include "pch.h"
 #include "EventSystem.h"
 
 using namespace YX;
 
+MouseEventData::MouseEventData():
+	ButtonType{ MouseEventData::InputButton::Left },
+	State{ MouseEventData::FramePressState::Released },
+	HoverObject{},
+	PressObject{},
+	DragObject{},
+	RawObject{},
+	EligibleClick{false},
+	x{0},y{0},deltaX{0},deltaY{0},
+	scrollDelta{0}
+{
+
+}
+
+EventSystem::EventSystem():
+	_curr{},
+	_casters{},
+	_leftEvt{},
+	_rightEvt{},
+	_middleEvt{},
+	_preX{0},_preY{0}
+{
+
+}
+
 void EventSystem::Update()
 {
-	int screenX = 0, screenY = 0;
-	// todo 判断当前事件类型
-	for (auto i = _caster.begin(); i != _caster.end(); i++)
+	UpdateMouseState();
+
+	ProcessMousePress(_leftEvt);
+	ProcessMove(_leftEvt);
+	ProcessDrag(_leftEvt);
+
+	ProcessMousePress(_rightEvt);
+	ProcessDrag(_rightEvt);
+
+	ProcessMousePress(_middleEvt);
+	ProcessDrag(_middleEvt);
+
+	ProcessWheel(_leftEvt);
+}
+
+void EventSystem::AddCaster(shared_ptr<InteractObjectCaster> caster)
+{
+	for (auto i = _casters.begin(); i != _casters.end(); i++)
 	{
-		auto pObj = (*i)->Cast(screenX, screenY);
-		if (!pObj.expired())
+		if ((*i) < caster)
 		{
-			// todo 事件处理
-			_curr = pObj;
+			_casters.insert(i, caster);
+			return;
+		}
+	}
+
+	_casters.push_back(caster);
+}
+
+void EventSystem::RemoveCaster(shared_ptr<InteractObjectCaster> caster)
+{
+	_casters.remove(caster);
+}
+
+void EventSystem::UpdateMouseState()
+{
+	auto state = DirectX::Mouse::Get().GetState();
+	weak_ptr<IInteractObject> tar;
+	for (auto i = _casters.begin(); i != _casters.end(); i++)
+	{
+		tar = (*i)->Cast(state.x, state.y);
+		if (!tar.expired())
+		{
 			break;
 		}
 	}
+
+	auto dx = state.x - _preX;
+	auto dy = state.y - _preY;
+	auto dScroll = state.scrollWheelValue - _preScroll;
+	UpdateEvent(_leftEvt, state.x, state.y, dx, dx, dScroll, state.leftButton);
+	UpdateEvent(_rightEvt, state.x, state.y, dx, dx, dScroll, state.rightButton);
+	UpdateEvent(_middleEvt, state.x, state.y, dx, dx, dScroll, state.middleButton);
+	_preX = state.x;
+	_preY = state.y;
+	_preScroll = state.scrollWheelValue;
 }
+
+void EventSystem::UpdateEvent(MouseEventData& evt, int x, int y, int dx, int dy, int scroll, bool down)
+{
+	if (down) {
+		switch (evt.State)
+		{
+		case MouseEventData::FramePressState::OnPress:
+		case MouseEventData::FramePressState::Pressed:
+			evt.State = MouseEventData::FramePressState::Pressed;
+			break;
+		case MouseEventData::FramePressState::OnRelease:
+		case MouseEventData::FramePressState::Released:
+			evt.State = MouseEventData::FramePressState::OnPress;
+			break;
+		default:
+			break;
+		}
+	}
+	else {
+		switch (evt.State)
+		{
+		case MouseEventData::FramePressState::OnPress:
+		case MouseEventData::FramePressState::Pressed:
+			evt.State = MouseEventData::FramePressState::OnRelease;
+			break;
+		case MouseEventData::FramePressState::OnRelease:
+		case MouseEventData::FramePressState::Released:
+			evt.State = MouseEventData::FramePressState::Pressed;
+			break;
+		default:
+			break;
+		}
+	}
+
+	evt.x = x;
+	evt.y = y;
+	evt.deltaX = dx;
+	evt.deltaY = dy;
+	evt.scrollDelta = scroll;
+}
+
+void EventSystem::ProcessMousePress(MouseEventData& evt)
+{}
+void EventSystem::ProcessMove(MouseEventData& evt)
+{}
+void EventSystem::ProcessDrag(MouseEventData& evt)
+{}
+void EventSystem::ProcessWheel(MouseEventData& evt)
+{}
