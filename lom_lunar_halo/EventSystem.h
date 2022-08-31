@@ -3,21 +3,40 @@
 #include <memory>
 #include <vector>
 #include <list>
+#include <functional>
 
 using std::shared_ptr;
 using std::weak_ptr;
 using std::vector;
 using std::list;
+using std::function;
 
 namespace YX
 {
-	interface IInteractObject
+	interface IInteractObject : public std::enable_shared_from_this<IInteractObject>
 	{
 		virtual bool CanHover() = 0;
 		virtual bool CanClick() = 0;
 		virtual bool CanDrag() = 0;
 		virtual bool CanScroll() = 0;
-		virtual IInteractObject* GetParent() = 0;
+		virtual weak_ptr<IInteractObject> GetParent() = 0;
+
+		inline weak_ptr<IInteractObject> FindHandler(function<bool(weak_ptr<IInteractObject>)> func)
+		{
+			weak_ptr<IInteractObject> handler{};
+			weak_ptr<IInteractObject> p = weak_from_this();
+			while (!p.expired())
+			{
+				if (func(p)) {
+					handler = p;
+					break;
+				}
+				else
+					p = p.lock()->GetParent();
+			}
+
+			return handler;
+		}
 	};
 
 	class MouseEventData
@@ -88,8 +107,6 @@ namespace YX
 		void AddCaster(shared_ptr<InteractObjectCaster> caster);
 		void RemoveCaster(shared_ptr<InteractObjectCaster> caster);
 	private:
-
-		weak_ptr<IInteractObject> _curr;
 		list<shared_ptr<InteractObjectCaster>> _casters;
 
 		MouseEventData _leftEvt;
@@ -105,5 +122,6 @@ namespace YX
 		void ProcessMove(MouseEventData& evt);
 		void ProcessDrag(MouseEventData& evt);
 		void ProcessWheel(MouseEventData& evt);
+		weak_ptr<IInteractObject> Cast(int screenX, int screenY);
 	};
 }

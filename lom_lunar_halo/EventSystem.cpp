@@ -18,12 +18,12 @@ MouseEventData::MouseEventData():
 }
 
 EventSystem::EventSystem():
-	_curr{},
 	_casters{},
 	_leftEvt{},
 	_rightEvt{},
 	_middleEvt{},
-	_preX{0},_preY{0}
+	_preX{0},_preY{0},
+	_preScroll{0}
 {
 
 }
@@ -67,16 +67,6 @@ void EventSystem::RemoveCaster(shared_ptr<InteractObjectCaster> caster)
 void EventSystem::UpdateMouseState()
 {
 	auto state = DirectX::Mouse::Get().GetState();
-	weak_ptr<IInteractObject> tar;
-	for (auto i = _casters.begin(); i != _casters.end(); i++)
-	{
-		tar = (*i)->Cast(state.x, state.y);
-		if (!tar.expired())
-		{
-			break;
-		}
-	}
-
 	auto dx = state.x - _preX;
 	auto dy = state.y - _preY;
 	auto dScroll = state.scrollWheelValue - _preScroll;
@@ -129,10 +119,37 @@ void EventSystem::UpdateEvent(MouseEventData& evt, int x, int y, int dx, int dy,
 }
 
 void EventSystem::ProcessMousePress(MouseEventData& evt)
-{}
+{
+	auto castObj = Cast(evt.x, evt.y);
+	auto clickObj = castObj.lock()->FindHandler([](auto p) {return p.lock()->CanClick(); });
+}
 void EventSystem::ProcessMove(MouseEventData& evt)
-{}
+{
+	auto castObj = Cast(evt.x, evt.y);
+	auto hoverObj = castObj.lock()->FindHandler([](auto p) {return p.lock()->CanHover(); });
+}
 void EventSystem::ProcessDrag(MouseEventData& evt)
-{}
+{
+	auto castObj = Cast(evt.x, evt.y);
+	auto dragObj = castObj.lock()->FindHandler([](auto p) {return p.lock()->CanDrag(); });
+}
 void EventSystem::ProcessWheel(MouseEventData& evt)
-{}
+{
+	auto castObj = Cast(evt.x, evt.y);
+	auto scrollObj = castObj.lock()->FindHandler([](auto p) {return p.lock()->CanScroll(); });
+}
+
+weak_ptr<IInteractObject> EventSystem::Cast(int screenX, int screenY)
+{
+	weak_ptr<IInteractObject> tar{};
+	for (auto i = _casters.begin(); i != _casters.end(); i++)
+	{
+		tar = (*i)->Cast(screenX, screenX);
+		if (!tar.expired())
+		{
+			break;
+		}
+	}
+
+	return tar;
+}
