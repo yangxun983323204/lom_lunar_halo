@@ -32,7 +32,7 @@ void GUIElement::SetParent(std::shared_ptr<GUIElement> self, std::shared_ptr<GUI
 {
 	if (self!=0 && self.get()!=this)
 	{
-		throw "GUIElement::SetParentµÄself²ÎÊýÇë´«Èë0»òÕß×ÔÉíµÄshared_ptr";
+		throw "GUIElement::SetParentçš„selfå‚æ•°è¯·ä¼ å…¥0æˆ–è€…è‡ªèº«çš„shared_ptr";
 	}
 	if (!_parent.expired())
 	{

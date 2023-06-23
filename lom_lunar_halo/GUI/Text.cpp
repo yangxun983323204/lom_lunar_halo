@@ -58,9 +58,9 @@ void Text::UpdateSprite()
 {
 	if (_rectDirty)
 	{
-		// ÏÈÖØ½¨¾«Áé£¬ÔÙäÖÈ¾ÎÄ±¾
+		// ï¿½ï¿½ï¿½Ø½ï¿½ï¿½ï¿½ï¿½é£¬ï¿½ï¿½ï¿½ï¿½È¾ï¿½Ä±ï¿½
 		_sprite.reset();
-		_sprite = Sprite::CreateRenderTarget(GetDeviceResource()->GetD3DDevice(), DPI_S(Width), DPI_S(Height), 0, 0, 0, 0);
+		_sprite = Sprite_old::CreateRenderTarget(GetDeviceResource()->GetD3DDevice(), DPI_S(Width), DPI_S(Height), 0, 0, 0, 0);
 	}
 
 	ComPtr<ID2D1Factory> pD2DFactory{};

@@ -17,7 +17,7 @@ shared_ptr<Canvas> LayoutLoader::Parse(wstring xmlPath)
 	xml.LoadFile(path.c_str());
 	auto root = xml.FirstChildElement();
 	shared_ptr<Canvas> canvas{};
-	// ÏÈ¸ù±éÀú
+	// å…ˆæ ¹éå†
 	queue<shared_ptr<GUIElement>> parentQueue{};
 	queue<tinyxml2::XMLElement*> xmlQueue{};
 	xmlQueue.push(root);
@@ -37,7 +37,7 @@ shared_ptr<Canvas> LayoutLoader::Parse(wstring xmlPath)
 		if (name == TYPE_CANVAS)
 		{
 			if (canvas)
-				throw "²»ÔÊĞíµ¥¸ö²¼¾ÖÎÄ¼şÖĞ°üº¬¶à¸öCanvas";
+				throw "ä¸å…è®¸å•ä¸ªå¸ƒå±€æ–‡ä»¶ä¸­åŒ…å«å¤šä¸ªCanvas";
 
 			canvas = std::make_shared<Canvas>();
 			curr = canvas;
@@ -49,7 +49,7 @@ shared_ptr<Canvas> LayoutLoader::Parse(wstring xmlPath)
 			curr = std::make_shared<Text>();
 		}
 		else {
-			printf("²»Ö§³ÖµÄUIÔªËØÀàĞÍ:%s", name);
+			printf("ä¸æ”¯æŒçš„UIå…ƒç´ ç±»å‹:%s", name);
 		}
 
 		if(curr)
@@ -58,7 +58,7 @@ shared_ptr<Canvas> LayoutLoader::Parse(wstring xmlPath)
 		if (curr && parent)
 			curr->SetParent(curr, parent);
 
-		// ½«Æä×Ó½Úµã¼ÓÈë¶ÓÁĞ
+		// å°†å…¶å­èŠ‚ç‚¹åŠ å…¥é˜Ÿåˆ—
 		if (node->FirstChildElement())
 		{
 			auto c = node->FirstChildElement();

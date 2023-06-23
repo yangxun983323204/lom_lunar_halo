@@ -76,6 +76,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>..\deps\RmlUi-vs2017-win64\Include\;$(IncludePath)</IncludePath>
+    <LibraryPath>..\deps\RmlUi-vs2017-win64\Bin\Dynamic-Debug\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -187,9 +189,11 @@
     <ClInclude Include="GUI\LayoutLoader.h" />
     <ClInclude Include="GUI\Text.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="MyRmlUi\DX11RmlRenderer.h" />
+    <ClInclude Include="MyRmlUi\RmlUiUtility.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Setting.h" />
-    <ClInclude Include="Sprite.h" />
+    <ClInclude Include="Sprite_old.h" />
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="StringCodec.hpp" />
     <ClInclude Include="tinyxml2.h" />
@@ -204,6 +208,8 @@
     <ClCompile Include="GUI\LayoutLoader.cpp" />
     <ClCompile Include="GUI\Text.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MyRmlUi\DX11RmlRenderer.cpp" />
+    <ClCompile Include="MyRmlUi\RmlUiUtility.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -211,7 +217,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Setting.cpp" />
-    <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="Sprite_old.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +235,9 @@
     </ProjectReference>
     <ProjectReference Include="..\mir_lib\mir_lib.vcxproj">
       <Project>{a4cf42bd-181a-45df-8ff6-fdc0ac636113}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\RenderFramework\RenderFramework.vcxproj">
+      <Project>{56588c33-df4d-4c8d-a476-de741d908815}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "Sprite.h"
+#include "Sprite_old.h"
 #include "../tinyxml2.h"
 
 namespace YX {
@@ -61,10 +61,10 @@ namespace YX {
 		public:
 			inline virtual bool Drawable() override { return true; }
 			inline virtual void Update(float deltaSec) override {}
-			inline Sprite* GetSprite() { return _sprite.get(); }
+			inline Sprite_old* GetSprite() { return _sprite.get(); }
 			virtual void Draw() override;
 		protected:
-			std::shared_ptr<Sprite> _sprite;
+			std::shared_ptr<Sprite_old> _sprite;
 		};
 
 		class Control : public GUIElement

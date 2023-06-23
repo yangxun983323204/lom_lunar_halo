@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK_Desktop_2022_Win1
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mir_lib", "mir_lib\mir_lib.vcxproj", "{A4CF42BD-181A-45DF-8FF6-FDC0AC636113}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderFramework", "RenderFramework\RenderFramework.vcxproj", "{56588C33-DF4D-4C8D-A476-DE741D908815}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -55,6 +57,18 @@ Global
 		{A4CF42BD-181A-45DF-8FF6-FDC0AC636113}.Release|x64.Build.0 = Release|x64
 		{A4CF42BD-181A-45DF-8FF6-FDC0AC636113}.Release|x86.ActiveCfg = Release|Win32
 		{A4CF42BD-181A-45DF-8FF6-FDC0AC636113}.Release|x86.Build.0 = Release|Win32
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Debug|ARM64.ActiveCfg = Debug|x64
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Debug|ARM64.Build.0 = Debug|x64
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Debug|x64.ActiveCfg = Debug|x64
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Debug|x64.Build.0 = Debug|x64
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Debug|x86.ActiveCfg = Debug|Win32
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Debug|x86.Build.0 = Debug|Win32
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Release|ARM64.ActiveCfg = Release|x64
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Release|ARM64.Build.0 = Release|x64
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Release|x64.ActiveCfg = Release|x64
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Release|x64.Build.0 = Release|x64
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Release|x86.ActiveCfg = Release|Win32
+		{56588C33-DF4D-4C8D-A476-DE741D908815}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

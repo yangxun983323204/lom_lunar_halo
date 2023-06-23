@@ -7,7 +7,7 @@
 #include "DeviceResources.h"
 #include "StepTimer.h"
 #include "../DirectXTK-main/Inc/SpriteBatch.h"
-#include "Sprite.h"
+#include "Sprite_old.h"
 #include "./GUI/Canvas.h"
 #include "Setting.h"
 

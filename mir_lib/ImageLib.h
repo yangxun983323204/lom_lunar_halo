@@ -10,7 +10,7 @@ using std::vector;
 class ImageLib
 {
 public:
-	const static unsigned char KeyNone;// Í¸Ã÷
+	const static unsigned char KeyNone;// é€æ˜
 	const static unsigned char KeyConst;
 	const static unsigned char KeyOverlay1;
 	const static unsigned char KeyOverlay2;
@@ -38,15 +38,15 @@ public:
 	uint32_t GetCount();
 	ImageInfo GetImageInfo(int idx);
 	/// <summary>
-	/// »ñÈ¡Î´½âÑ¹µÄÔ­Ê¼Êı¾İ
+	/// è·å–æœªè§£å‹çš„åŸå§‹æ•°æ®
 	/// </summary>
 	vector<uint16_t> GetImageRaw(int idx);
 	/// <summary>
-	/// »ñÈ¡½âÑ¹ÎªRGB565µÄÊı¾İ
+	/// è·å–è§£å‹ä¸ºRGB565çš„æ•°æ®
 	/// </summary>
 	vector<uint16_t> GetImageRGB565(int idx);
 	/// <summary>
-	/// »ñÈ¡½âÑ¹ÎªRGBA3µÄÊı¾İ
+	/// è·å–è§£å‹ä¸ºRGBA3çš„æ•°æ®
 	/// </summary>
 	vector<uint32_t> GetImageRGBA32(int idx);
 

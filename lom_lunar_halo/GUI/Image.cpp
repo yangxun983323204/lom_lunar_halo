@@ -12,7 +12,7 @@ using std::string;
 extern DX::DeviceResources* GetDeviceResource();
 extern std::shared_ptr<Setting> GetSetting();
 
-void Image::SetSprite(std::shared_ptr<Sprite> sprite)
+void Image::SetSprite(std::shared_ptr<Sprite_old> sprite)
 {
 	_sprite = sprite;
 }
@@ -34,7 +34,7 @@ void Image::LoadXml(tinyxml2::XMLElement* e)
 			int idx = 0;
 			if (e->QueryIntAttribute("Index",&idx) == tinyxml2::XML_SUCCESS)
 			{
-				// todo ½öÁÙÊ±Ğ´·¨
+				// todo ä»…ä¸´æ—¶å†™æ³•
 				ImageLib imgLib{};
 				imgLib.Open(GetSetting()->GetDataDir() + Utf8ToWString(pbuffer));
 				//assert(imgLib.IsOpened());
@@ -44,7 +44,7 @@ void Image::LoadXml(tinyxml2::XMLElement* e)
 					auto info = imgLib.GetImageInfo(i);
 					auto rgba32 = imgLib.GetImageRGBA32(i);
 					imgLib.Close();
-					auto sprite = YX::Sprite::CreateFromWIL(GetDeviceResource()->GetD3DDevice(), info, std::move(rgba32));
+					auto sprite = YX::Sprite_old::CreateFromWIL(GetDeviceResource()->GetD3DDevice(), info, std::move(rgba32));
 					SetSprite(sprite);
 					bool UseNativeSize = e->BoolAttribute("UseNativeSize", false);
 					if (UseNativeSize)
@@ -56,6 +56,6 @@ void Image::LoadXml(tinyxml2::XMLElement* e)
 		}
 	}
 	else {
-		printf("²»Ö§³ÖµÄÍ¼Æ¬ÀàĞÍ:%s", pbuffer);
+		printf("ä¸æ”¯æŒçš„å›¾ç‰‡ç±»å‹:%s", pbuffer);
 	}
 }

@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-const unsigned char ImageLib::KeyNone = 0xc0;// Í¸Ã÷
+const unsigned char ImageLib::KeyNone = 0xc0;// é€æ˜
 const unsigned char ImageLib::KeyConst = 0xc1;
 const unsigned char ImageLib::KeyOverlay1 = 0xc2;
 const unsigned char ImageLib::KeyOverlay2 = 0xc3;
@@ -29,15 +29,15 @@ struct ImageLib::Impl
 		return _infos[idx];
 	}
 	/// <summary>
-	/// »ñÈ¡Î´½âÑ¹µÄÔ­Ê¼Êı¾İ
+	/// è·å–æœªè§£å‹çš„åŸå§‹æ•°æ®
 	/// </summary>
 	vector<uint16_t> GetImageRaw(int idx);
 	/// <summary>
-	/// »ñÈ¡½âÑ¹ÎªRGB565µÄÊı¾İ
+	/// è·å–è§£å‹ä¸ºRGB565çš„æ•°æ®
 	/// </summary>
 	vector<uint16_t> GetImageRGB565(int idx);
 	/// <summary>
-	/// »ñÈ¡½âÑ¹ÎªRGBA3µÄÊı¾İ
+	/// è·å–è§£å‹ä¸ºRGBA3çš„æ•°æ®
 	/// </summary>
 	vector<uint32_t> GetImageRGBA32(int idx);
 
@@ -91,7 +91,7 @@ struct ImageLib::Impl
 		int32_t ImgCount;
 		int32_t* Data;
 	};
-	/* ¿ÉÒÔ²»Ê¹ÓÃ
+	/* å¯ä»¥ä¸ä½¿ç”¨
 	struct WilHeader3
 	{
 		int16_t HasCompress;
@@ -119,7 +119,7 @@ void ImageLib::Impl::Open(wstring wixPath, wstring wilPath)
 {
 	if (_isOpened)
 		return;
-	// ´ÓwilÎÄ¼ş»ñÈ¡°æ±¾ºÅ
+	// ä»wilæ–‡ä»¶è·å–ç‰ˆæœ¬å·
 	FILE* wil = nullptr;
 	_wfopen_s(&wil, wilPath.c_str(), L"rb");
 	//assert(fpeekVer != nullptr);
@@ -143,7 +143,7 @@ void ImageLib::Impl::Open(wstring wixPath, wstring wilPath)
 	wil = nullptr;
 	_wfopen_s(&wil, wilPath.c_str(), L"rb");
 	_wil.reset(wil);
-	// ¶ÁÈ¡ImageInfo
+	// è¯»å–ImageInfo
 	_blockAddress.clear();
 	_blockAddress.reserve(wixHeader->ImgCount);
 	_infos.clear();
@@ -226,7 +226,7 @@ vector<uint16_t> ImageLib::Impl::GetImageRGB565(int idx)
 				//chooseColor = chooseColor2;
 				for (size_t t = 0; t < cntCpy; t++)
 				{
-					// ¿¼ÂÇ²»ÔÚÕâÀï×öÑÕÉ«±ä¸ü£¬Ö»×ö¸ö±ê¼Ç
+					// è€ƒè™‘ä¸åœ¨è¿™é‡Œåšé¢œè‰²å˜æ›´ï¼Œåªåšä¸ªæ ‡è®°
 					pData[row * w + dstNowRowAt + t] = rawbuffer[rawNowAt + t];
 				}
 				rawNowAt += cntCpy;
@@ -287,7 +287,7 @@ vector<uint32_t> ImageLib::Impl::GetImageRGBA32(int idx)
 				//chooseColor = chooseColor2;
 				for (size_t t = 0; t < cntCpy; t++)
 				{
-					// ¿¼ÂÇ²»ÔÚÕâÀï×öÑÕÉ«±ä¸ü£¬Ö»×ö¸ö±ê¼Ç
+					// è€ƒè™‘ä¸åœ¨è¿™é‡Œåšé¢œè‰²å˜æ›´ï¼Œåªåšä¸ªæ ‡è®°
 					pData[row * w + dstNowRowAt + t] = RGBA32(rawbuffer[rawNowAt + t]);
 				}
 				rawNowAt += cntCpy;

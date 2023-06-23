@@ -6,7 +6,7 @@
 namespace YX 
 {
 	/// <summary>
-	/// 将wstring转换到utf8编码的string
+	/// 灏唚string杞崲鍒皍tf8缂栫爜鐨剆tring
 	/// </summary>
 	inline std::string WStringToUtf8(std::wstring wstr) 
 	{
@@ -15,7 +15,7 @@ namespace YX
 	}
 
 	/// <summary>
-	/// 将utf8编码的string转换到wstring
+	/// 灏唘tf8缂栫爜鐨剆tring杞崲鍒皐string
 	/// </summary>
 	inline std::wstring Utf8ToWString(std::string u8str)
 	{

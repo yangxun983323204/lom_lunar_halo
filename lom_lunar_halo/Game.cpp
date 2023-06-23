@@ -11,12 +11,17 @@
 #include "./GUI/Image.h"
 #include "./GUI/Text.h"
 #include "./GUI/LayoutLoader.h"
+#include "../RenderFramework/RenderFramework.h"
+#include "StringCodec.hpp"
 
 extern void ExitGame() noexcept;
 
 using namespace DirectX;
 
 using Microsoft::WRL::ComPtr;
+// test scene
+std::shared_ptr<SceneNode> _testScene;
+std::shared_ptr<SpriteRenderSystem> _testRenderSystem;
 
 Game::Game() noexcept(false):
     _batch{}
@@ -89,7 +94,8 @@ void Game::Render()
 
     // TODO: Add your rendering code here.
     _batch->Begin();
-    YX::GUI::Canvas::DrawAll();
+    _testRenderSystem->Render();
+    //YX::GUI::Canvas::DrawAll();
     _batch->End();
 
     m_deviceResources->PIXEndEvent();
@@ -174,7 +180,7 @@ void Game::GetDefaultSize(int& width, int& height) const noexcept
 
 void Game::GetCurrSize(int& width, int& height) const noexcept
 {
-    // todo 根据当前游戏状态，返回登陆布局大小或游戏布局大小
+    // todo 鏍规嵁褰撳墠娓告垙鐘舵�侊紝杩斿洖鐧婚檰甯冨眬澶у皬鎴栨父鎴忓竷灞�澶у皬
     width = GameLayoutW;
     height = GameLayoutH;
 }
@@ -190,6 +196,42 @@ void Game::CreateDeviceDependentResources()
     _batch.reset(new SpriteBatch{ m_deviceResources->GetD3DDeviceContext()});
 
     _testMir3 = YX::GUI::LayoutLoader::Parse(_setting->GetUILayoutDir() + L"login.xml");
+    // 娴嬭瘯鍦烘櫙娓叉煋
+    _testScene = std::make_shared<SceneNode>();
+    auto camera = std::make_shared<Camera>();
+    auto sp = std::make_shared<Sprite>();
+    auto spRenderer = std::make_shared<SpriteRenderer>();
+    spRenderer->Sprite = sp;
+    //
+    ImageLib imgLib{};
+    imgLib.Open(GetSetting()->GetDataDir() + L"Interface1c.wil");
+    //assert(imgLib.IsOpened());
+    if (imgLib.IsOpened())
+    {
+        int i = 80;
+        auto info = imgLib.GetImageInfo(i);
+        sp->Rect = { 0,0,info.Width, info.Height };
+        auto rgba32 = imgLib.GetImageRGBA32(i);
+        imgLib.Close();
+        D3D11_SUBRESOURCE_DATA subData{ 0 };
+        subData.pSysMem = rgba32.data();
+        subData.SysMemPitch = info.Width * 4;
+        DX::ThrowIfFailed(DirectX::CreateTextureFromMemory(
+            device,
+            info.Width, info.Height,
+            DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
+            (const D3D11_SUBRESOURCE_DATA)subData,
+            nullptr, sp->TextureSRV.GetAddressOf()));
+    }
+    //
+    _testScene->AddComponent(std::weak_ptr<Camera>(camera));
+    _testScene->AddComponent(std::weak_ptr<SpriteRenderer>(spRenderer));
+
+    _testRenderSystem = std::make_shared<SpriteRenderSystem>();
+    _testRenderSystem->SetClearFunc([this](DirectX::XMFLOAT4 color) { this->Clear(); });
+    _testRenderSystem->SetRenderFunc([this](ID3D11ShaderResourceView* srv, RECT rect, DirectX::XMFLOAT4 color) {
+        DrawTexture(srv, rect);
+        });
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

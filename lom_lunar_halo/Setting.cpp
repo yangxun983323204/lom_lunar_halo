@@ -27,17 +27,17 @@ bool Setting::Load()
 
 wstring Setting::GetDataDir()
 {
-    return _originDataDir + L"./Data/";
+    return _originDataDir + L"Data/";
 }
 
 wstring Setting::GetMapDir()
 {
-    return _originDataDir + L"./Map/";
+    return _originDataDir + L"Map/";
 }
 
 wstring Setting::GetSoundDir()
 {
-    return _originDataDir + L"./Sound/";
+    return _originDataDir + L"Sound/";
 }
 
 wstring Setting::GetUILayoutDir()
