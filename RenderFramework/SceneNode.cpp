@@ -77,17 +77,6 @@ vector<weak_ptr<SceneNode>> SceneNode::GetChildren()
     return ret;
 }
 
-void SceneNode::AddComponent(weak_ptr<ISceneNodeComponent> component)
-{
-    if (component.expired())
-        return;
-
-    auto ptr = component.lock();
-    ptr->Reg();
-    ptr->_node = weak_from_this();
-    _components.push_back(ptr);
-}
-
 weak_ptr<ISceneNodeComponent> SceneNode::GetComponent(int typeId)
 {
     for(auto i : _components) 

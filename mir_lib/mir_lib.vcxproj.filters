@@ -21,12 +21,18 @@
     <ClInclude Include="ImageLib.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MapData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ImageLib.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MapData.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

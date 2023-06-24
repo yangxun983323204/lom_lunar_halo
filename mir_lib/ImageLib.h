@@ -46,7 +46,7 @@ public:
 	/// </summary>
 	vector<uint16_t> GetImageRGB565(int idx);
 	/// <summary>
-	/// 获取解压为RGBA3的数据
+	/// 获取解压为RGBA32的数据
 	/// </summary>
 	vector<uint32_t> GetImageRGBA32(int idx);
 

@@ -44,6 +44,7 @@
     <ClInclude Include="EventSystem.h" />
     <ClInclude Include="MyRmlUi\RmlUiUtility.h" />
     <ClInclude Include="MyRmlUi\DX11RmlRenderer.h" />
+    <ClInclude Include="SceneManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -73,6 +74,7 @@
     <ClCompile Include="EventSystem.cpp" />
     <ClCompile Include="MyRmlUi\RmlUiUtility.cpp" />
     <ClCompile Include="MyRmlUi\DX11RmlRenderer.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

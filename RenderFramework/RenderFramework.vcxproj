@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="GridView.h" />
     <ClInclude Include="ISceneNodeComponent.h" />
     <ClInclude Include="ISystem.h" />
     <ClInclude Include="RenderFramework.h" />
@@ -30,6 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="GridView.cpp" />
     <ClCompile Include="ISceneNodeComponent.cpp" />
     <ClCompile Include="ISystem.cpp" />
     <ClCompile Include="SceneNode.cpp" />

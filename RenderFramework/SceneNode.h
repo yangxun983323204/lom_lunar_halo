@@ -33,7 +33,8 @@ public:
 	void SetParent(weak_ptr<SceneNode> parent);
 	weak_ptr<SceneNode> GetParent();
 	vector<weak_ptr<SceneNode>> GetChildren();
-	void AddComponent(weak_ptr<ISceneNodeComponent> component);
+	template<typename TComponent>
+	weak_ptr<TComponent> AddComponent();
 	weak_ptr<ISceneNodeComponent> GetComponent(int typeId);
 	vector<weak_ptr<ISceneNodeComponent>> GetComponents(int typeId);
 	vector<weak_ptr<ISceneNodeComponent>> GetComponentsInChildren(int typeId);
@@ -49,3 +50,13 @@ private:
 	vector<shared_ptr<SceneNode>> _children;
 	vector<shared_ptr<ISceneNodeComponent>> _components;
 };
+
+template<class TComponent>
+weak_ptr<TComponent> SceneNode::AddComponent()
+{
+	auto ptr = std::make_shared<TComponent>();
+	ptr->Reg();
+	ptr->_node = weak_from_this();
+	_components.push_back(ptr);
+	return std::weak_ptr<TComponent>{ptr};
+}

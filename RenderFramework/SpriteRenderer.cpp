@@ -21,7 +21,7 @@ RECT SpriteRenderer::GetWorldRect()
 	rect.bottom *= wScale.y;
 #endif
 	auto w = rect.right - rect.left;
-	auto h = rect.top - rect.bottom;
+	auto h = rect.bottom - rect.top;
 	auto offsetX = -w * Sprite->Pivot.x;
 	auto offsetY = -h * Sprite->Pivot.y;
 

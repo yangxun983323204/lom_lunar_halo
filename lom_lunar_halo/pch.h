@@ -62,6 +62,9 @@ const int LoginLayoutH = 360;
 const int GameLayoutW = 800;
 const int GameLayoutH = 600;
 
+// 用来解决本身素材过小的问题
+extern float UserScale;
+// 用来解决DPI缩放
 extern float DpiScale;
 
 extern DirectX::Mouse gMouse;
@@ -72,7 +75,7 @@ extern DirectX::Mouse gMouse;
 template<typename T>
 inline T DPI_S(T v)
 {
-    return v * DpiScale;
+    return v * DpiScale * UserScale;
 }
 
 namespace DX

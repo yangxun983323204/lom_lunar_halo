@@ -7,12 +7,14 @@
 #include <sys/stat.h>
 #include "../DirectXTK-main/Inc/BufferHelpers.h"
 #include "../mir_lib/ImageLib.h"
+#include "../mir_lib/MapData.h"
 #include <string>
 #include "./GUI/Image.h"
 #include "./GUI/Text.h"
 #include "./GUI/LayoutLoader.h"
-#include "../RenderFramework/RenderFramework.h"
+#include "SceneManager.h"
 #include "StringCodec.hpp"
+#include <format>
 
 extern void ExitGame() noexcept;
 
@@ -21,7 +23,7 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 // test scene
 std::shared_ptr<SceneNode> _testScene;
-std::shared_ptr<SpriteRenderSystem> _testRenderSystem;
+std::shared_ptr<SceneManager> _sceneManager;
 
 Game::Game() noexcept(false):
     _batch{}
@@ -94,7 +96,7 @@ void Game::Render()
 
     // TODO: Add your rendering code here.
     _batch->Begin();
-    _testRenderSystem->Render();
+    _sceneManager->Render();
     //YX::GUI::Canvas::DrawAll();
     _batch->End();
 
@@ -181,8 +183,8 @@ void Game::GetDefaultSize(int& width, int& height) const noexcept
 void Game::GetCurrSize(int& width, int& height) const noexcept
 {
     // todo 根据当前游戏状态，返回登陆布局大小或游戏布局大小
-    width = GameLayoutW;
-    height = GameLayoutH;
+    width = LoginLayoutW;
+    height = LoginLayoutH;
 }
 #pragma endregion
 
@@ -197,19 +199,22 @@ void Game::CreateDeviceDependentResources()
 
     _testMir3 = YX::GUI::LayoutLoader::Parse(_setting->GetUILayoutDir() + L"login.xml");
     // 测试场景渲染
-    _testScene = std::make_shared<SceneNode>();
-    auto camera = std::make_shared<Camera>();
-    auto sp = std::make_shared<Sprite>();
-    auto spRenderer = std::make_shared<SpriteRenderer>();
-    spRenderer->Sprite = sp;
+    _sceneManager = std::make_shared<SceneManager>(m_deviceResources.get());
+    int w, h;
+    GetCurrSize(w, h);
+    _sceneManager->SetScreen(w, h);
+    _testScene = _sceneManager->CreateSpriteNode();
+    _testScene->SetLocalPosition({ 0,0 });
+    auto camera  = _testScene->AddComponent<Camera>();
     //
     ImageLib imgLib{};
     imgLib.Open(GetSetting()->GetDataDir() + L"Interface1c.wil");
     //assert(imgLib.IsOpened());
     if (imgLib.IsOpened())
     {
-        int i = 80;
+        int i = 0;
         auto info = imgLib.GetImageInfo(i);
+        auto sp = dynamic_cast<SpriteRenderer*>(_testScene->GetComponent(SpriteRenderer::TypeId).lock().get())->Sprite;
         sp->Rect = { 0,0,info.Width, info.Height };
         auto rgba32 = imgLib.GetImageRGBA32(i);
         imgLib.Close();
@@ -223,15 +228,11 @@ void Game::CreateDeviceDependentResources()
             (const D3D11_SUBRESOURCE_DATA)subData,
             nullptr, sp->TextureSRV.GetAddressOf()));
     }
-    //
-    _testScene->AddComponent(std::weak_ptr<Camera>(camera));
-    _testScene->AddComponent(std::weak_ptr<SpriteRenderer>(spRenderer));
-
-    _testRenderSystem = std::make_shared<SpriteRenderSystem>();
-    _testRenderSystem->SetClearFunc([this](DirectX::XMFLOAT4 color) { this->Clear(); });
-    _testRenderSystem->SetRenderFunc([this](ID3D11ShaderResourceView* srv, RECT rect, DirectX::XMFLOAT4 color) {
-        DrawTexture(srv, rect);
-        });
+    // 测试地图加载
+    auto mapData = std::make_unique<MapData>();
+    mapData->Load(GetSetting()->GetMapDir() + L"0.map");
+    wstring sizeStr = L"map size:" + std::to_wstring(mapData->w()) + L"," + std::to_wstring(mapData->h());
+    MessageBox(m_deviceResources->GetWindow(), sizeStr.c_str(), L"测试map加载", 0);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

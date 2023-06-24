@@ -5,6 +5,7 @@
 
 #include "pch.h"
 
+float UserScale = 2;
 float DpiScale = 1;
 
 DirectX::Mouse gMouse{};
