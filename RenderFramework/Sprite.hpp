@@ -2,6 +2,7 @@
 #include <wrl.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include "../DirectXTK-main/Inc/SimpleMath.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -13,10 +14,7 @@ public:
 	{
 	}
 
-	inline uint32_t GetWidth() { return Rect.right - Rect.left; }
-	inline uint32_t GetHeight() { return Rect.top - Rect.bottom; }
-
-	RECT Rect;
+	DirectX::SimpleMath::Rectangle Rect;
 	DirectX::XMFLOAT2 Pivot;
 	ComPtr<ID3D11ShaderResourceView> TextureSRV;
 };

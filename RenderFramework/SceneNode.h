@@ -5,6 +5,8 @@
 #include <DirectXMath.h>
 #include "ISceneNodeComponent.h"
 
+#define SCENE_NODE_SCALE
+
 using std::unique_ptr;
 using std::shared_ptr;
 using std::weak_ptr;
@@ -15,10 +17,10 @@ class SceneNode:
 {
 public:
 	std::wstring Name;
-
-	inline DirectX::XMFLOAT2 GetLocalPosition() { return _localPosition; }
-	inline void SetLocalPosition(DirectX::XMFLOAT2 lPos) { _localPosition = lPos; }
-	DirectX::XMFLOAT2 GetWorldPosition();
+	SceneNode();
+	inline DirectX::XMINT2 GetLocalPosition() { return _localPosition; }
+	inline void SetLocalPosition(DirectX::XMINT2 lPos) { _localPosition = lPos; }
+	DirectX::XMINT2 GetWorldPosition();
 
 	inline float GetLocalAngle() { return _localAngle; }
 	inline void SetLocalAngle(float lAngle) { _localAngle = lAngle; }
@@ -41,7 +43,7 @@ public:
 	void RemoveComponent(weak_ptr<ISceneNodeComponent> component);
 
 private:
-	DirectX::XMFLOAT2 _localPosition;
+	DirectX::XMINT2 _localPosition;
 	float _localAngle;
 #ifdef SCENE_NODE_SCALE
 	DirectX::XMFLOAT2 _localScale;

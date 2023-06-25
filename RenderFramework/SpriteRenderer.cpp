@@ -3,31 +3,29 @@
 
 const int SpriteRenderer::GetTypeId() { return TypeId; }
 
-RECT SpriteRenderer::GetWorldRect()
+DirectX::SimpleMath::Rectangle SpriteRenderer::GetWorldRect()
 {
 	if (GetSceneNode() == nullptr)
-		return RECT();
+		return DirectX::SimpleMath::Rectangle();
 
 	if (!Sprite)
-		return RECT();
+		return DirectX::SimpleMath::Rectangle();
 
 	auto wPos = GetSceneNode()->GetWorldPosition();
 	auto rect = Sprite->Rect;
 #ifdef SCENE_NODE_SCALE
 	auto wScale = GetSceneNode()->GetWorldScale();
-	rect.left *= wScale.x;
-	rect.right *= wScale.x;
-	rect.top *= wScale.y;
-	rect.bottom *= wScale.y;
+	rect.x *= wScale.x;
+	rect.y *= wScale.y;
+	rect.width *= wScale.x;
+	rect.height *= wScale.y;
 #endif
-	auto w = rect.right - rect.left;
-	auto h = rect.bottom - rect.top;
+	auto w = rect.width;
+	auto h = rect.height;
 	auto offsetX = -w * Sprite->Pivot.x;
 	auto offsetY = -h * Sprite->Pivot.y;
 
-	rect.left += wPos.x + offsetX;
-	rect.right += wPos.x + offsetX;
-	rect.bottom += wPos.y + offsetY;
-	rect.top += wPos.y + offsetY;
+	rect.x += wPos.x + offsetX;
+	rect.y += wPos.y + offsetY;
 	return rect;
 }

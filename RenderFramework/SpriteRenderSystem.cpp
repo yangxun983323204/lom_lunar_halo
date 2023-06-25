@@ -47,6 +47,10 @@ void SpriteRenderSystem::RenderCamera(Camera* camera)
 
 	for (auto spRenderer : spRenderers) {
 		auto sr = dynamic_cast<SpriteRenderer*>(spRenderer);
-		_renderFunc(sr->Sprite->TextureSRV.Get(), sr->GetWorldRect(), sr->Color);
+		auto wRect = sr->GetWorldRect();
+		auto cameraWPos = camera->GetSceneNode()->GetWorldPosition();
+		wRect.x -= cameraWPos.x;
+		wRect.y -= cameraWPos.y;
+		_renderFunc(sr->Sprite->TextureSRV.Get(), wRect, sr->Color);
 	}
 }

@@ -6,6 +6,14 @@ void SceneManager::Render()
 	_renderSystem->Render();
 }
 
+shared_ptr<SceneNode> SceneManager::CreateNode()
+{
+    auto node = std::make_shared<SceneNode>();
+    node->SetLocalPosition({ 0,0 });
+    node->SetParent(weak_ptr<SceneNode>(_root));
+    return node;
+}
+
 shared_ptr<SceneNode> SceneManager::CreateSpriteNode()
 {
     auto node = std::make_shared<SceneNode>();
@@ -13,6 +21,16 @@ shared_ptr<SceneNode> SceneManager::CreateSpriteNode()
     auto sp = std::make_shared<Sprite>();
     auto spRenderer = node->AddComponent<SpriteRenderer>().lock();
     spRenderer->Sprite = sp;
+    node->SetParent(weak_ptr<SceneNode>(_root));
+    return node;
+}
+
+shared_ptr<SceneNode> SceneManager::CreateCameraNode()
+{
+    auto node = std::make_shared<SceneNode>();
+    node->SetLocalPosition({ 0,0 });
+    node->AddComponent<Camera>();
+    node->SetParent(weak_ptr<SceneNode>(_root));
     return node;
 }
 
@@ -37,6 +55,10 @@ void SceneManager::Draw(ID3D11ShaderResourceView* srv, RECT wRect, XMFLOAT4 colo
     sRect.right += offsetX;
     sRect.top += offsetY;
     sRect.bottom += offsetY;
+
+    auto oldBottom = sRect.bottom;
+    sRect.bottom = _height - sRect.top;
+    sRect.top = _height - oldBottom;
     // todo 支持精灵颜色
     DrawTexture(srv, sRect);
 }

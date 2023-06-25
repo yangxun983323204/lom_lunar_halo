@@ -23,12 +23,15 @@ public:
 		_renderSystem->SetClearFunc(clearFunc);
 		auto renderFunc = std::bind(&SceneManager::Draw, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 		_renderSystem->SetRenderFunc(renderFunc);
+		_root = std::make_shared<SceneNode>();
 	}
 
 	inline void SetScreen(int width, int height) { _width = width; _height = height; }
 	void Render();
 
+	shared_ptr<SceneNode> CreateNode();
 	shared_ptr<SceneNode> CreateSpriteNode();
+	shared_ptr<SceneNode> CreateCameraNode();
 
 private:
 	void ClearScreen(XMFLOAT4 color);
@@ -38,6 +41,7 @@ private:
 	int _height;
 	DX::DeviceResources* _dr;
 
+	shared_ptr<SceneNode> _root;
 	unique_ptr<SpriteRenderSystem> _renderSystem;
 };
 

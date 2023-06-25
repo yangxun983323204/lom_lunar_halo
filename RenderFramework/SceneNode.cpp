@@ -1,7 +1,16 @@
 #include "SceneNode.h"
 #include <algorithm>
 
-DirectX::XMFLOAT2 SceneNode::GetWorldPosition()
+SceneNode::SceneNode():
+    _localPosition{0,0}, _localAngle{0}, 
+#ifdef SCENE_NODE_SCALE
+    _localScale{1,1},
+#endif
+    _parent{}, _children{}, _components{}
+{
+}
+
+DirectX::XMINT2 SceneNode::GetWorldPosition()
 {
     if(_parent.expired())
         return _localPosition;
@@ -11,9 +20,9 @@ DirectX::XMFLOAT2 SceneNode::GetWorldPosition()
         auto pWPos = p->GetWorldPosition();
 #ifdef SCENE_NODE_SCALE
         auto pWScale = p->GetWorldScale();
-        return DirectX::XMFLOAT2(pWPos.x + _localPosition.x*pWScale.x, pWPos.y + _localPosition.y*pWScale.y);
+        return DirectX::XMINT2(int(pWPos.x + _localPosition.x*pWScale.x), int(pWPos.y + _localPosition.y*pWScale.y));
 #else
-        return DirectX::XMFLOAT2(pWPos.x + _localPosition.x, pWPos.y + _localPosition.y);
+        return DirectX::XMINT2(pWPos.x + _localPosition.x, pWPos.y + _localPosition.y);
 #endif
     }
 }
@@ -37,7 +46,7 @@ DirectX::XMFLOAT2 SceneNode::GetWorldScale()
     else {
         auto p = _parent.lock();
         auto pWScale = p->GetWorldScale();
-        return DirectX::XMFLOAT2(pWScale.x + _localScale.x, pWScale.y + _localScale.y);
+        return DirectX::XMFLOAT2(pWScale.x * _localScale.x, pWScale.y * _localScale.y);
     }
 }
 #endif
@@ -56,8 +65,7 @@ void SceneNode::SetParent(weak_ptr<SceneNode> parent)
     if (!_parent.expired())
     {
         auto p = _parent.lock();
-        auto pChildren = p->_children;
-        pChildren.push_back(shared_from_this());
+        p->_children.push_back(shared_from_this());
     }
 }
 

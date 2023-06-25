@@ -205,7 +205,8 @@ void Game::CreateDeviceDependentResources()
     _sceneManager->SetScreen(w, h);
     _testScene = _sceneManager->CreateSpriteNode();
     _testScene->SetLocalPosition({ 0,0 });
-    auto camera  = _testScene->AddComponent<Camera>();
+    auto cameraNode = _sceneManager->CreateCameraNode();
+    cameraNode->SetLocalPosition({ int(w / 4),int(h / 4) });
     //
     ImageLib imgLib{};
     imgLib.Open(GetSetting()->GetDataDir() + L"Interface1c.wil");
@@ -215,7 +216,7 @@ void Game::CreateDeviceDependentResources()
         int i = 0;
         auto info = imgLib.GetImageInfo(i);
         auto sp = dynamic_cast<SpriteRenderer*>(_testScene->GetComponent(SpriteRenderer::TypeId).lock().get())->Sprite;
-        sp->Rect = { 0,0,info.Width, info.Height };
+        sp->Rect = { 0,0,long(info.Width * 0.5), long(info.Height * 0.5) };
         auto rgba32 = imgLib.GetImageRGBA32(i);
         imgLib.Close();
         D3D11_SUBRESOURCE_DATA subData{ 0 };

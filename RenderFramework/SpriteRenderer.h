@@ -12,7 +12,7 @@ class SpriteRenderer : public ISceneNodeComponent
 public:
 	static const uint32_t TypeId = 0;
 	const int GetTypeId() override;
-	RECT GetWorldRect();
+	DirectX::SimpleMath::Rectangle GetWorldRect();
 
 	DirectX::XMFLOAT4 Color = DirectX::XMFLOAT4{ 1,1,1,1 };
 	int SortLayer = 0;
