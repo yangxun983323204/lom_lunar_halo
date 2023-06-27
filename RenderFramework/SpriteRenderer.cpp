@@ -1,8 +1,6 @@
 #include "SpriteRenderer.h"
 #include "SceneNode.h"
 
-const int SpriteRenderer::GetTypeId() { return TypeId; }
-
 DirectX::SimpleMath::Rectangle SpriteRenderer::GetWorldRect()
 {
 	if (GetSceneNode() == nullptr)

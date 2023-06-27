@@ -194,6 +194,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Setting.h" />
+    <ClInclude Include="WilSpriteManager.h" />
     <ClInclude Include="Sprite_old.h" />
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="StringCodec.hpp" />
@@ -219,6 +220,7 @@
     </ClCompile>
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Setting.cpp" />
+    <ClCompile Include="WilSpriteManager.cpp" />
     <ClCompile Include="Sprite_old.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>

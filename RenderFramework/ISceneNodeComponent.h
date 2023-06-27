@@ -10,13 +10,15 @@ using std::vector;
 
 class SceneNode;
 
+
+#define SCENE_NODE_COMPONENT(T)  static const uint32_t TypeId = T; virtual uint32_t GetTypeId() const {return T;}
+
 class ISceneNodeComponent
 {
 public:
+	SCENE_NODE_COMPONENT('isnc');
 	bool Enable;
-	virtual const int GetTypeId();
 	inline SceneNode* GetSceneNode() { return _node.expired() ? nullptr : _node.lock().get(); }
-
 protected:
 	friend class SceneNode;
 	friend class ISystem;

@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <functional>
 #include <DirectXMath.h>
 #include "../DirectXTK-main/Inc/SimpleMath.h"
@@ -10,11 +11,10 @@ typedef function<void(int, int)> CellNotifyCallback;
 class GridView
 {
 public:
-	GridView(int cellWidth, int cellHeight, int rows, int cols);
-	// 设置视口大小
-	void SetView(int width, int height);
-	// 设置预加载区域
-	void SetPrepareBorder(int width, int height);
+	GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols);
+	~GridView();
+	// 设置视口大小和预加载区域
+	void SetView(uint32_t width, uint32_t height, uint32_t borderX, uint32_t borderY);
 	// 更新观察点
 	void UpdateViewPoint(int x, int y);
 
@@ -28,19 +28,15 @@ public:
 
 
 private:
-	CellNotifyCallback _onCellShow;
-	CellNotifyCallback _onCellHide;
-	CellNotifyCallback _onCellWillShow;
-
 	DirectX::XMINT2 _viewPoint;
-	DirectX::XMINT2 _viewSize;
-	DirectX::XMINT2 _viewBorder;
+	DirectX::XMUINT2 _viewSize;
+	DirectX::XMUINT2 _viewBorder;
 
-	DirectX::XMINT2 _cellSize;
-	DirectX::XMINT2 _cellCount;
-	DirectX::XMINT2 _gridSize;
+	DirectX::XMUINT2 _cellSize;
+	DirectX::XMUINT2 _cellCount;
+	DirectX::XMUINT2 _gridSize;
 
-	DirectX::SimpleMath::Rectangle _viewRect;
-	DirectX::SimpleMath::Rectangle _roiRect;
+	class Inner;
+	Inner* _inner;
 };
 

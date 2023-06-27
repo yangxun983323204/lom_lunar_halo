@@ -4,11 +4,18 @@
 #include "SpriteRenderer.h"
 #include <iostream>
 #include <algorithm>
+#include "GridViewComponent.hpp"
 
 using std::cout;
 
 void SpriteRenderSystem::Render()
 {
+	auto gridViews = ISystem::GetComponentsByType(GridViewComponent::TypeId);
+	for (auto view : gridViews)
+	{
+		dynamic_cast<GridViewComponent*>(view)->SyncNodePos();
+	}
+
 	auto cameras = ISystem::GetComponentsByType(Camera::TypeId);
 	if (cameras.size()<=0)
 	{

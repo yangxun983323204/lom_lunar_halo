@@ -5,3 +5,5 @@
 #include "../RenderFramework/SpriteRenderer.h"
 #include "../RenderFramework/Camera.h"
 #include "../RenderFramework/SpriteRenderSystem.h"
+#include "../RenderFramework/GridView.h"
+#include "../RenderFramework/GridViewComponent.hpp"

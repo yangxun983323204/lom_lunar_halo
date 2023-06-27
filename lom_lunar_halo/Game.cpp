@@ -234,6 +234,18 @@ void Game::CreateDeviceDependentResources()
     mapData->Load(GetSetting()->GetMapDir() + L"0.map");
     wstring sizeStr = L"map size:" + std::to_wstring(mapData->w()) + L"," + std::to_wstring(mapData->h());
     MessageBox(m_deviceResources->GetWindow(), sizeStr.c_str(), L"测试map加载", 0);
+    auto view = cameraNode->AddComponent<GridViewComponent>().lock();
+    view->Init(64, 48, mapData->h(), mapData->w());
+    view->GetView()->SetCellHideCallback([](int x, int y) {
+        auto s = x + y;
+        });
+    view->GetView()->SetCellShowCallback([&mapData](int x, int y) {
+
+        });
+    view->GetView()->SetCellWillShowCallback([](int x, int y) {
+        auto s = x + y;
+        });
+    view->GetView()->SetView(640, 480, 64, 48);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

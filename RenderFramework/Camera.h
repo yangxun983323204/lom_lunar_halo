@@ -11,8 +11,7 @@ public:
 		Color,
 	};
 
-	static const uint32_t TypeId = 1;
-	const int GetTypeId() override;
+	SCENE_NODE_COMPONENT('cmra')
 
 	int Depth = 0;
 	Camera::ClearType ClearType = Camera::ClearType::None;

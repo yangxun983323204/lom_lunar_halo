@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GridView.h" />
+    <ClInclude Include="GridViewComponent.hpp" />
     <ClInclude Include="ISceneNodeComponent.h" />
     <ClInclude Include="ISystem.h" />
     <ClInclude Include="RenderFramework.h" />
