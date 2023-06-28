@@ -10,6 +10,7 @@ class Setting
 {
 public:
 	bool Load();
+	wstring GetRootDir();
 	wstring GetDataDir();
 	wstring GetMapDir();
 	wstring GetSoundDir();

@@ -24,6 +24,7 @@
     <ClInclude Include="GridViewComponent.hpp" />
     <ClInclude Include="ISceneNodeComponent.h" />
     <ClInclude Include="ISystem.h" />
+    <ClInclude Include="LRU.hpp" />
     <ClInclude Include="RenderFramework.h" />
     <ClInclude Include="SceneNode.h" />
     <ClInclude Include="Sprite.hpp" />

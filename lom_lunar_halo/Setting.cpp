@@ -25,6 +25,11 @@ bool Setting::Load()
     return false;
 }
 
+wstring Setting::GetRootDir()
+{
+    return _originDataDir;
+}
+
 wstring Setting::GetDataDir()
 {
     return _originDataDir + L"Data/";

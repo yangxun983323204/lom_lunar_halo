@@ -15,6 +15,7 @@
 #include "SceneManager.h"
 #include "StringCodec.hpp"
 #include <format>
+#include "WilSpriteManager.h"
 
 extern void ExitGame() noexcept;
 
@@ -24,6 +25,7 @@ using Microsoft::WRL::ComPtr;
 // test scene
 std::shared_ptr<SceneNode> _testScene;
 std::shared_ptr<SceneManager> _sceneManager;
+std::shared_ptr<WilSpriteManager> _spriteManager;
 
 Game::Game() noexcept(false):
     _batch{}
@@ -196,7 +198,7 @@ void Game::CreateDeviceDependentResources()
 
     // TODO: Initialize device dependent objects here (independent of window size).
     _batch.reset(new SpriteBatch{ m_deviceResources->GetD3DDeviceContext()});
-
+    _spriteManager = std::make_shared<WilSpriteManager>(device, _setting->GetRootDir());
     _testMir3 = YX::GUI::LayoutLoader::Parse(_setting->GetUILayoutDir() + L"login.xml");
     // 测试场景渲染
     _sceneManager = std::make_shared<SceneManager>(m_deviceResources.get());
