@@ -45,9 +45,13 @@ public:
 
 		_viewRect.x = viewPoint.x - _halfViewWidth;
 		_viewRect.y = viewPoint.y - _halfViewHeight;
+		_viewRect.width = _halfViewWidth * 2;
+		_viewRect.height = _halfViewHeight * 2;
 
 		_roiRect.x = viewPoint.x - _halfRoiWidth;
 		_roiRect.y = viewPoint.y - _halfRoiHeight;
+		_roiRect.width = _halfRoiWidth * 2;
+		_roiRect.height = _halfRoiHeight * 2;
 
 		InflatRect(_viewRect);
 		InflatRect(_roiRect);
@@ -66,9 +70,14 @@ public:
 			return;
 
 		// 计算更新
-		for (long y = _preRoiRect.y; y < _preRoiRect.y + _preRoiRect.height; y++)
+		long startY = _preRoiRect.y;
+		long stopY = _preRoiRect.y + _preRoiRect.height;
+		long startX = _preRoiRect.x;
+		long stopX = _preRoiRect.x + _preRoiRect.width;
+
+		for (long y = startY; y < stopY; y+=_cellSize.y)
 		{
-			for (long x = _preRoiRect.x; x < _preRoiRect.x + _preRoiRect.width; x++)
+			for (long x = startX; x < stopX; x+=_cellSize.x)
 			{
 				if (!_gridRect.Contains(x, y))
 					continue;
@@ -77,13 +86,18 @@ public:
 					continue;
 
 				if (_preViewRect.Contains(x, y))
-					_onCellHide(x, y);
+					_onCellHide(x / _cellSize.x, y / _cellSize.y);
 			}
 		}
 
-		for (long y = _roiRect.y; y < _roiRect.y + _roiRect.height; y++)
+		startY = _roiRect.y;
+		stopY = _roiRect.y + _roiRect.height;
+		startX = _roiRect.x;
+		stopX = _roiRect.x + _roiRect.width;
+
+		for (long y = _roiRect.y; y < _roiRect.y + _roiRect.height; y += _cellSize.y)
 		{
-			for (long x = _roiRect.x; x < _roiRect.x + _roiRect.width; x++)
+			for (long x = _roiRect.x; x < _roiRect.x + _roiRect.width; x += _cellSize.x)
 			{
 				if (!_gridRect.Contains(x, y))
 					continue;
@@ -91,9 +105,9 @@ public:
 				if (intersect.Contains(x, y))
 					continue;
 
-				_onCellWillShow(x, y);
+				_onCellWillShow(x / _cellSize.x, y / _cellSize.y);
 				if (_viewRect.Contains(x, y))
-					_onCellShow(x, y);
+					_onCellShow(x / _cellSize.x, y / _cellSize.y);
 			}
 		}
 		//

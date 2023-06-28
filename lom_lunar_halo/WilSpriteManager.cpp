@@ -22,7 +22,9 @@ public:
 	void SetCapacity(uint32_t sizeMb);
 	void PreloadSprite(WilSpriteKey key);
 	shared_ptr<SpriteResHandle> LoadSprite(WilSpriteKey key);
-	void FreeSpace(uint32_t size);
+	void MakeSpace(uint32_t size);
+	void NotifyFreeSpace(uint32_t size);
+	inline uint32_t GetIdleSpace() { return _currentSize >= _capacitySize ? 0 : _capacitySize - _currentSize; }
 private:
 	shared_ptr<SpriteResHandle> Find(WilSpriteKey key);
 
@@ -50,7 +52,8 @@ WilSpriteManager::Impl::Impl(ID3D11Device* dev, wstring dir, WilSpriteManager* p
 		
 		int i = 0;
 		for (auto record : jObj) {
-			_fileMap[i] = YX::Utf8ToWString(record);
+			string r = record;
+			_fileMap[i] = YX::Utf8ToWString(r.substr(2));
 			++i;
 		}
 	}
@@ -73,36 +76,68 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 		goto LABEL_RET;
 
 	fileRecord = _fileMap.find(fileId);
-	if (fileRecord == _fileMap.end())
+	if (fileRecord == _fileMap.end()) {
 		handle = {};
-	else {
+		goto LABEL_RET;
+	}
+
+	{
 		ImageLib imgLib = {};
 		imgLib.Open(_dir + fileRecord->second);
-		if (imgLib.IsOpened() || imgLib.GetCount() <= imgId || imgId < 0) {
+		if (!imgLib.IsOpened() || imgLib.GetCount() <= imgId || imgId < 0) {
 			imgLib.Close();
 			handle = {};
+			goto LABEL_RET;
 		}
-		else {
-			auto info = imgLib.GetImageInfo(imgId);
-			auto rgba32 = imgLib.GetImageRGBA32(imgId);
+		auto info = imgLib.GetImageInfo(imgId);
+		if (info.Width<=0 || info.Height<=0) {
 			imgLib.Close();
-			handle = std::make_shared<SpriteResHandle>(_parent, rgba32.size());
-			D3D11_SUBRESOURCE_DATA subData{ 0 };
-			subData.pSysMem = rgba32.data();
-			subData.SysMemPitch = info.Width * 4;
-			DX::ThrowIfFailed(DirectX::CreateTextureFromMemory(
-				_dev,
-				info.Width, info.Height,
-				DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
-				(const D3D11_SUBRESOURCE_DATA)subData,
-				nullptr, handle->_srv.GetAddressOf()));
+			handle = {};
+			goto LABEL_RET;
 		}
+		auto needSize = info.Width * info.Height * 4;
+		MakeSpace(needSize);
+		if (needSize >= GetIdleSpace())
+		{
+			imgLib.Close();
+			handle = {};
+			goto LABEL_RET;
+		}
+		auto rgba32 = imgLib.GetImageRGBA32(imgId);
+		imgLib.Close();
+		handle = std::make_shared<SpriteResHandle>(_parent, rgba32.size());
+		handle->GetSprite()->Rect = { 0,0,info.Width,info.Height };
+		D3D11_SUBRESOURCE_DATA subData{ 0 };
+		subData.pSysMem = rgba32.data();
+		subData.SysMemPitch = info.Width * 4;
+		DX::ThrowIfFailed(DirectX::CreateTextureFromMemory(
+			_dev,
+			info.Width, info.Height,
+			DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
+			(const D3D11_SUBRESOURCE_DATA)subData,
+			nullptr, handle->GetSprite()->TextureSRV.GetAddressOf()));
+		_currentSize += needSize;
 	}
 
 LABEL_RET:
 	_lru.set(key, handle);
 	return handle;
 }
+
+void WilSpriteManager::Impl::MakeSpace(uint32_t size)
+{
+	while(_lru.getSize()>0 && GetIdleSpace()<size)
+		_lru.removeLast();
+}
+
+void WilSpriteManager::Impl::NotifyFreeSpace(uint32_t size)
+{
+	if (_currentSize <= size)
+		_currentSize = 0;
+	else
+		_currentSize -= size;
+}
+
 shared_ptr<SpriteResHandle> WilSpriteManager::Impl::Find(WilSpriteKey key)
 {
 	shared_ptr<SpriteResHandle> p = {};
@@ -111,13 +146,14 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::Find(WilSpriteKey key)
 }
 
 SpriteResHandle::SpriteResHandle(WilSpriteManager* mgr, uint32_t size) :
-	_mgr{ mgr }, _size{ size }, _srv{}
+	_mgr{ mgr }, _size{ size }, _sprite{}
 {
+	_sprite = std::make_shared<Sprite>();
 }
 
 SpriteResHandle::~SpriteResHandle()
 {
-	_mgr->_impl->FreeSpace(_size);
+	_mgr->_impl->NotifyFreeSpace(_size);
 }
 
 WilSpriteManager::WilSpriteManager(ID3D11Device* dev, wstring dir)

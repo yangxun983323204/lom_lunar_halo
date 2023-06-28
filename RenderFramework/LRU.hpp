@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_map>
+#include <stdint.h>
 
 using std::unordered_map;
 
@@ -21,6 +22,11 @@ private:
 
 public:
 	LRUCache(int capacity) : size(capacity), head(nullptr), tail(nullptr) {}
+
+	uint32_t getSize()
+	{
+		return mp.size();
+	}
 
 	void remove(CacheNode<T1, T2>* node) {
 		if (nullptr != node->pre) {
@@ -78,5 +84,16 @@ public:
 			setHead(node);
 			value = node->value;
 		}
+	}
+
+	T2&& removeLast()
+	{
+		CacheNode<T1, T2>* last = tail;
+		auto it = mp.find(tail->key);
+		remove(tail);
+		mp.erase(it);
+		auto t2 = last->value;
+		delete last;
+		return std::move(t2);
 	}
 };

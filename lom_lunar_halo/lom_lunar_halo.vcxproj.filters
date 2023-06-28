@@ -46,6 +46,7 @@
     <ClInclude Include="MyRmlUi\DX11RmlRenderer.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="WilSpriteManager.h" />
+    <ClInclude Include="SpriteHandleHolder.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

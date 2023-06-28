@@ -46,7 +46,10 @@ void SpriteRenderSystem::RenderCamera(Camera* camera)
 		if (sa == sb) {
 			auto wposA = a->GetSceneNode()->GetWorldPosition();
 			auto wposB = b->GetSceneNode()->GetWorldPosition();
-			return wposA.x < wposB.x || wposA.y > wposB.y;
+			if (wposA.x == wposB.x)
+				return wposA.y > wposB.y;
+			else
+				return wposA.x < wposB.x;
 		}
 		else
 			return sa < sb;
@@ -54,10 +57,13 @@ void SpriteRenderSystem::RenderCamera(Camera* camera)
 
 	for (auto spRenderer : spRenderers) {
 		auto sr = dynamic_cast<SpriteRenderer*>(spRenderer);
+		if (sr->Sprite.expired())
+			continue;
+
 		auto wRect = sr->GetWorldRect();
 		auto cameraWPos = camera->GetSceneNode()->GetWorldPosition();
 		wRect.x -= cameraWPos.x;
 		wRect.y -= cameraWPos.y;
-		_renderFunc(sr->Sprite->TextureSRV.Get(), wRect, sr->Color);
+		_renderFunc(sr->Sprite.lock()->TextureSRV.Get(), wRect, sr->Color);
 	}
 }

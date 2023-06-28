@@ -6,6 +6,7 @@
 #include <DirectXMath.h>
 #include <functional>
 #include <string>
+#include "../RenderFramework/Sprite.hpp"
 
 using std::shared_ptr;
 using Microsoft::WRL::ComPtr;
@@ -57,16 +58,15 @@ private:
 
 class SpriteResHandle
 {
-	friend class WilSpriteManager::Impl;
+	friend struct WilSpriteManager::Impl;
 public:
 	SpriteResHandle(WilSpriteManager* mgr, uint32_t size);
 	~SpriteResHandle();
 	inline uint32_t GetSize() { return _size; }
-	inline ID3D11ShaderResourceView* GetSRV() { return _srv.Get(); }
-
+	inline shared_ptr<Sprite> GetSprite() { return _sprite; }
 private:
 	WilSpriteManager* _mgr;
 	WilSpriteKey _key;
-	ComPtr<ID3D11ShaderResourceView> _srv;
 	uint32_t _size;
+	shared_ptr<Sprite> _sprite;
 };

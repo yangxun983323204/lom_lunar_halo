@@ -5,7 +5,7 @@
 #include <DirectXMath.h>
 #include "Sprite.hpp"
 
-using std::shared_ptr;
+using std::weak_ptr;
 
 class SpriteRenderer : public ISceneNodeComponent
 {
@@ -15,6 +15,6 @@ public:
 
 	DirectX::XMFLOAT4 Color = DirectX::XMFLOAT4{ 1,1,1,1 };
 	int SortLayer = 0;
-	shared_ptr<Sprite> Sprite;
+	weak_ptr<Sprite> Sprite;
 };
 

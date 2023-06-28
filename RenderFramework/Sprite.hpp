@@ -9,7 +9,7 @@ using Microsoft::WRL::ComPtr;
 class Sprite
 {
 public:
-	inline Sprite() :
+	Sprite() :
 		Rect(), Pivot(0.5, 0.5), TextureSRV()
 	{
 	}
