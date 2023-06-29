@@ -189,6 +189,7 @@
     <ClInclude Include="GUI\LayoutLoader.h" />
     <ClInclude Include="GUI\Text.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="MirWorldRenderManager.h" />
     <ClInclude Include="MyRmlUi\DX11RmlRenderer.h" />
     <ClInclude Include="MyRmlUi\RmlUiUtility.h" />
     <ClInclude Include="pch.h" />
@@ -211,6 +212,7 @@
     <ClCompile Include="GUI\LayoutLoader.cpp" />
     <ClCompile Include="GUI\Text.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MirWorldRenderManager.cpp" />
     <ClCompile Include="MyRmlUi\DX11RmlRenderer.cpp" />
     <ClCompile Include="MyRmlUi\RmlUiUtility.cpp" />
     <ClCompile Include="pch.cpp">

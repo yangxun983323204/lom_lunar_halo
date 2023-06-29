@@ -47,6 +47,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="WilSpriteManager.h" />
     <ClInclude Include="SpriteHandleHolder.hpp" />
+    <ClInclude Include="MirWorldRenderManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -78,6 +79,7 @@
     <ClCompile Include="MyRmlUi\DX11RmlRenderer.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="WilSpriteManager.cpp" />
+    <ClCompile Include="MirWorldRenderManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

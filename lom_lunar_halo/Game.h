@@ -10,6 +10,9 @@
 #include "Sprite_old.h"
 #include "./GUI/Canvas.h"
 #include "Setting.h"
+#include "../mir_lib/MirLib.h"
+
+using namespace Mir;
 
 using Microsoft::WRL::ComPtr;
 using DX::ThrowIfFailed;

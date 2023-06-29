@@ -24,6 +24,15 @@
     <ClInclude Include="MapData.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MirConst.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MirUtility.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MirLib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -33,6 +42,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MapData.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MirConst.h.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MirUtility.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

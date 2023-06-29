@@ -37,6 +37,8 @@ public:
 	vector<weak_ptr<SceneNode>> GetChildren();
 	template<typename TComponent>
 	weak_ptr<TComponent> AddComponent();
+	template<typename TComponent>
+	weak_ptr<ISceneNodeComponent> GetComponent();
 	weak_ptr<ISceneNodeComponent> GetComponent(int typeId);
 	vector<weak_ptr<ISceneNodeComponent>> GetComponents(int typeId);
 	vector<weak_ptr<ISceneNodeComponent>> GetComponentsInChildren(int typeId);
@@ -61,4 +63,16 @@ weak_ptr<TComponent> SceneNode::AddComponent()
 	ptr->_node = weak_from_this();
 	_components.push_back(ptr);
 	return std::weak_ptr<TComponent>{ptr};
+}
+
+template<class TComponent>
+weak_ptr<ISceneNodeComponent> SceneNode::GetComponent()
+{
+	for (auto i : _components)
+	{
+		if (i->GetTypeId() == TComponent::TypeId)
+			return weak_ptr<ISceneNodeComponent>(i);
+	}
+
+	return {};
 }

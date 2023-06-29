@@ -19,6 +19,8 @@ public:
 	SCENE_NODE_COMPONENT('isnc');
 	bool Enable;
 	inline SceneNode* GetSceneNode() { return _node.expired() ? nullptr : _node.lock().get(); }
+	template<typename TComponent>
+	TComponent* As();
 protected:
 	friend class SceneNode;
 	friend class ISystem;
@@ -33,3 +35,9 @@ private:
 
 	static std::map<int,vector<ISceneNodeComponent*>> __componentsReg;
 };
+
+template<typename TComponent>
+TComponent* ISceneNodeComponent::As()
+{
+	return dynamic_cast<TComponent*>(this);
+}

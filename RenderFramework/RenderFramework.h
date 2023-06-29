@@ -1,9 +1,10 @@
 #pragma once
 // 说明，本框架以左下角为坐标原点
-#include "../RenderFramework/SceneNode.h"
-#include "../RenderFramework/Sprite.hpp"
-#include "../RenderFramework/SpriteRenderer.h"
-#include "../RenderFramework/Camera.h"
-#include "../RenderFramework/SpriteRenderSystem.h"
-#include "../RenderFramework/GridView.h"
-#include "../RenderFramework/GridViewComponent.hpp"
+#include "HashSupport.h"
+#include "SceneNode.h"
+#include "Sprite.hpp"
+#include "SpriteRenderer.h"
+#include "Camera.h"
+#include "SpriteRenderSystem.h"
+#include "GridView.h"
+#include "GridViewComponent.hpp"

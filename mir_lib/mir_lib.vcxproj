@@ -141,11 +141,16 @@
   <ItemGroup>
     <ClInclude Include="ImageLib.h" />
     <ClInclude Include="MapData.h" />
+    <ClInclude Include="MirConst.h" />
+    <ClInclude Include="MirLib.h" />
+    <ClInclude Include="MirUtility.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageLib.cpp" />
     <ClCompile Include="MapData.cpp" />
+    <ClCompile Include="MirConst.h.cpp" />
+    <ClCompile Include="MirUtility.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

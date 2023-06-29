@@ -57,11 +57,6 @@
 
 #include "../DirectXTK-main//Inc/Mouse.h"
 
-const int LoginLayoutW = 640;
-const int LoginLayoutH = 360;
-const int GameLayoutW = 800;
-const int GameLayoutH = 600;
-
 // 用来解决本身素材过小的问题
 extern float UserScale;
 // 用来解决DPI缩放

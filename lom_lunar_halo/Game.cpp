@@ -12,7 +12,7 @@
 #include "./GUI/Image.h"
 #include "./GUI/Text.h"
 #include "./GUI/LayoutLoader.h"
-#include "SceneManager.h"
+#include "MirWorldRenderManager.h"
 #include "StringCodec.hpp"
 #include <format>
 #include "WilSpriteManager.h"
@@ -24,8 +24,7 @@ using namespace DirectX;
 
 using Microsoft::WRL::ComPtr;
 // test scene
-std::shared_ptr<SceneNode> _testScene;
-std::shared_ptr<SceneManager> _sceneManager;
+std::shared_ptr<MirWorldRenderManager> _worldRenderMgr;
 std::shared_ptr<WilSpriteManager> _spriteManager;
 
 Game::Game() noexcept(false):
@@ -99,7 +98,7 @@ void Game::Render()
 
     // TODO: Add your rendering code here.
     _batch->Begin();
-    _sceneManager->Render();
+    _worldRenderMgr->Render();
     //YX::GUI::Canvas::DrawAll();
     _batch->End();
 
@@ -186,8 +185,10 @@ void Game::GetDefaultSize(int& width, int& height) const noexcept
 void Game::GetCurrSize(int& width, int& height) const noexcept
 {
     // todo 根据当前游戏状态，返回登陆布局大小或游戏布局大小
-    width = LoginLayoutW;
-    height = LoginLayoutH;
+    //width = LoginLayoutW;
+    //height = LoginLayoutH;
+    width = GameLayoutW;
+    height = GameLayoutH;
 }
 #pragma endregion
 
@@ -203,39 +204,13 @@ void Game::CreateDeviceDependentResources()
     _spriteManager->SetCapacity(100);
     _testMir3 = YX::GUI::LayoutLoader::Parse(_setting->GetUILayoutDir() + L"login.xml");
     // 测试场景渲染
-    _sceneManager = std::make_shared<SceneManager>(m_deviceResources.get());
-    int w, h;
-    GetCurrSize(w, h);
-    _sceneManager->SetScreen(w, h);
-    auto cameraNode = _sceneManager->CreateCameraNode();
-    cameraNode->SetLocalPosition({ int(400*64),int(400*32) });
+    _worldRenderMgr = std::make_shared<MirWorldRenderManager>(m_deviceResources.get(), _spriteManager);
     // 测试地图加载
     auto mapData = std::make_shared<MapData>();
     mapData->Load(GetSetting()->GetMapDir() + L"0.map");
     wstring sizeStr = L"map size:" + std::to_wstring(mapData->w()) + L"," + std::to_wstring(mapData->h());
     MessageBox(m_deviceResources->GetWindow(), sizeStr.c_str(), L"测试map加载", 0);
-    auto view = cameraNode->AddComponent<GridViewComponent>().lock();
-    view->Init(64, 48, mapData->h(), mapData->w());
-    view->GetView()->SetCellHideCallback([](int x, int y) {
-        });
-    view->GetView()->SetCellShowCallback([mapData](int x, int y) {
-        auto info = mapData->TileAt(x, y);
-        auto fileId = info.FileIndex;
-        int imgId = info.TileIndex;
-        if (info.RemapFileIndex(imgId))
-            return;
-        auto spriteHandle = _spriteManager->LoadSprite({ fileId, (uint32_t)imgId });
-        if (!spriteHandle)
-            return;
-        auto spRender = _sceneManager->CreateSpriteNode()->GetComponent(SpriteRenderer::TypeId).lock();
-        spRender->GetSceneNode()->SetLocalPosition({ x * 64, y * 48});
-        dynamic_cast<SpriteRenderer*>(spRender.get())->Sprite = spriteHandle->GetSprite();
-        spRender->GetSceneNode()->AddComponent<SpriteHandleHolder>().lock()->holder.push_back(spriteHandle);
-        });
-    view->GetView()->SetCellWillShowCallback([](int x, int y) {
-        auto s = x + y;
-        });
-    view->GetView()->SetView(640, 480, 64, 48);
+    _worldRenderMgr->SetMapData(mapData);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

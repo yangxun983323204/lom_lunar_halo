@@ -107,6 +107,7 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 		imgLib.Close();
 		handle = std::make_shared<SpriteResHandle>(_parent, rgba32.size());
 		handle->GetSprite()->Rect = { 0,0,info.Width,info.Height };
+		handle->GetSprite()->Pivot = { (float)info.PivotX / info.Width, (float)info.PivotY / info.Height };
 		D3D11_SUBRESOURCE_DATA subData{ 0 };
 		subData.pSysMem = rgba32.data();
 		subData.SysMemPitch = info.Width * 4;

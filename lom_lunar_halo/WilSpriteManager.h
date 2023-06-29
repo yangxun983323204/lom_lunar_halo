@@ -7,6 +7,7 @@
 #include <functional>
 #include <string>
 #include "../RenderFramework/Sprite.hpp"
+#include "../RenderFramework/HashSupport.h"
 
 using std::shared_ptr;
 using Microsoft::WRL::ComPtr;
@@ -16,29 +17,6 @@ using std::wstring;
 
 typedef DirectX::XMUINT2 WilSpriteKey;
 typedef function<void(ComPtr<ID3D11ShaderResourceView>)> WilSpriteLoadCallback;
-
-namespace std {
-	template<>
-	class hash<WilSpriteKey> 
-	{
-	public:
-		size_t operator()(const WilSpriteKey& sk) const
-		{
-			return hash<uint32_t>()(sk.x) ^ hash<uint32_t>()(sk.y);
-		}
-	};
-
-	template<>
-	struct equal_to<WilSpriteKey> 
-	{
-	public:
-		bool operator()(const WilSpriteKey& k1, const WilSpriteKey& k2) const
-		{
-			return k1.x == k2.x && k1.y == k2.y;
-		}
-
-	};
-};
 
 class WilSpriteManager
 {
@@ -52,7 +30,7 @@ public:
 	// 发起加载并等待完成
 	shared_ptr<SpriteResHandle> LoadSprite(WilSpriteKey key);
 private:
-	struct Impl;
+	class Impl;
 	Impl* _impl;
 };
 
