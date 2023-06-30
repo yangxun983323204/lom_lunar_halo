@@ -15,6 +15,8 @@ namespace Mir
 	const uint16_t CellCountY = 17;
 	const uint16_t LoginLayoutW = 640;
 	const uint16_t LoginLayoutH = 480;
-	const uint16_t GameLayoutW = CellW * CellCountX;// 必须为800*600，不然UI对应不上位置
-	const uint16_t GameLayoutH = CellH * CellCountY;
+	const uint16_t GameLayoutW = 800;// 必须为800*600，不然UI对应不上位置
+	const uint16_t GameLayoutH = 600;
+	const uint16_t GameLayoutWHalf = 400;// 必须为800*600，不然UI对应不上位置
+	const uint16_t GameLayoutHHalf = 300;
 }

@@ -33,8 +33,8 @@ public:
 		_roiRect.width = roiSize.x;
 		_roiRect.height = roiSize.y;
 
-		InflatRect(_viewRect);
-		InflatRect(_roiRect);
+		AlignRect(_viewRect);
+		AlignRect(_roiRect);
 		TryTriggerEvent();
 	}
 
@@ -53,14 +53,17 @@ public:
 		_roiRect.width = _halfRoiWidth * 2;
 		_roiRect.height = _halfRoiHeight * 2;
 
-		InflatRect(_viewRect);
-		InflatRect(_roiRect);
+		AlignRect(_viewRect);
+		AlignRect(_roiRect);
 		TryTriggerEvent();
 	}
 	// 使rect范围向外扩充，与格子边框对齐
-	void InflatRect(SimpleMath::Rectangle& rect)
+	void AlignRect(SimpleMath::Rectangle& rect)
 	{
-		rect.Inflate(_cellSize.x, _cellSize.y);
+		rect.x = (long)(floor((float)rect.x / _cellSize.x) * _cellSize.x);
+		rect.y = (long)(floor((float)rect.y / _cellSize.y) * _cellSize.y);
+		rect.width += _cellSize.x - rect.width % _cellSize.x;
+		rect.height += _cellSize.y - rect.y % _cellSize.y;
 	}
 
 	void TryTriggerEvent()
@@ -95,9 +98,9 @@ public:
 		startX = _roiRect.x;
 		stopX = _roiRect.x + _roiRect.width;
 
-		for (long y = _roiRect.y; y < _roiRect.y + _roiRect.height; y += _cellSize.y)
+		for (long y = _roiRect.y; y < stopY; y += _cellSize.y)
 		{
-			for (long x = _roiRect.x; x < _roiRect.x + _roiRect.width; x += _cellSize.x)
+			for (long x = _roiRect.x; x < stopX; x += _cellSize.x)
 			{
 				if (!_gridRect.Contains(x, y))
 					continue;

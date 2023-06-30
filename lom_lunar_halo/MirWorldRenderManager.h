@@ -33,11 +33,14 @@ public:
 	void SetMapData(shared_ptr<MapData> mapData);
 	SpriteRenderer* GetSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
 	void ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
-	inline void Render() { _sceneMgr->Render(); }
+	inline void Render() { _renderSystem->Render(); }
 
 private:
-	void DrawBg(WilSpriteKey key);
-	void DrawMid(WilSpriteKey key, int i, SpriteRenderLayer use);
+	void SetUpBg(WilSpriteKey key);
+	void SetUpMid(WilSpriteKey key, int i, SpriteRenderLayer use);
+
+	void ClearScreen(XMFLOAT4 color);
+	void Draw(ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, XMFLOAT4 color);
 
 	SpriteRenderLayer _bgUse;
 	SpriteRenderLayer _mid1Use;
@@ -48,6 +51,7 @@ private:
 	DX::DeviceResources* _dr;
 	shared_ptr<MapData> _mapData;
 	unique_ptr<SceneManager> _sceneMgr;
+	unique_ptr<SpriteRenderSystem> _renderSystem;
 	shared_ptr<WilSpriteManager> _spriteMgr;
 	shared_ptr<GridViewComponent> _gridView;
 };

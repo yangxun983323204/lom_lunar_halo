@@ -306,12 +306,10 @@ vector<uint32_t> ImageLib::Impl::GetImageRGBA32(int idx)
 
 #pragma region ImageLib
 
-ImageLib::ImageLib() :
-	_impl{std::make_unique<ImageLib::Impl>()}
+ImageLib::ImageLib()
 {
+	_impl = new ImageLib::Impl();
 }
-
-ImageLib::~ImageLib() = default;
 
 void ImageLib::Open(wstring wilPath)
 {

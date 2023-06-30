@@ -68,7 +68,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
         // Create window
         int w, h;
-        g_game->GetDefaultSize(w, h);
+        g_game->GetCurrSize(w, h);
         GetDpiScale();
         RECT rc = { 0, 0, static_cast<LONG>(DPI_S(w)), static_cast<LONG>(DPI_S(h)) };
         style = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME/* 不允许缩放 */;

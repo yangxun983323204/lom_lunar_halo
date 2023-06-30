@@ -30,7 +30,7 @@ public:
 	#pragma pack()
 
 	ImageLib();
-	~ImageLib();
+	~ImageLib() { delete _impl; }
 	void Open(wstring wilPath);
 	void Close();
 	bool IsOpened();
@@ -52,6 +52,6 @@ public:
 
 private:
 	struct Impl;
-	unique_ptr<Impl> _impl;
+	Impl* _impl;
 };
 

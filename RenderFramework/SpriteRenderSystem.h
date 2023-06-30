@@ -8,7 +8,8 @@
 #include <functional>
 
 using std::function;
-typedef function<void(ID3D11ShaderResourceView*, RECT, DirectX::XMFLOAT4)> RenderFunc;
+// SRV  观察坐标系(左下原点)下Rectangle  颜色
+typedef function<void(ID3D11ShaderResourceView*, DirectX::SimpleMath::Rectangle, DirectX::XMFLOAT4)> RenderFunc;
 typedef function<void(DirectX::XMFLOAT4)> ClearFunc;
 
 class SpriteRenderSystem : public ISystem

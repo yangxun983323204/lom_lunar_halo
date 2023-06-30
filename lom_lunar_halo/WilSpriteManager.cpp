@@ -18,7 +18,8 @@ using std::string;
 class WilSpriteManager::Impl
 {
 public:
-	WilSpriteManager::Impl(ID3D11Device* dev, wstring dir, WilSpriteManager* parent);
+	Impl(ID3D11Device* dev, wstring dir, WilSpriteManager* parent);
+	~Impl();
 	void SetCapacity(uint32_t sizeMb);
 	void PreloadSprite(WilSpriteKey key);
 	shared_ptr<SpriteResHandle> LoadSprite(WilSpriteKey key);
@@ -35,11 +36,13 @@ private:
 	uint32_t _capacitySize;
 	uint32_t _currentSize;
 	unordered_map<uint32_t, wstring> _fileMap;
+	unordered_map<uint32_t, ImageLib*> _imgLibs;
 };
 
 WilSpriteManager::Impl::Impl(ID3D11Device* dev, wstring dir, WilSpriteManager* parent) :
 	_dir{dir}, _parent{ parent }, _dev{ dev },
-	_lru{ INT_MAX }, _capacitySize{ 0 }, _currentSize{ 0 }
+	_lru{ INT_MAX }, _capacitySize{ 0 }, _currentSize{ 0 },
+	_imgLibs{}
 {
 	struct _stat buffer;
 	if (_wstat(L"wil.json", &buffer) == 0)
@@ -57,6 +60,14 @@ WilSpriteManager::Impl::Impl(ID3D11Device* dev, wstring dir, WilSpriteManager* p
 			++i;
 		}
 	}
+}
+WilSpriteManager::Impl::~Impl()
+{
+	for (auto lib : _imgLibs)
+	{
+		delete lib.second;
+	}
+	_imgLibs.clear();
 }
 void WilSpriteManager::Impl::SetCapacity(uint32_t sizeMb)
 {
@@ -82,16 +93,25 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 	}
 
 	{
-		ImageLib imgLib = {};
-		imgLib.Open(_dir + fileRecord->second);
-		if (!imgLib.IsOpened() || imgLib.GetCount() <= imgId || imgId < 0) {
-			imgLib.Close();
+		ImageLib* imgLib;
+		auto imgLibF = _imgLibs.find(fileRecord->first);
+		if (imgLibF!= _imgLibs.end())
+		{
+			imgLib = imgLibF->second;
+		}
+		else {
+			imgLib = new ImageLib();
+			imgLib->Open(_dir + fileRecord->second);
+			_imgLibs[fileRecord->first] = imgLib;
+		}
+
+		if (!imgLib->IsOpened() || imgLib->GetCount() <= imgId || imgId < 0) {
 			handle = {};
 			goto LABEL_RET;
 		}
-		auto info = imgLib.GetImageInfo(imgId);
+
+		auto info = imgLib->GetImageInfo(imgId);
 		if (info.Width<=0 || info.Height<=0) {
-			imgLib.Close();
 			handle = {};
 			goto LABEL_RET;
 		}
@@ -99,12 +119,10 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 		MakeSpace(needSize);
 		if (needSize >= GetIdleSpace())
 		{
-			imgLib.Close();
 			handle = {};
 			goto LABEL_RET;
 		}
-		auto rgba32 = imgLib.GetImageRGBA32(imgId);
-		imgLib.Close();
+		auto rgba32 = imgLib->GetImageRGBA32(imgId);
 		handle = std::make_shared<SpriteResHandle>(_parent, rgba32.size());
 		handle->GetSprite()->Rect = { 0,0,info.Width,info.Height };
 		handle->GetSprite()->Pivot = { (float)info.PivotX / info.Width, (float)info.PivotY / info.Height };

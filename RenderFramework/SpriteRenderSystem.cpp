@@ -60,10 +60,10 @@ void SpriteRenderSystem::RenderCamera(Camera* camera)
 		if (sr->Sprite.expired())
 			continue;
 
-		auto wRect = sr->GetWorldRect();
+		auto viewRect = sr->GetWorldRect();
 		auto cameraWPos = camera->GetSceneNode()->GetWorldPosition();
-		wRect.x -= cameraWPos.x;
-		wRect.y -= cameraWPos.y;
-		_renderFunc(sr->Sprite.lock()->TextureSRV.Get(), wRect, sr->Color);
+		viewRect.x -= cameraWPos.x;
+		viewRect.y -= cameraWPos.y;
+		_renderFunc(sr->Sprite.lock()->TextureSRV.Get(), viewRect, sr->Color);
 	}
 }

@@ -8,8 +8,13 @@ MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr, shared_ptr
     _dr{ dr }, _spriteMgr{spriteMgr},
     _bgUse{0}, _mid1Use{1}, _mid2Use{1}, _topUse{2}
 {
-    _sceneMgr = std::make_unique<SceneManager>(_dr);
-    _sceneMgr->SetScreen(Mir::GameLayoutW, Mir::GameLayoutH);
+    _sceneMgr = std::make_unique<SceneManager>();
+    _renderSystem = std::make_unique<SpriteRenderSystem>();
+    auto clearFunc = std::bind(&MirWorldRenderManager::ClearScreen, this, std::placeholders::_1);
+    _renderSystem->SetClearFunc(clearFunc);
+    auto renderFunc = std::bind(&MirWorldRenderManager::Draw, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    _renderSystem->SetRenderFunc(renderFunc);
+
     auto cameraNode = _sceneMgr->CreateCameraNode();
     cameraNode->SetLocalPosition(Mir::GetCellCenter(400, 400));
     //
@@ -29,16 +34,19 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
         });
 
     _gridView->GetView()->SetCellShowCallback([this](int x, int y) {
+        auto log = L"{" + std::to_wstring(x) + L"," + std::to_wstring(y) + L"}";
+        OutputDebugString(log.c_str());
+
         WilSpriteKey key = { (uint32_t)x,(uint32_t)y };
-        DrawBg(key);
-        DrawMid(key, 1, _mid1Use);// 物体左半
-        DrawMid(key, 2, _mid2Use);// 物体右半
+        SetUpBg(key);
+        SetUpMid(key, 1, _mid1Use);// 物体左半
+        SetUpMid(key, 2, _mid2Use);// 物体右半
         });
 
     _gridView->GetView()->SetCellWillShowCallback([](int x, int y) {
         });
 
-    _gridView->GetView()->SetView(Mir::GameLayoutW, Mir::GameLayoutH, Mir::CellW * 4, Mir::CellH * 4);
+    _gridView->GetView()->SetView(Mir::GameLayoutW + Mir::CellW, Mir::GameLayoutH + Mir::CellH, Mir::CellW * 4, Mir::CellH * 4);
 }
 
 SpriteRenderer* MirWorldRenderManager::GetSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key)
@@ -76,13 +84,16 @@ void MirWorldRenderManager::ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpr
     sr->Enable = false;
 }
 
-void MirWorldRenderManager::DrawBg(WilSpriteKey key)
+void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
 {
-    auto tile = this->_mapData->TileAt(key.x, key.y);
+    if (key.x % 2 != 0 || key.y % 2 != 0)
+        return;
+
+    auto tile = this->_mapData->TileAt(key.x, _mapData->h() - key.y);
     auto fileIdx = tile.FileIndex;
     int imgIdx = tile.TileIndex;
-    if (tile.RemapFileIndex(imgIdx))
-        return;
+    //if (tile.RemapFileIndex(imgIdx))
+    //    return;
     auto spriteHandle = _spriteMgr->LoadSprite({ fileIdx, (uint32_t)imgIdx });
     if (!spriteHandle)
         return;
@@ -93,9 +104,9 @@ void MirWorldRenderManager::DrawBg(WilSpriteKey key)
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.push_back(spriteHandle);
 }
 
-void MirWorldRenderManager::DrawMid(WilSpriteKey key,int i, SpriteRenderLayer use)
+void MirWorldRenderManager::SetUpMid(WilSpriteKey key,int i, SpriteRenderLayer use)
 {
-    auto cell = this->_mapData->CellAt(key.x, key.y);
+    auto cell = this->_mapData->CellAt(key.x, _mapData->h() - key.y);
     if (!cell.FileEnableOf(i))
         return;
 
@@ -121,4 +132,31 @@ void MirWorldRenderManager::DrawMid(WilSpriteKey key,int i, SpriteRenderLayer us
         spRender->Sprite.lock()->Pivot = { 0, 0 };
         spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.push_back(spriteHandle);
     }
+}
+
+void MirWorldRenderManager::ClearScreen(XMFLOAT4 color)
+{
+    auto context = _dr->GetD3DDeviceContext();
+    auto renderTarget = _dr->GetRenderTargetView();
+    auto depthStencil = _dr->GetDepthStencilView();
+
+    context->ClearRenderTargetView(renderTarget, (const FLOAT*)&color);
+    context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
+extern void DrawTexture(ID3D11ShaderResourceView* srv, RECT rect);
+
+void MirWorldRenderManager::Draw(ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, XMFLOAT4 color)
+{
+    // 观察坐标->屏幕坐标
+    int offsetX = Mir::GameLayoutWHalf;
+    int offsetY = Mir::GameLayoutHHalf;
+    // 变换到左下角
+    viewRect.x += offsetX;
+    viewRect.y += offsetY;
+    // 变换到左上角
+    viewRect.y = Mir::GameLayoutH - viewRect.y;
+    RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
+    // todo 支持精灵颜色
+    DrawTexture(srv, sRect);
 }

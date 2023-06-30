@@ -2,6 +2,7 @@
 #include <wrl.h>
 #include <memory>
 #include <vector>
+#include <unordered_map>
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <functional>
@@ -12,6 +13,7 @@
 using std::shared_ptr;
 using Microsoft::WRL::ComPtr;
 using std::vector;
+using std::unordered_map;
 using std::function;
 using std::wstring;
 
