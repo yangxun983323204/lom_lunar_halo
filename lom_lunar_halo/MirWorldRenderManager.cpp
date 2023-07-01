@@ -34,8 +34,8 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
         });
 
     _gridView->GetView()->SetCellShowCallback([this](int x, int y) {
-        auto log = L"{" + std::to_wstring(x) + L"," + std::to_wstring(y) + L"}";
-        OutputDebugString(log.c_str());
+        //auto log = L"{" + std::to_wstring(x) + L"," + std::to_wstring(y) + L"}";
+        //OutputDebugString(log.c_str());
 
         WilSpriteKey key = { (uint32_t)x,(uint32_t)y };
         SetUpBg(key);
@@ -46,7 +46,7 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
     _gridView->GetView()->SetCellWillShowCallback([](int x, int y) {
         });
 
-    _gridView->GetView()->SetView(Mir::GameLayoutW + Mir::CellW, Mir::GameLayoutH + Mir::CellH, Mir::CellW * 4, Mir::CellH * 4);
+    _gridView->GetView()->SetView(Mir::GameLayoutW + Mir::TileW, Mir::GameLayoutH + Mir::TileH, Mir::TileW * 4, Mir::TileH * 4);
 }
 
 SpriteRenderer* MirWorldRenderManager::GetSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key)
@@ -86,7 +86,9 @@ void MirWorldRenderManager::ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpr
 
 void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
 {
-    if (key.x % 2 != 0 || key.y % 2 != 0)
+    key.x = key.x / 2 * 2;// tile是2*2个cell，所以绘制时cell需对齐到tile
+    key.y = key.y / 2 * 2;
+    if (_bgUse.Record.find(key) != _bgUse.Record.end())// 一个tile最多会重复触发4次绘制，检查一下是否已经绘制过了
         return;
 
     auto tile = this->_mapData->TileAt(key.x, _mapData->h() - key.y);

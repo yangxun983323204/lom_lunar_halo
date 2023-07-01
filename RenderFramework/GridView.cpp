@@ -60,10 +60,14 @@ public:
 	// 使rect范围向外扩充，与格子边框对齐
 	void AlignRect(SimpleMath::Rectangle& rect)
 	{
-		rect.x = (long)(floor((float)rect.x / _cellSize.x) * _cellSize.x);
-		rect.y = (long)(floor((float)rect.y / _cellSize.y) * _cellSize.y);
+		auto newX = (long)(floor((float)rect.x / _cellSize.x) * _cellSize.x);
+		auto newY = (long)(floor((float)rect.y / _cellSize.y) * _cellSize.y);
+		rect.width += rect.x - newX;
+		rect.height += rect.y - newY;
+		rect.x = newX;
+		rect.y = newY;
 		rect.width += _cellSize.x - rect.width % _cellSize.x;
-		rect.height += _cellSize.y - rect.y % _cellSize.y;
+		rect.height += _cellSize.y - rect.height % _cellSize.y;
 	}
 
 	void TryTriggerEvent()
