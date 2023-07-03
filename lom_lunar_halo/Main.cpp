@@ -203,9 +203,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         //    info->ptMinTrackSize.y = DPI_S(height);
         //}
         break;
-
+    case WM_ACTIVATE:
+        Mouse::ProcessMessage(message, wParam, lParam);
+        Keyboard::ProcessMessage(message, wParam, lParam);
+        break;
     case WM_ACTIVATEAPP:
         Mouse::ProcessMessage(message, wParam, lParam);
+        Keyboard::ProcessMessage(message, wParam, lParam);
         if (game)
         {
             if (wParam)
@@ -273,6 +277,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             s_fullscreen = !s_fullscreen;
         }
+        Keyboard::ProcessMessage(message, wParam, lParam);
         break;
 
     case WM_MENUCHAR:
@@ -287,7 +292,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break; 
     }
 
-    case WM_ACTIVATE:
     case WM_INPUT:
     case WM_MOUSEMOVE:
     case WM_LBUTTONDOWN:
@@ -305,6 +309,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEACTIVATE:
         // When you click to activate the window, we want Mouse to ignore that event.
         return MA_ACTIVATEANDEAT;
+    case WM_KEYDOWN:
+    case WM_KEYUP:
+    case WM_SYSKEYUP:
+        Keyboard::ProcessMessage(message, wParam, lParam);
+        break;
     }
 
     return DefWindowProc(hWnd, message, wParam, lParam);

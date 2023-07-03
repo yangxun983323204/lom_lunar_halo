@@ -9,3 +9,4 @@ float UserScale = 1;
 float DpiScale = 1;
 
 DirectX::Mouse gMouse{};
+DirectX::Keyboard gKeyboard{};

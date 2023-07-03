@@ -55,7 +55,8 @@
 #include <dxgidebug.h>
 #endif
 
-#include "../DirectXTK-main//Inc/Mouse.h"
+#include "../DirectXTK-main/Inc/Mouse.h"
+#include "../DirectXTK-main/Inc/Keyboard.h"
 
 // 用来解决本身素材过小的问题
 extern float UserScale;
@@ -63,6 +64,7 @@ extern float UserScale;
 extern float DpiScale;
 
 extern DirectX::Mouse gMouse;
+extern DirectX::Keyboard gKeyboard;
 
 /// <summary>
 /// 获取DPI缩放后的值
