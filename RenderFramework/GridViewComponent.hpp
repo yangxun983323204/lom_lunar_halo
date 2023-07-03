@@ -16,6 +16,9 @@ public:
 
 	inline void SyncNodePos()
 	{
+		if (!_gridView)
+			return;
+
 		auto wpos = GetSceneNode()->GetWorldPosition();
 		_gridView->UpdateViewPoint(wpos.x, wpos.y);
 	}

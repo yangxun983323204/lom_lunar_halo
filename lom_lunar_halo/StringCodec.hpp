@@ -3,6 +3,9 @@
 #include <locale>
 #include <codecvt>
 
+using std::string;
+using std::wstring;
+
 namespace YX 
 {
 	/// <summary>
@@ -19,7 +22,7 @@ namespace YX
 	/// </summary>
 	inline std::wstring Utf8ToWString(std::string u8str)
 	{
-		std::wstring_convert< std::codecvt_utf8<wchar_t> > cvt;
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> cvt;
 		return cvt.from_bytes(u8str);
 	}
 
@@ -52,4 +55,9 @@ namespace YX
 		setlocale(LC_ALL, curLocale.c_str());
 		return result;
 	}
+}
+
+inline wstring _W(string s)
+{
+	return YX::Utf8ToWString(s);
 }

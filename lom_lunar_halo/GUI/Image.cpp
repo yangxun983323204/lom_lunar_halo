@@ -36,7 +36,7 @@ void Image::LoadXml(tinyxml2::XMLElement* e)
 			{
 				// todo 仅临时写法
 				ImageLib imgLib{};
-				imgLib.Open(GetSetting()->GetDataDir() + Utf8ToWString(pbuffer));
+				imgLib.Open(_W(GetSetting()->GetDataDir() + pbuffer));
 				//assert(imgLib.IsOpened());
 				if (imgLib.IsOpened())
 				{

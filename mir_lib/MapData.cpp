@@ -26,6 +26,9 @@ void MapData::Load(wstring mapPath)
 	mPath = mapPath;
 	FILE* f;
 	_wfopen_s(&f, mPath.c_str(), L"rb");
+	if (f == nullptr)
+		return;
+
 	mHeader = new MapHeader();
 	fread(reinterpret_cast<void*>(mHeader), sizeof(MapHeader), 1, f);
 	mTileCount = mHeader->Width * mHeader->Height / 4;
@@ -62,6 +65,11 @@ void MapData::Load(wstring mapPath)
 		}
 	}
 	fclose(f);
+}
+
+bool MapData::IsLoaded()
+{
+	return mHeader != nullptr;
 }
 
 int16_t MapData::w()

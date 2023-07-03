@@ -148,5 +148,5 @@ void Text::LoadXml(tinyxml2::XMLElement* e)
 	Graphic::LoadXml(e);
 	string val = e->GetText();
 	uint8_t fsize = e->IntAttribute("FontSize", 15);
-	Set(Utf8ToWString(val), fsize);
+	Set(_W(val), fsize);
 }

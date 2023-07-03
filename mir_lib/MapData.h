@@ -201,6 +201,7 @@ public:
 	MapData();
 	~MapData();
 	void Load(wstring mapPath);
+	bool IsLoaded();
 	int16_t w();
 	int16_t h();
 	TileInfo TileAt(uint32_t cellX, uint32_t cellY);

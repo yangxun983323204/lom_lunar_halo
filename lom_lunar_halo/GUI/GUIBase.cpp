@@ -117,7 +117,7 @@ void GUIElement::LoadXml(tinyxml2::XMLElement* e)
 {
 	char* pbuffer;
 	if(e->QueryStringAttribute("Id", (const char**)&pbuffer) == tinyxml2::XML_SUCCESS)
-		Id = Utf8ToWString(pbuffer);
+		Id = _W(pbuffer);
 
 	Interactable = e->BoolAttribute("Interactable", true);
 	SelfVisiable = e->BoolAttribute("SelfVisiable", true);

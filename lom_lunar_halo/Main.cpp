@@ -5,6 +5,7 @@
 #include "pch.h"
 #include "Game.h"
 #include <d2d1.h>
+#include "StringCodec.hpp"
 
 using namespace DirectX;
 
@@ -20,7 +21,7 @@ namespace
     std::unique_ptr<Game> g_game;
 }
 
-LPCWSTR g_szAppName = L"传奇:月辉";
+string g_szAppName = "传奇:月辉";
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void ExitGame() noexcept;
@@ -74,7 +75,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         style = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME/* 不允许缩放 */;
         AdjustWindowRect(&rc, style, FALSE);
 
-        HWND hwnd = CreateWindowExW(0, L"lom_lunar_haloWindowClass", g_szAppName, style,
+        HWND hwnd = CreateWindowExW(0, L"lom_lunar_haloWindowClass", _W(g_szAppName).c_str(), style,
             CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
             nullptr);
         // TODO: Change to CreateWindowExW(WS_EX_TOPMOST, L"lom_lunar_haloWindowClass", g_szAppName, WS_POPUP,

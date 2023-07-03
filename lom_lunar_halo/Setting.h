@@ -10,17 +10,17 @@ class Setting
 {
 public:
 	bool Load();
-	wstring GetRootDir();
-	wstring GetDataDir();
-	wstring GetMapDir();
-	wstring GetSoundDir();
-	wstring GetUILayoutDir();
+	string GetRootDir();
+	string GetDataDir();
+	string GetMapDir();
+	string GetSoundDir();
+	string GetUILayoutDir();
 private:
 	json _setting;
-	wstring _originDataDir;
-	wstring _uiLayoutDir;
+	string _originDataDir;
+	string _uiLayoutDir;
 
 	void Read();
-	void ReadKey(string key, wstring& val, wstring defaultVal);
+	void ReadKey(string key, string& val, string defaultVal);
 };
 

@@ -25,43 +25,42 @@ bool Setting::Load()
     return false;
 }
 
-wstring Setting::GetRootDir()
+string Setting::GetRootDir()
 {
     return _originDataDir;
 }
 
-wstring Setting::GetDataDir()
+string Setting::GetDataDir()
 {
-    return _originDataDir + L"Data/";
+    return _originDataDir + "Data/";
 }
 
-wstring Setting::GetMapDir()
+string Setting::GetMapDir()
 {
-    return _originDataDir + L"Map/";
+    return _originDataDir + "Map/";
 }
 
-wstring Setting::GetSoundDir()
+string Setting::GetSoundDir()
 {
-    return _originDataDir + L"Sound/";
+    return _originDataDir + "Sound/";
 }
 
-wstring Setting::GetUILayoutDir()
+string Setting::GetUILayoutDir()
 {
     return _uiLayoutDir;
 }
 
 void Setting::Read()
 {
-    ReadKey(KEY_ORIGIN_DATA, _originDataDir, L"./");
-    ReadKey(KEY_UILAYOUT, _uiLayoutDir, L"./UILayout/");
+    ReadKey(KEY_ORIGIN_DATA, _originDataDir, "./");
+    ReadKey(KEY_UILAYOUT, _uiLayoutDir, "./UILayout/");
 }
 
-void Setting::ReadKey(string key, wstring& val, wstring defaultVal)
+void Setting::ReadKey(string key, string& val, string defaultVal)
 {
     if (_setting.contains(key))
     {
-        std::string s = _setting.at(key);
-        val = YX::Utf8ToWString(s);
+        val = _setting.at(key);
     }
     else {
         val = defaultVal;

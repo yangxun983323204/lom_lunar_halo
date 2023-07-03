@@ -56,7 +56,7 @@ WilSpriteManager::Impl::Impl(ID3D11Device* dev, wstring dir, WilSpriteManager* p
 		int i = 0;
 		for (auto record : jObj) {
 			string r = record;
-			_fileMap[i] = YX::Utf8ToWString(r.substr(2));
+			_fileMap[i] = _W(r.substr(2));
 			++i;
 		}
 	}
@@ -65,6 +65,7 @@ WilSpriteManager::Impl::~Impl()
 {
 	for (auto lib : _imgLibs)
 	{
+		lib.second->Close();
 		delete lib.second;
 	}
 	_imgLibs.clear();

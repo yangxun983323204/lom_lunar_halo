@@ -17,6 +17,7 @@
 #include <format>
 #include "WilSpriteManager.h"
 #include "SpriteHandleHolder.hpp"
+#include "StringCodec.hpp"
 
 extern void ExitGame() noexcept;
 
@@ -200,17 +201,22 @@ void Game::CreateDeviceDependentResources()
 
     // TODO: Initialize device dependent objects here (independent of window size).
     _batch.reset(new SpriteBatch{ m_deviceResources->GetD3DDeviceContext()});
-    _spriteManager = std::make_shared<WilSpriteManager>(device, _setting->GetRootDir());
+    _spriteManager = std::make_shared<WilSpriteManager>(device, _W(_setting->GetRootDir()));
     _spriteManager->SetCapacity(100);
-    _testMir3 = YX::GUI::LayoutLoader::Parse(_setting->GetUILayoutDir() + L"login.xml");
+    _testMir3 = YX::GUI::LayoutLoader::Parse(_W(_setting->GetUILayoutDir() + "login.xml"));
     // 测试场景渲染
     _worldRenderMgr = std::make_shared<MirWorldRenderManager>(m_deviceResources.get(), _spriteManager);
     // 测试地图加载
     auto mapData = std::make_shared<MapData>();
-    mapData->Load(GetSetting()->GetMapDir() + L"0.map");
-    wstring sizeStr = L"map size:" + std::to_wstring(mapData->w()) + L"," + std::to_wstring(mapData->h());
-    MessageBox(m_deviceResources->GetWindow(), sizeStr.c_str(), L"测试map加载", 0);
-    _worldRenderMgr->SetMapData(mapData);
+    mapData->Load(_W(GetSetting()->GetMapDir() + "0.map"));
+    if (mapData->IsLoaded()) {
+        wstring sizeStr = L"map size:" + std::to_wstring(mapData->w()) + L"," + std::to_wstring(mapData->h());
+        MessageBox(m_deviceResources->GetWindow(), sizeStr.c_str(), _W("测试map加载").c_str(), 0);
+        _worldRenderMgr->SetMapData(mapData);
+    }
+    else {
+        MessageBox(m_deviceResources->GetWindow(), _W("加载map失败").c_str(), _W("测试map加载").c_str(), 0);
+    }
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
