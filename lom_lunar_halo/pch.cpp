@@ -10,3 +10,4 @@ float DpiScale = 1;
 
 DirectX::Mouse gMouse{};
 DirectX::Keyboard gKeyboard{};
+DirectX::Keyboard::KeyboardStateTracker gKBTracker{};

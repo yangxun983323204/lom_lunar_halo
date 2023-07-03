@@ -24,6 +24,7 @@ public:
 	shared_ptr<SceneNode> CreateSpriteNode();
 	shared_ptr<SceneNode> CreateCameraNode();
 
+	void Clear();
 private:
 	shared_ptr<SceneNode> _root;
 };

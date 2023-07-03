@@ -49,6 +49,22 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
     _gridView->GetView()->SetView(Mir::GameLayoutW + Mir::TileW, Mir::GameLayoutH + Mir::TileH, Mir::TileW * 4, Mir::TileH * 4);
 }
 
+DirectX::XMINT2 MirWorldRenderManager::GetViewPoint()
+{
+    if (!_gridView)
+        return DirectX::XMINT2();
+    else
+        return _gridView->GetSceneNode()->GetLocalPosition();
+}
+
+void MirWorldRenderManager::SetViewPoint(DirectX::XMINT2 coor)
+{
+    if (!_gridView)
+        return;
+    else
+        _gridView->GetSceneNode()->SetLocalPosition(coor);
+}
+
 SpriteRenderer* MirWorldRenderManager::GetSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key)
 {
     auto f = use.Record.find(key);
@@ -82,6 +98,12 @@ void MirWorldRenderManager::ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpr
     _pool.push_back(sr);
     sr->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
     sr->Enable = false;
+}
+
+void MirWorldRenderManager::Clear()
+{
+    _mapData = nullptr;
+    _sceneMgr->Clear();
 }
 
 void MirWorldRenderManager::SetUpBg(WilSpriteKey key)

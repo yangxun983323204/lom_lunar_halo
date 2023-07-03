@@ -12,21 +12,14 @@
 #include "./GUI/Image.h"
 #include "./GUI/Text.h"
 #include "./GUI/LayoutLoader.h"
-#include "MirWorldRenderManager.h"
 #include "StringCodec.hpp"
 #include <format>
-#include "WilSpriteManager.h"
-#include "SpriteHandleHolder.hpp"
-#include "StringCodec.hpp"
 
 extern void ExitGame() noexcept;
 
 using namespace DirectX;
 
 using Microsoft::WRL::ComPtr;
-// test scene
-std::shared_ptr<MirWorldRenderManager> _worldRenderMgr;
-std::shared_ptr<WilSpriteManager> _spriteManager;
 
 Game::Game() noexcept(false):
     _batch{}
@@ -78,7 +71,10 @@ void Game::Update(DX::StepTimer const& timer)
     float elapsedTime = float(timer.GetElapsedSeconds());
 
     // TODO: Add your game logic here.
-    elapsedTime;
+    auto state = Keyboard::Get().GetState();
+    gKBTracker.Update(state);
+    if (_procMgr)
+        _procMgr->Update(timer);
 }
 #pragma endregion
 
@@ -100,7 +96,7 @@ void Game::Render()
     // TODO: Add your rendering code here.
     _batch->Begin();
     _worldRenderMgr->Render();
-    //YX::GUI::Canvas::DrawAll();
+    YX::GUI::Canvas::DrawAll();
     _batch->End();
 
     m_deviceResources->PIXEndEvent();
@@ -185,11 +181,23 @@ void Game::GetDefaultSize(int& width, int& height) const noexcept
 
 void Game::GetCurrSize(int& width, int& height) const noexcept
 {
-    // todo 根据当前游戏状态，返回登陆布局大小或游戏布局大小
-    //width = LoginLayoutW;
-    //height = LoginLayoutH;
-    width = GameLayoutW;
-    height = GameLayoutH;
+    if (!_procMgr) {
+        GetDefaultSize(width, height);
+        return;
+    }
+
+    _procMgr->GetCurrentProcess()->GetWindowSize(width, height);
+}
+
+extern long style;
+void Game::SetWindowSize(int width, int height)
+{
+    RECT oldRc;
+    GetWindowRect(GetDeviceResource()->GetWindow(), &oldRc);
+
+    RECT rc = { 0, 0, static_cast<LONG>(DPI_S(width)), static_cast<LONG>(DPI_S(height)) };
+    AdjustWindowRect(&rc, style, FALSE);
+    SetWindowPos(GetDeviceResource()->GetWindow(), 0, oldRc.left, oldRc.top, rc.right - rc.left, rc.bottom - rc.top, 0);
 }
 #pragma endregion
 
@@ -201,22 +209,11 @@ void Game::CreateDeviceDependentResources()
 
     // TODO: Initialize device dependent objects here (independent of window size).
     _batch.reset(new SpriteBatch{ m_deviceResources->GetD3DDeviceContext()});
-    _spriteManager = std::make_shared<WilSpriteManager>(device, _W(_setting->GetRootDir()));
-    _spriteManager->SetCapacity(100);
-    _testMir3 = YX::GUI::LayoutLoader::Parse(_W(_setting->GetUILayoutDir() + "login.xml"));
-    // 测试场景渲染
-    _worldRenderMgr = std::make_shared<MirWorldRenderManager>(m_deviceResources.get(), _spriteManager);
-    // 测试地图加载
-    auto mapData = std::make_shared<MapData>();
-    mapData->Load(_W(GetSetting()->GetMapDir() + "0.map"));
-    if (mapData->IsLoaded()) {
-        wstring sizeStr = L"map size:" + std::to_wstring(mapData->w()) + L"," + std::to_wstring(mapData->h());
-        MessageBox(m_deviceResources->GetWindow(), sizeStr.c_str(), _W("测试map加载").c_str(), 0);
-        _worldRenderMgr->SetMapData(mapData);
-    }
-    else {
-        MessageBox(m_deviceResources->GetWindow(), _W("加载map失败").c_str(), _W("测试map加载").c_str(), 0);
-    }
+    _mapSpriteManager = std::make_shared<WilSpriteManager>(device, _W(_setting->GetRootDir()));
+    _mapSpriteManager->SetCapacity(100);
+    _worldRenderMgr = std::make_shared<MirWorldRenderManager>(m_deviceResources.get(), _mapSpriteManager);
+    _procMgr = std::make_shared<ProcessManager>(this);
+    _procMgr->StartEnter(_procMgr->GetLoginProcess());
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

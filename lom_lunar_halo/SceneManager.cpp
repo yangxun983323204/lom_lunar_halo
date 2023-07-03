@@ -28,3 +28,11 @@ shared_ptr<SceneNode> SceneManager::CreateCameraNode()
     node->SetParent(weak_ptr<SceneNode>(_root));
     return node;
 }
+
+void SceneManager::Clear()
+{
+    for (auto c : _root->GetChildren())
+    {
+        c.lock()->SetParent({});
+    }
+}

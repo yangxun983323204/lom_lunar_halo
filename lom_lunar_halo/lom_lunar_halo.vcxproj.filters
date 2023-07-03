@@ -11,6 +11,18 @@
     <Filter Include="GUI">
       <UniqueIdentifier>{a9b94d00-01a1-4eef-a8e6-2d078145d610}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Process">
+      <UniqueIdentifier>{f1a421d0-4c3f-4fc7-a035-e07ba9b13ffc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SceneManager">
+      <UniqueIdentifier>{16b21083-657c-4456-b92c-768910b24a26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RmlUI">
+      <UniqueIdentifier>{a9ff1c91-9d61-4cf8-9a67-252e96677c56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{8adf3145-5fdf-4422-aa46-d4e72564c64e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -24,8 +36,6 @@
     <ClInclude Include="Sprite_old.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Setting.h" />
-    <ClInclude Include="StringCodec.hpp" />
-    <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="GUI\Canvas.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -41,13 +51,48 @@
     <ClInclude Include="GUI\LayoutLoader.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="EventSystem.h" />
-    <ClInclude Include="MyRmlUi\RmlUiUtility.h" />
-    <ClInclude Include="MyRmlUi\DX11RmlRenderer.h" />
-    <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="WilSpriteManager.h" />
-    <ClInclude Include="SpriteHandleHolder.hpp" />
-    <ClInclude Include="MirWorldRenderManager.h" />
+    <ClInclude Include="GameProcess.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="IProcess.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginProcess.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectProcess.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="MirWorldRenderManager.h">
+      <Filter>SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteHandleHolder.hpp">
+      <Filter>SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="WilSpriteManager.h">
+      <Filter>SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessManager.h">
+      <Filter>Process</Filter>
+    </ClInclude>
+    <ClInclude Include="MyRmlUi\RmlUiUtility.h">
+      <Filter>RmlUI</Filter>
+    </ClInclude>
+    <ClInclude Include="EventSystem.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="tinyxml2.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="StringCodec.hpp">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MyRmlUi\DX11RmlRenderer.h">
+      <Filter>RmlUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -58,7 +103,6 @@
     <ClCompile Include="Sprite_old.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Setting.cpp" />
-    <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="GUI\Canvas.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
@@ -74,12 +118,39 @@
     <ClCompile Include="GUI\LayoutLoader.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="EventSystem.cpp" />
-    <ClCompile Include="MyRmlUi\RmlUiUtility.cpp" />
-    <ClCompile Include="MyRmlUi\DX11RmlRenderer.cpp" />
-    <ClCompile Include="SceneManager.cpp" />
-    <ClCompile Include="WilSpriteManager.cpp" />
-    <ClCompile Include="MirWorldRenderManager.cpp" />
+    <ClCompile Include="GameProcess.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginProcess.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="SelectProcess.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="MirWorldRenderManager.cpp">
+      <Filter>SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="WilSpriteManager.cpp">
+      <Filter>SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessManager.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="MyRmlUi\RmlUiUtility.cpp">
+      <Filter>RmlUI</Filter>
+    </ClCompile>
+    <ClCompile Include="EventSystem.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="tinyxml2.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="MyRmlUi\DX11RmlRenderer.cpp">
+      <Filter>RmlUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

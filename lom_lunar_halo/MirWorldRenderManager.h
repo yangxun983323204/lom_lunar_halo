@@ -31,9 +31,12 @@ public:
 
 	MirWorldRenderManager(DX::DeviceResources* dr, shared_ptr<WilSpriteManager> spriteMgr);
 	void SetMapData(shared_ptr<MapData> mapData);
+	DirectX::XMINT2 GetViewPoint();
+	void SetViewPoint(DirectX::XMINT2 coor);
 	SpriteRenderer* GetSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
 	void ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
 	inline void Render() { _renderSystem->Render(); }
+	void Clear();
 
 private:
 	void SetUpBg(WilSpriteKey key);

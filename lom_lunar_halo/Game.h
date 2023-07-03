@@ -11,6 +11,10 @@
 #include "./GUI/Canvas.h"
 #include "Setting.h"
 #include "../mir_lib/MirLib.h"
+#include "MirWorldRenderManager.h"
+#include "WilSpriteManager.h"
+#include "SpriteHandleHolder.hpp"
+#include "ProcessManager.h"
 
 using namespace Mir;
 
@@ -54,10 +58,13 @@ public:
     // Properties
     void GetDefaultSize( int& width, int& height ) const noexcept;
     void GetCurrSize(int& width, int& height) const noexcept;
+    void SetWindowSize(int width, int height);
 
     inline std::shared_ptr<Setting> GetSetting() { return _setting; }
     inline DX::DeviceResources* GetDeviceResource() { return m_deviceResources.get(); }
     void DrawTexture(ID3D11ShaderResourceView* srv, RECT rect);
+    inline std::shared_ptr<MirWorldRenderManager> GetWorldRenderManager() { return _worldRenderMgr; }
+    inline std::shared_ptr<WilSpriteManager> GetMapSpriteManager() { return _mapSpriteManager; }
 private:
 
     void Update(DX::StepTimer const& timer);
@@ -77,5 +84,8 @@ private:
     std::shared_ptr<Setting> _setting;
     std::unique_ptr<DirectX::SpriteBatch> _batch;
 
-    std::shared_ptr<YX::GUI::Canvas> _testMir3;
+    std::shared_ptr<MirWorldRenderManager> _worldRenderMgr;
+    std::shared_ptr<WilSpriteManager> _mapSpriteManager;
+
+    std::shared_ptr<ProcessManager> _procMgr;
 };

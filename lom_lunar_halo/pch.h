@@ -65,6 +65,7 @@ extern float DpiScale;
 
 extern DirectX::Mouse gMouse;
 extern DirectX::Keyboard gKeyboard;
+extern DirectX::Keyboard::KeyboardStateTracker gKBTracker;
 
 /// <summary>
 /// 获取DPI缩放后的值

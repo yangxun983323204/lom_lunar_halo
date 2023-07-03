@@ -186,17 +186,22 @@
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="EventSystem.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameProcess.h" />
     <ClInclude Include="GUI\Canvas.h" />
     <ClInclude Include="GUI\GUIBase.h" />
     <ClInclude Include="GUI\Image.h" />
     <ClInclude Include="GUI\LayoutLoader.h" />
     <ClInclude Include="GUI\Text.h" />
+    <ClInclude Include="IProcess.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="LoginProcess.h" />
     <ClInclude Include="MirWorldRenderManager.h" />
     <ClInclude Include="MyRmlUi\DX11RmlRenderer.h" />
     <ClInclude Include="MyRmlUi\RmlUiUtility.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ProcessManager.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="SelectProcess.h" />
     <ClInclude Include="Setting.h" />
     <ClInclude Include="SpriteHandleHolder.hpp" />
     <ClInclude Include="WilSpriteManager.h" />
@@ -209,11 +214,13 @@
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="EventSystem.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameProcess.cpp" />
     <ClCompile Include="GUI\Canvas.cpp" />
     <ClCompile Include="GUI\GUIBase.cpp" />
     <ClCompile Include="GUI\Image.cpp" />
     <ClCompile Include="GUI\LayoutLoader.cpp" />
     <ClCompile Include="GUI\Text.cpp" />
+    <ClCompile Include="LoginProcess.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MirWorldRenderManager.cpp" />
     <ClCompile Include="MyRmlUi\DX11RmlRenderer.cpp" />
@@ -224,7 +231,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ProcessManager.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SelectProcess.cpp" />
     <ClCompile Include="Setting.cpp" />
     <ClCompile Include="WilSpriteManager.cpp" />
     <ClCompile Include="Sprite_old.cpp" />

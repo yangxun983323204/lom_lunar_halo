@@ -174,7 +174,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         else if (!s_in_sizemove && game)
         {
-            //game->OnWindowSizeChanged(GameLayoutW, GameLayoutH);
+            UINT width = LOWORD(lParam);
+            UINT height = HIWORD(lParam);
+            game->OnWindowSizeChanged(width, height);
         }
         break;
 

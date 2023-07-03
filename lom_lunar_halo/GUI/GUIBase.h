@@ -28,7 +28,8 @@ namespace YX {
 				Height{4},
 				LocalPos{0,0},
 				Pivot{0,0},
-				_delayFill{false}
+				_delayFill{false},
+				_parent{}, _children{}
 			{
 			};
 			inline bool IsRoot() { return false; }
