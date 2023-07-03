@@ -10,32 +10,24 @@ public:
 		_cellSize{ cellSize }, _gridSize{gridSize},
 		_preViewRect{}, _preRoiRect{},
 		_viewRect{}, _roiRect{},
-		_halfViewWidth{}, _halfViewHeight{},
-		_halfRoiWidth{}, _halfRoiHeight{}
+		_viewSize{}, _border{}
 	{
 		_gridRect = { 0,0,(long)gridSize.x, (long)gridSize.y };
 	}
 
-	void Init(XMINT2 viewPoint, XMUINT2 viewSize, XMUINT2 roiSize)
+	inline uint32_t ViewUp() { return _viewSize.x; }
+	inline uint32_t ViewDown() { return _viewSize.y; }
+	inline uint32_t ViewLeft() { return _viewSize.z; }
+	inline uint32_t ViewRight() { return _viewSize.w; }
+	inline uint32_t ViewWidth() { return _viewSize.w + _viewSize.z; }
+	inline uint32_t ViewHeight() { return _viewSize.x + _viewSize.y; }
+
+	void Init(XMINT2 viewPoint, XMUINT4 viewSize, XMUINT2 border)
 	{
-		_halfViewWidth = viewSize.x / 2;
-		_halfViewHeight = viewSize.y / 2;
-		_halfRoiWidth = roiSize.x / 2;
-		_halfRoiHeight = roiSize.y / 2;
+		_viewSize = viewSize;
+		_border = border;
 
-		_viewRect.x = viewPoint.x - _halfViewWidth;
-		_viewRect.y = viewPoint.y - _halfViewHeight;
-		_viewRect.width = viewSize.x;
-		_viewRect.height = viewSize.y;
-
-		_roiRect.x = viewPoint.x - _halfRoiWidth;
-		_roiRect.y = viewPoint.y - _halfRoiHeight;
-		_roiRect.width = roiSize.x;
-		_roiRect.height = roiSize.y;
-
-		AlignRect(_viewRect);
-		AlignRect(_roiRect);
-		TryTriggerEvent();
+		UpdateRect(viewPoint);
 	}
 
 	void UpdateRect(XMINT2 viewPoint)
@@ -43,15 +35,15 @@ public:
 		_preViewRect = _viewRect;
 		_preRoiRect = _roiRect;
 
-		_viewRect.x = viewPoint.x - _halfViewWidth;
-		_viewRect.y = viewPoint.y - _halfViewHeight;
-		_viewRect.width = _halfViewWidth * 2;
-		_viewRect.height = _halfViewHeight * 2;
+		_viewRect.x = viewPoint.x - ViewLeft();
+		_viewRect.y = viewPoint.y - ViewDown();
+		_viewRect.width = ViewWidth();
+		_viewRect.height = ViewHeight();
 
-		_roiRect.x = viewPoint.x - _halfRoiWidth;
-		_roiRect.y = viewPoint.y - _halfRoiHeight;
-		_roiRect.width = _halfRoiWidth * 2;
-		_roiRect.height = _halfRoiHeight * 2;
+		_roiRect.x = viewPoint.x - ViewLeft() - _border.x;
+		_roiRect.y = viewPoint.y - ViewDown() - _border.y;
+		_roiRect.width = ViewWidth() + _border.x * 2;
+		_roiRect.height = ViewHeight() + _border.y * 2;
 
 		AlignRect(_viewRect);
 		AlignRect(_roiRect);
@@ -72,10 +64,10 @@ public:
 
 	void TryTriggerEvent()
 	{
-		auto intersect = SimpleMath::Rectangle::Intersect(_preRoiRect, _roiRect);
-		if (intersect == _roiRect)// 区域覆盖的格子未变化
+		if (_preViewRect == _viewRect)// 区域覆盖的格子未变化
 			return;
 
+		auto intersectView = SimpleMath::Rectangle::Intersect(_preViewRect, _viewRect);
 		// 计算更新
 		long startY = _preRoiRect.y;
 		long stopY = _preRoiRect.y + _preRoiRect.height;
@@ -89,7 +81,7 @@ public:
 				if (!_gridRect.Contains(x, y))
 					continue;
 
-				if (intersect.Contains(x, y))
+				if (intersectView.Contains(x, y))
 					continue;
 
 				if (_preViewRect.Contains(x, y))
@@ -109,7 +101,7 @@ public:
 				if (!_gridRect.Contains(x, y))
 					continue;
 
-				if (intersect.Contains(x, y))
+				if (intersectView.Contains(x, y))
 					continue;
 
 				_onCellWillShow(x / _cellSize.x, y / _cellSize.y);
@@ -137,8 +129,8 @@ public:
 	SimpleMath::Rectangle _viewRect;
 	SimpleMath::Rectangle _roiRect;
 
-	uint32_t _halfViewWidth, _halfViewHeight;
-	uint32_t _halfRoiWidth, _halfRoiHeight;
+	XMUINT4 _viewSize;
+	XMUINT2 _border;
 };
 
 GridView::GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols):
@@ -152,12 +144,11 @@ GridView::~GridView()
 {
 	delete _inner;
 }
-void GridView::SetView(uint32_t width, uint32_t height, uint32_t borderX, uint32_t borderY)
+void GridView::SetView(uint32_t up, uint32_t down, uint32_t left, uint32_t right, uint32_t borderX, uint32_t borderY)
 {
-	_viewSize = { width, height };
+	_viewSize = { up, down, left, right };
 	_viewBorder = { borderX, borderY };
-	XMUINT2 roi = { width + borderX, height + borderY };
-	_inner->Init({ -10000000,-10000000 }, _viewSize, roi);
+	_inner->Init({ -10000000,-10000000 }, _viewSize, _viewBorder);
 }
 
 void GridView::UpdateViewPoint(int x, int y)

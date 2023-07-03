@@ -6,7 +6,7 @@
 
 MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr, shared_ptr<WilSpriteManager> spriteMgr):
     _dr{ dr }, _spriteMgr{spriteMgr},
-    _bgUse{0}, _mid1Use{1}, _mid2Use{1}, _topUse{2}
+    _bgUse{0}, _mid1Use{1}, _mid2Use{2}, _topUse{3}
 {
     _sceneMgr = std::make_unique<SceneManager>();
     _renderSystem = std::make_unique<SpriteRenderSystem>();
@@ -27,7 +27,8 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
     _gridView->Init(Mir::CellW, Mir::CellH, _mapData->h(), _mapData->w());
     _gridView->GetView()->SetCellHideCallback([this](int x, int y) {
         WilSpriteKey key = { (uint32_t)x,(uint32_t)y };
-        this->ReleaseSpriteRenderer(_bgUse, key);
+        WilSpriteKey bgKey = { (uint32_t)x / 2 * 2,(uint32_t)y / 2 * 2 };
+        this->ReleaseSpriteRenderer(_bgUse, bgKey);
         this->ReleaseSpriteRenderer(_mid1Use, key);
         this->ReleaseSpriteRenderer(_mid2Use, key);
         this->ReleaseSpriteRenderer(_topUse, key);
@@ -46,7 +47,10 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
     _gridView->GetView()->SetCellWillShowCallback([](int x, int y) {
         });
 
-    _gridView->GetView()->SetView(Mir::GameLayoutW + Mir::TileW, Mir::GameLayoutH + Mir::TileH, Mir::TileW * 4, Mir::TileH * 4);
+    _gridView->GetView()->SetView(
+        Mir::GameLayoutHHalf + Mir::TileH, Mir::GameLayoutHHalf * 4,
+        Mir::GameLayoutWHalf * 2, Mir::GameLayoutWHalf * 2,
+        Mir::TileW * 4, Mir::TileH * 4);
 }
 
 DirectX::XMINT2 MirWorldRenderManager::GetViewPoint()
@@ -75,6 +79,7 @@ SpriteRenderer* MirWorldRenderManager::GetSpriteRenderer(SpriteRenderLayer& use,
     if (_pool.size() > 0) {
         SpriteRenderer* last = *(--_pool.end());
         _pool.pop_back();
+        sr = last;
     }
     else {
         sr = _sceneMgr->CreateSpriteNode()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();

@@ -38,11 +38,13 @@ void GUIElement::SetParent(std::shared_ptr<GUIElement> self, std::shared_ptr<GUI
 	{
 		auto parent = _parent.lock();
 		auto children = parent->_children;
-		std::remove_if(children.begin(), children.end(), [&parent](shared_ptr<GUIElement> n)
+		auto s = std::find_if(children.begin(), children.end(), [&parent](shared_ptr<GUIElement> n)
 			{
 				return n.get() == parent.get();
 			}
 		);
+		if (s != children.end())
+			children.erase(s);
 	}
 
 	_parent = parent;

@@ -19,11 +19,11 @@ void SpriteRenderSystem::Render()
 	auto cameras = ISystem::GetComponentsByType(Camera::TypeId);
 	if (cameras.size()<=0)
 	{
-		cout << L"no camera!";
+		cout << "no camera!";
 		return;
 	}
 
-	std::sort(cameras.begin(), cameras.end(), [](ISceneNodeComponent* a, ISceneNodeComponent* b) {
+	cameras.sort([](ISceneNodeComponent* a, ISceneNodeComponent* b) {
 		return dynamic_cast<Camera*>(a)->Depth < dynamic_cast<Camera*>(b)->Depth;
 		});
 
@@ -40,7 +40,7 @@ void SpriteRenderSystem::RenderCamera(Camera* camera)
 	}
 
 	auto spRenderers = ISystem::GetComponentsByType(SpriteRenderer::TypeId);
-	std::sort(spRenderers.begin(), spRenderers.end(), [](ISceneNodeComponent*a, ISceneNodeComponent*b) {
+	spRenderers.sort([](ISceneNodeComponent*a, ISceneNodeComponent*b) {
 		auto sa = dynamic_cast<SpriteRenderer*>(a)->SortLayer;
 		auto sb = dynamic_cast<SpriteRenderer*>(b)->SortLayer;
 		if (sa == sb) {

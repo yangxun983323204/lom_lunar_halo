@@ -3,10 +3,12 @@
 #include <memory>
 #include <map>
 #include <vector>
+#include <list>
 #include "ISystem.h"
 
 using std::weak_ptr;
 using std::vector;
+using std::list;
 
 class SceneNode;
 
@@ -25,7 +27,7 @@ protected:
 	friend class SceneNode;
 	friend class ISystem;
 
-	static vector<ISceneNodeComponent*> GetComponentsByType(int typeId);
+	static list<ISceneNodeComponent*> GetComponentsByType(int typeId);
 
 	weak_ptr<SceneNode> _node;
 
@@ -33,7 +35,7 @@ private:
 	void Reg();
 	void UnReg();
 
-	static std::map<int,vector<ISceneNodeComponent*>> __componentsReg;
+	static std::map<int, list<ISceneNodeComponent*>> __componentsReg;
 };
 
 template<typename TComponent>

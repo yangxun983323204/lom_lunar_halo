@@ -2,11 +2,6 @@
 #include "IProcess.h"
 
 class Game;
-namespace YX {
-	namespace GUI {
-		class Canvas;
-	}
-}
 class GameProcess :public IProcess
 {
 public:
@@ -16,8 +11,5 @@ public:
 	virtual void StartExit() override;
 	virtual void Update(DX::StepTimer const& timer) override;
 	virtual void GetWindowSize(int& w, int& h) override;
-
-private:
-	std::shared_ptr<YX::GUI::Canvas> _testUI;
 };
 

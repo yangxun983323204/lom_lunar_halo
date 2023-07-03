@@ -1,7 +1,7 @@
 #include "ISceneNodeComponent.h"
 #include <algorithm>
 
-std::map<int, vector<ISceneNodeComponent*>> ISceneNodeComponent::__componentsReg{};
+std::map<int, list<ISceneNodeComponent*>> ISceneNodeComponent::__componentsReg{};
 
 void ISceneNodeComponent::Reg()
 {
@@ -16,7 +16,7 @@ void ISceneNodeComponent::UnReg()
 		v.erase(f);
 }
 
-vector<ISceneNodeComponent*> ISceneNodeComponent::GetComponentsByType(int typeId)
+list<ISceneNodeComponent*> ISceneNodeComponent::GetComponentsByType(int typeId)
 {
 	return __componentsReg[typeId];
 }

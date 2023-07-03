@@ -14,7 +14,7 @@ public:
 	GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols);
 	~GridView();
 	// 设置视口大小和预加载区域
-	void SetView(uint32_t width, uint32_t height, uint32_t borderX, uint32_t borderY);
+	void SetView(uint32_t up, uint32_t down, uint32_t left, uint32_t right, uint32_t borderX, uint32_t borderY);
 	// 更新观察点
 	void UpdateViewPoint(int x, int y);
 
@@ -29,7 +29,7 @@ public:
 
 private:
 	DirectX::XMINT2 _viewPoint;
-	DirectX::XMUINT2 _viewSize;
+	DirectX::XMUINT4 _viewSize;
 	DirectX::XMUINT2 _viewBorder;
 
 	DirectX::XMUINT2 _cellSize;

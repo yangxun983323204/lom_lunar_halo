@@ -3,7 +3,6 @@
 #include "Game.h"
 #include "StringCodec.hpp"
 #include "../DirectXTK-main/Inc/Keyboard.h"
-#include "GUI/LayoutLoader.h"
 
 using DirectX::Keyboard;
 
@@ -22,7 +21,6 @@ void GameProcess::StartEnter()
         MessageBox(_game->GetDeviceResource()->GetWindow(), _W("加载map失败").c_str(), _W("测试map加载").c_str(), 0);
     }
 
-    _testUI = YX::GUI::LayoutLoader::Parse(_W(_game->GetSetting()->GetUILayoutDir() + "game.xml"));
 	_state = IProcess::State::Entered;
 }
 
@@ -30,7 +28,6 @@ void GameProcess::StartExit()
 {
     _state = IProcess::State::Exiting;
     _game->GetWorldRenderManager()->Clear();
-    _testUI = nullptr;
 	_state = IProcess::State::Exited;
 }
 
@@ -40,22 +37,22 @@ void GameProcess::Update(DX::StepTimer const& timer)
     if (state.IsKeyDown(Keyboard::Keys::A))
     {
         auto pos = _game->GetWorldRenderManager()->GetViewPoint();
-        pos.x -= 1;
+        pos.x -= 4;
         _game->GetWorldRenderManager()->SetViewPoint(pos);
     }
     else if (state.IsKeyDown(Keyboard::Keys::D)) {
         auto pos = _game->GetWorldRenderManager()->GetViewPoint();
-        pos.x += 1;
+        pos.x += 4;
         _game->GetWorldRenderManager()->SetViewPoint(pos);
     }
     else if (state.IsKeyDown(Keyboard::Keys::W)) {
         auto pos = _game->GetWorldRenderManager()->GetViewPoint();
-        pos.y += 1;
+        pos.y += 4;
         _game->GetWorldRenderManager()->SetViewPoint(pos);
     }
     else if (state.IsKeyDown(Keyboard::Keys::S)) {
         auto pos = _game->GetWorldRenderManager()->GetViewPoint();
-        pos.y -= 1;
+        pos.y -= 4;
         _game->GetWorldRenderManager()->SetViewPoint(pos);
     }
 }

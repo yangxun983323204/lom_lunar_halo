@@ -210,7 +210,7 @@ void Game::CreateDeviceDependentResources()
     // TODO: Initialize device dependent objects here (independent of window size).
     _batch.reset(new SpriteBatch{ m_deviceResources->GetD3DDeviceContext()});
     _mapSpriteManager = std::make_shared<WilSpriteManager>(device, _W(_setting->GetRootDir()));
-    _mapSpriteManager->SetCapacity(100);
+    _mapSpriteManager->SetCapacity(200);
     _worldRenderMgr = std::make_shared<MirWorldRenderManager>(m_deviceResources.get(), _mapSpriteManager);
     _procMgr = std::make_shared<ProcessManager>(this);
     _procMgr->StartEnter(_procMgr->GetLoginProcess());

@@ -16,11 +16,16 @@ Canvas::Canvas():
 
 Canvas::~Canvas()
 {
-	std::remove_if(_canvasList.begin(), _canvasList.end(), [this](Canvas* n)
+	auto s = std::find_if(_canvasList.begin(), _canvasList.end(), [this](Canvas* n)
 		{
 			return n == this;
 		}
 	);
+
+	if (s!= _canvasList.end())
+	{
+		_canvasList.erase(s);
+	}
 }
 
 void Canvas::Update(float deltaSec)
@@ -69,7 +74,7 @@ void Canvas::Foreach(function<void(shared_ptr<GUIElement>)> func)
 			func(n);
 
 		if (n->IsRoot())
-			continue;// 子canvas不由父canvas驱动更新
+			continue;
 		else
 		{
 			children = n->Children();
