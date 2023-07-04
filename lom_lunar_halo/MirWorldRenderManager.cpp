@@ -26,6 +26,8 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
     _mapData = mapData;
     _gridView->Init(Mir::CellW, Mir::CellH, _mapData->h(), _mapData->w());
     _gridView->GetView()->SetCellHideCallback([this](int x, int y) {
+        if (x < 0 || y < 0)
+            return;
         WilSpriteKey key = { (uint32_t)x,(uint32_t)y };
         WilSpriteKey bgKey = { (uint32_t)x / 2 * 2,(uint32_t)y / 2 * 2 };
         this->ReleaseSpriteRenderer(_bgUse, bgKey);
@@ -35,6 +37,8 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
         });
 
     _gridView->GetView()->SetCellShowCallback([this](int x, int y) {
+        if (x < 0 || y < 0)
+            return;
         //auto log = L"{" + std::to_wstring(x) + L"," + std::to_wstring(y) + L"}";
         //OutputDebugString(log.c_str());
 
@@ -45,6 +49,8 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
         });
 
     _gridView->GetView()->SetCellWillShowCallback([](int x, int y) {
+        if (x < 0 || y < 0)
+            return;
         });
 
     _gridView->GetView()->SetView(
