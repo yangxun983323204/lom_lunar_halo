@@ -58,8 +58,9 @@ public:
     // Properties
     void GetDefaultSize( int& width, int& height ) const noexcept;
     void GetCurrSize(int& width, int& height) const noexcept;
-    void SetWindowSize(int width, int height);
-
+    
+    inline void SetWindowAsLogin() { SetWindowSize(Mir::LoginLayoutW, Mir::LoginLayoutH); }
+    inline void SetWindowAsGame() { SetWindowSize(Mir::GameLayoutW, Mir::GameLayoutH); }
     inline std::shared_ptr<Setting> GetSetting() { return _setting; }
     inline DX::DeviceResources* GetDeviceResource() { return m_deviceResources.get(); }
     void DrawTexture(ID3D11ShaderResourceView* srv, RECT rect);
@@ -68,7 +69,7 @@ public:
     inline std::shared_ptr<WilSpriteManager> GetActorSpriteManager() { return _actorSpriteManager; }
     inline std::shared_ptr<WilSpriteManager> GetUiSpriteManager() { return _uiSpriteManager; }
 private:
-
+    void SetWindowSize(int width, int height);
     void Update(DX::StepTimer const& timer);
     void Render();
 

@@ -9,7 +9,7 @@ using DirectX::Keyboard;
 void GameProcess::StartEnter()
 {
     _state = IProcess::State::Entering;
-    _game->SetWindowSize(Mir::GameLayoutW, Mir::GameLayoutH);
+    _game->SetWindowAsGame();
     auto mapData = std::make_shared<MapData>();
     mapData->Load(_W(_game->GetSetting()->GetMapDir() + "0.map"));
     if (mapData->IsLoaded()) {

@@ -137,6 +137,7 @@ void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
     spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(key.x, key.y));
     spRender->Sprite = spriteHandle->GetSprite();
     spRender->Sprite.lock()->Pivot = { 0, 0 };
+    spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.push_back(spriteHandle);
 }
 
@@ -166,6 +167,7 @@ void MirWorldRenderManager::SetUpMid(WilSpriteKey key,int i, SpriteRenderLayer& 
         spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(key.x, key.y));
         spRender->Sprite = spriteHandle->GetSprite();
         spRender->Sprite.lock()->Pivot = { 0, 0 };
+        spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
         spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.push_back(spriteHandle);
     }
 }

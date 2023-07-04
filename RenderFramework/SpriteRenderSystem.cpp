@@ -46,14 +46,14 @@ void SpriteRenderSystem::RenderCamera(Camera* camera)
 		if (sa == sb) {
 			auto wposA = a->GetSceneNode()->GetWorldPosition();
 			auto wposB = b->GetSceneNode()->GetWorldPosition();
-			if (wposA.x == wposB.x) {
-				if (wposA.y == wposB.y)
+			if (wposA.y == wposB.y) {
+				if (wposA.x == wposB.x)
 					return dynamic_cast<SpriteRenderer*>(a)->Depth < dynamic_cast<SpriteRenderer*>(b)->Depth;
 				else
-					return wposA.y > wposB.y;
+					return wposA.x < wposB.x;
 			}
 			else
-				return wposA.x < wposB.x;
+				return wposA.y > wposB.y;
 		}
 		else
 			return sa < sb;

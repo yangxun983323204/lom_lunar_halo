@@ -11,7 +11,7 @@ using DirectX::Keyboard;
 
 void LoginProcess::StartEnter()
 {
-	_game->SetWindowSize(Mir::LoginLayoutW, Mir::LoginLayoutH);
+	_game->SetWindowAsLogin();
 	_testUI = YX::GUI::LayoutLoader::Parse(_W(_game->GetSetting()->GetUILayoutDir() + "login.xml"));
 	_state = IProcess::State::Entered;
 }

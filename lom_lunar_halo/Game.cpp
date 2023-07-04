@@ -198,6 +198,7 @@ void Game::SetWindowSize(int width, int height)
     RECT rc = { 0, 0, static_cast<LONG>(DPI_S(width)), static_cast<LONG>(DPI_S(height)) };
     AdjustWindowRect(&rc, style, FALSE);
     SetWindowPos(GetDeviceResource()->GetWindow(), 0, oldRc.left, oldRc.top, rc.right - rc.left, rc.bottom - rc.top, 0);
+    OnWindowSizeChanged(width, height);
 }
 #pragma endregion
 
