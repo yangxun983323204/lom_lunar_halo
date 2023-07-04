@@ -146,8 +146,13 @@ LABEL_RET:
 
 void WilSpriteManager::Impl::MakeSpace(uint32_t size)
 {
-	while(_lru.getSize()>0 && GetIdleSpace()<size)
+	if (GetIdleSpace() >= size)
+		return;
+
+	auto moreSpace = size * 20;
+	while (_lru.getSize() > 0 && GetIdleSpace() < moreSpace) {
 		_lru.removeLast();
+	}
 }
 
 void WilSpriteManager::Impl::NotifyFreeSpace(uint32_t size)

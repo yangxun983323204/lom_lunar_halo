@@ -86,14 +86,14 @@ public:
 		}
 	}
 
-	T2&& removeLast()
+	T2 removeLast()
 	{
 		CacheNode<T1, T2>* last = tail;
-		auto it = mp.find(tail->key);
-		remove(tail);
+		auto it = mp.find(last->key);
+		remove(last);
 		mp.erase(it);
 		auto t2 = last->value;
 		delete last;
-		return std::move(t2);
+		return t2;
 	}
 };

@@ -7,6 +7,7 @@
 #include "SceneManager.h"
 #include "WilSpriteManager.h"
 #include "../mir_lib/MapData.h"
+#include "StepTimer.h"
 
 using std::shared_ptr;
 using std::unique_ptr;
@@ -36,7 +37,8 @@ public:
 	void SetViewPoint(DirectX::XMINT2 coor);
 	SpriteRenderer* GetSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
 	void ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
-	inline void Render() { _renderSystem->Render(); }
+	void Update(DX::StepTimer const& timer);
+	void Render();
 	void Clear();
 
 private:
@@ -55,6 +57,7 @@ private:
 	DX::DeviceResources* _dr;
 	shared_ptr<MapData> _mapData;
 	unique_ptr<SceneManager> _sceneMgr;
+	unique_ptr<AnimatorSystem> _animatorSystem;
 	unique_ptr<SpriteRenderSystem> _renderSystem;
 	shared_ptr<WilSpriteManager> _spriteMgr;
 	shared_ptr<GridViewComponent> _gridView;

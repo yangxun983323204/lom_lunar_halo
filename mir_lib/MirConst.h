@@ -19,4 +19,9 @@ namespace Mir
 	const uint16_t GameLayoutH = 600;
 	const uint16_t GameLayoutWHalf = 400;// 必须为800*600，不然UI对应不上位置
 	const uint16_t GameLayoutHHalf = 300;
+
+	// Tile有8种动画帧间间隔
+	const uint16_t TileAnimSpanMs[]{
+		150,200,250,300,350,400,420,450
+	};
 }

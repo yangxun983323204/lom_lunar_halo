@@ -9,6 +9,7 @@ MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr, shared_ptr
     _bgUse{0,0}, _mid1Use{1,0}, _mid2Use{1,1}, _topUse{2,0}
 {
     _sceneMgr = std::make_unique<SceneManager>();
+    _animatorSystem = std::make_unique<AnimatorSystem>();
     _renderSystem = std::make_unique<SpriteRenderSystem>();
     auto clearFunc = std::bind(&MirWorldRenderManager::ClearScreen, this, std::placeholders::_1);
     _renderSystem->SetClearFunc(clearFunc);
@@ -90,6 +91,7 @@ SpriteRenderer* MirWorldRenderManager::GetSpriteRenderer(SpriteRenderLayer& use,
     else {
         sr = _sceneMgr->CreateSpriteNode()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
         sr->GetSceneNode()->AddComponent<SpriteHandleHolder>();
+        sr->GetSceneNode()->AddComponent<Animator>().lock()->Enable = false;
     }
 
     sr->SortLayer = use.Layer;
@@ -108,8 +110,19 @@ void MirWorldRenderManager::ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpr
     SpriteRenderer* sr = f->second;
     use.Record.erase(key);
     _pool.push_back(sr);
+    sr->GetSceneNode()->GetComponent<Animator>().lock()->Enable = false;
     sr->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
     sr->Enable = false;
+}
+
+void MirWorldRenderManager::Update(DX::StepTimer const& timer)
+{
+    _animatorSystem->Update(timer.GetTotalTicks() / 10000, timer.GetElapsedTicks() / 10000);
+}
+
+void MirWorldRenderManager::Render()
+{
+    _renderSystem->Render();
 }
 
 void MirWorldRenderManager::Clear()
@@ -128,8 +141,8 @@ void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
     auto tile = this->_mapData->TileAt(key.x, _mapData->h() - key.y);
     auto fileIdx = tile.FileIndex;
     int imgIdx = tile.TileIndex;
-    //if (tile.RemapFileIndex(imgIdx))
-    //    return;
+    /*if (!tile.RemapFileIndex(imgIdx))
+        return;*/
     auto spriteHandle = _spriteMgr->LoadSprite({ fileIdx, (uint32_t)imgIdx });
     if (!spriteHandle)
         return;
@@ -137,6 +150,7 @@ void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
     spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(key.x, key.y));
     spRender->Sprite = spriteHandle->GetSprite();
     spRender->Sprite.lock()->Pivot = { 0, 0 };
+    spRender->GetSceneNode()->GetComponent<Animator>().lock()->Enable = false;
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.push_back(spriteHandle);
 }
@@ -147,27 +161,55 @@ void MirWorldRenderManager::SetUpMid(WilSpriteKey key,int i, SpriteRenderLayer& 
     if (!cell.FileEnableOf(i))
         return;
 
+    auto spRender = this->GetSpriteRenderer(use, key);
+    spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(key.x, key.y));
+    spRender->GetSceneNode()->GetComponent<Animator>().lock()->Enable = false;
+    spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
+
     auto fileIdx = cell.FileIndexOf(i);
     auto imgIdx = cell.ImgIndexOf(i);
     auto blend = false;
     if (fileIdx > 2 && fileIdx < 14) {
         if (cell.HasDoor())
             imgIdx += cell.DoorImgIdx();
-        /*if (cell.HasAnimOf(i))
+
+        if (cell.HasAnimOf(i))
         {
             if (cell.ObjBlendOf(i))
                 blend = true;
-            imgIdx += _animTileState[cell.Obj1AnimTickType()][cell.Obj1AnimCount()];
-        }*/
+
+            auto animator = spRender->GetSceneNode()->GetComponent<Animator>().lock()->As<Animator>();
+            animator->Enable = true;
+            animator->Clear();
+            auto spHolder = spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>();
+            spHolder->holder.clear();
+            Animation anim{};
+
+            auto frameCount = cell.AnimCountOf(i);
+            auto animSpanMs = Mir::TileAnimSpanMs[cell.AnimTickTypeOf(i)];
+            for (short i = 0; i < frameCount; i++)
+            {
+                auto idx = imgIdx + i;
+                auto spriteHandle = _spriteMgr->LoadSprite({ fileIdx, (uint32_t)idx });
+                if (!spriteHandle) {
+                    anim.AddFrame({});
+                    continue;
+                }
+                spriteHandle->GetSprite()->Pivot = { 0, 0 };
+                anim.AddFrame(spriteHandle->GetSprite());
+                spHolder->holder.push_back(spriteHandle);
+            }
+            animator->Anims.push_back(anim);
+            animator->Current = &animator->Anims[0];
+            return;
+        }
         // 地表物体图片的原点是左下角,对齐的也是cell的左下角
         auto spriteHandle = _spriteMgr->LoadSprite({ fileIdx, (uint32_t)imgIdx });
         if (!spriteHandle)
             return;
-        auto spRender = this->GetSpriteRenderer(use, key);
-        spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(key.x, key.y));
+
         spRender->Sprite = spriteHandle->GetSprite();
         spRender->Sprite.lock()->Pivot = { 0, 0 };
-        spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
         spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.push_back(spriteHandle);
     }
 }

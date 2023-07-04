@@ -8,3 +8,6 @@
 #include "SpriteRenderSystem.h"
 #include "GridView.h"
 #include "GridViewComponent.hpp"
+#include "Animation.h"
+#include "Animator.h"
+#include "AnimatorSystem.h"

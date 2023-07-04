@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="Animator.h" />
+    <ClInclude Include="AnimatorSystem.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GridView.h" />
     <ClInclude Include="GridViewComponent.hpp" />
@@ -33,6 +36,9 @@
     <ClInclude Include="SpriteRenderSystem.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="Animator.cpp" />
+    <ClCompile Include="AnimatorSystem.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GridView.cpp" />
     <ClCompile Include="ISceneNodeComponent.cpp" />

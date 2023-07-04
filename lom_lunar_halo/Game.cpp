@@ -75,6 +75,8 @@ void Game::Update(DX::StepTimer const& timer)
     gKBTracker.Update(state);
     if (_procMgr)
         _procMgr->Update(timer);
+
+    _worldRenderMgr->Update(timer);
 }
 #pragma endregion
 
