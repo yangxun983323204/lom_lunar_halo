@@ -15,6 +15,7 @@ public:
 
 	DirectX::XMFLOAT4 Color = DirectX::XMFLOAT4{ 1,1,1,1 };
 	int SortLayer = 0;
+	int Depth = 0;
 	weak_ptr<Sprite> Sprite;
 };
 

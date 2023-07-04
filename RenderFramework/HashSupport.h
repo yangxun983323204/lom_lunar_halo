@@ -9,7 +9,7 @@ namespace std {
 	public:
 		size_t operator()(const DirectX::XMUINT2& sk) const
 		{
-			return hash<uint32_t>()(sk.x) ^ hash<uint32_t>()(sk.y);
+			return hash<uint32_t>()(sk.x*1000000) ^ hash<uint32_t>()(sk.y);
 		}
 	};
 

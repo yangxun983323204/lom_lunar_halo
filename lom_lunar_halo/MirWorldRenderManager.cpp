@@ -6,7 +6,7 @@
 
 MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr, shared_ptr<WilSpriteManager> spriteMgr):
     _dr{ dr }, _spriteMgr{spriteMgr},
-    _bgUse{0}, _mid1Use{1}, _mid2Use{2}, _topUse{3}
+    _bgUse{0,0}, _mid1Use{1,0}, _mid2Use{1,1}, _topUse{2,0}
 {
     _sceneMgr = std::make_unique<SceneManager>();
     _renderSystem = std::make_unique<SpriteRenderSystem>();
@@ -93,6 +93,7 @@ SpriteRenderer* MirWorldRenderManager::GetSpriteRenderer(SpriteRenderLayer& use,
     }
 
     sr->SortLayer = use.Layer;
+    sr->Depth = use.Depth;
     sr->Enable = true;
     use.Record[key] = sr;
     return sr;
@@ -139,7 +140,7 @@ void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.push_back(spriteHandle);
 }
 
-void MirWorldRenderManager::SetUpMid(WilSpriteKey key,int i, SpriteRenderLayer use)
+void MirWorldRenderManager::SetUpMid(WilSpriteKey key,int i, SpriteRenderLayer& use)
 {
     auto cell = this->_mapData->CellAt(key.x, _mapData->h() - key.y);
     if (!cell.FileEnableOf(i))

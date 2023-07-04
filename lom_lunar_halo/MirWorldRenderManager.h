@@ -21,11 +21,12 @@ public:
 	class SpriteRenderLayer
 	{
 	public:
-		SpriteRenderLayer(int layer) :
-			Layer{ layer }, Record{}
+		SpriteRenderLayer(int layer, int depth) :
+			Layer{ layer }, Depth{depth}, Record{}
 		{}
 
 		int Layer;
+		int Depth;
 		unordered_map<WilSpriteKey, SpriteRenderer*> Record;
 	};
 
@@ -40,7 +41,7 @@ public:
 
 private:
 	void SetUpBg(WilSpriteKey key);
-	void SetUpMid(WilSpriteKey key, int i, SpriteRenderLayer use);
+	void SetUpMid(WilSpriteKey key, int i, SpriteRenderLayer& use);
 
 	void ClearScreen(XMFLOAT4 color);
 	void Draw(ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, XMFLOAT4 color);

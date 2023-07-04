@@ -65,6 +65,8 @@ public:
     void DrawTexture(ID3D11ShaderResourceView* srv, RECT rect);
     inline std::shared_ptr<MirWorldRenderManager> GetWorldRenderManager() { return _worldRenderMgr; }
     inline std::shared_ptr<WilSpriteManager> GetMapSpriteManager() { return _mapSpriteManager; }
+    inline std::shared_ptr<WilSpriteManager> GetActorSpriteManager() { return _actorSpriteManager; }
+    inline std::shared_ptr<WilSpriteManager> GetUiSpriteManager() { return _uiSpriteManager; }
 private:
 
     void Update(DX::StepTimer const& timer);
@@ -86,6 +88,8 @@ private:
 
     std::shared_ptr<MirWorldRenderManager> _worldRenderMgr;
     std::shared_ptr<WilSpriteManager> _mapSpriteManager;
+    std::shared_ptr<WilSpriteManager> _actorSpriteManager;
+    std::shared_ptr<WilSpriteManager> _uiSpriteManager;
 
     std::shared_ptr<ProcessManager> _procMgr;
 };

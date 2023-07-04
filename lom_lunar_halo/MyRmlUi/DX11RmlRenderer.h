@@ -1,30 +1,57 @@
 #pragma once
+#pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"RmlCore.lib")
 
 #include "pch.h"
+#include <memory>
+#include <functional>
+#include <unordered_map>
+#include <wrl.h>
 #include "RmlUi/Core/RenderInterface.h"
 #include "../../DirectXTK-main/Inc/BufferHelpers.h"
+#include "../../DirectXTK-main/Inc/SimpleMath.h"
 
-using namespace Rml;
+using Microsoft::WRL::ComPtr;
+using std::unordered_map;
+using std::shared_ptr;
+using std::function;
 
+class SpriteResHandle;
 
 namespace YX {
+	// 加载图片功能强相关于应用资源管理，因此核心实现中开放外部注入实现
+	
+	// 从文件创建纹理
+	typedef function<bool(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source)> LoadTextureFunc;
+	// 从像素创建纹理
+	typedef function<bool(Rml::TextureHandle& texture_handle, const byte* source, const Rml::Vector2i& source_dimensions)> GenTextureFunc;
+	typedef function<void(Rml::TextureHandle texture)> ReleaseTextureFunc;
+	// 通过TextureHandle获取对应的SRV**
+	typedef function<ID3D11ShaderResourceView**(Rml::TextureHandle& texture_handle)> GetTextureFunc;
+
 	class DX11RmlRenderer : public Rml::RenderInterface
 	{
 	public:
 		DX11RmlRenderer(ID3D11Device* pDev, ID3D11DeviceContext* pCtx);
-		virtual void RenderGeometry(Vertex* vertices, int num_vertices, int* indices, int num_indices, TextureHandle texture, const Vector2f& translation);
-		virtual CompiledGeometryHandle CompileGeometry(Vertex* vertices, int num_vertices, int* indices, int num_indices, TextureHandle texture);
-		virtual void RenderCompiledGeometry(CompiledGeometryHandle geometry, const Vector2f& translation);
-		virtual void ReleaseCompiledGeometry(CompiledGeometryHandle geometry);
-		virtual void EnableScissorRegion(bool enable);
-		virtual void SetScissorRegion(int x, int y, int width, int height);
-		virtual bool LoadTexture(TextureHandle& texture_handle, Vector2i& texture_dimensions, const String& source);
-		virtual bool GenerateTexture(TextureHandle& texture_handle, const byte* source, const Vector2i& source_dimensions);
-		virtual void ReleaseTexture(TextureHandle texture);
-		virtual void SetTransform(const Matrix4f* transform);
+		virtual ~DX11RmlRenderer() override;
+
+		inline void SetLoadTextureFunc(LoadTextureFunc func) { _loadTexFunc = func; }
+		inline void SetGenTextureFunc(GenTextureFunc func) { _genTexFunc = func; }
+		inline void SetReleaseTextureFunc(ReleaseTextureFunc func) { _releaseTexFunc = func; }
+		inline void SetGetTextureFunc(GetTextureFunc func) { _getTexFunc = func; }
+		// RenderInterface的虚函数实现
+		virtual void RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture, const Rml::Vector2f& translation) override;
+		virtual Rml::CompiledGeometryHandle CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture) override;
+		virtual void RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry, const Rml::Vector2f& translation) override;
+		virtual void ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry) override;
+		virtual void EnableScissorRegion(bool enable) override;
+		virtual void SetScissorRegion(int x, int y, int width, int height) override;
+		virtual bool LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source) override;
+		virtual bool GenerateTexture(Rml::TextureHandle& texture_handle, const byte* source, const Rml::Vector2i& source_dimensions) override;
+		virtual void ReleaseTexture(Rml::TextureHandle texture) override;
+		virtual void SetTransform(const Rml::Matrix4f* transform) override;
 	protected:
-		struct GeometryData
+		class GeometryData
 		{
 		public:
 			Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
@@ -36,12 +63,18 @@ namespace YX {
 			DXGI_FORMAT indexFormat;
 
 			Rml::TextureHandle textureHandle;
-
-			GeometryData(ID3D11Device* device,const Vertex* vertices, size_t verticesSize, int* indices, size_t indicesSize, Rml::TextureHandle texture)
-				: vertexBuffer(nullptr), vertexStride(0), vertexCount(0), textureHandle(texture), indexBuffer(nullptr), indexCount(0), indexFormat(DXGI_FORMAT::DXGI_FORMAT_UNKNOWN)
+			GeometryData():
+				vertexBuffer{}, vertexStride(0), vertexCount(0),
+				indexBuffer{}, indexCount(0), indexFormat(DXGI_FORMAT::DXGI_FORMAT_UNKNOWN),
+				textureHandle{}
+			{}
+			GeometryData(ID3D11Device* device,const Rml::Vertex* vertices, int verticesSize, int* indices, int indicesSize, Rml::TextureHandle texture): 
+				vertexBuffer(nullptr), vertexStride(0), vertexCount(0), 
+				indexBuffer(nullptr), indexCount(0), indexFormat(DXGI_FORMAT::DXGI_FORMAT_UNKNOWN),
+				textureHandle(texture)
 			{
-				DirectX::CreateStaticBuffer(device, (const char*)vertices, verticesSize, sizeof(Vertex), D3D11_BIND_VERTEX_BUFFER, vertexBuffer.GetAddressOf());
-				vertexStride = sizeof(Vertex);
+				DirectX::CreateStaticBuffer(device, (const char*)vertices, verticesSize, sizeof(Rml::Vertex), D3D11_BIND_VERTEX_BUFFER, vertexBuffer.GetAddressOf());
+				vertexStride = sizeof(Rml::Vertex);
 				vertexCount = verticesSize;
 
 				DirectX::CreateStaticBuffer(device, (const char*)indices, indicesSize, sizeof(int), D3D11_BIND_INDEX_BUFFER, indexBuffer.GetAddressOf());
@@ -49,8 +82,38 @@ namespace YX {
 				indexFormat = DXGI_FORMAT_R32_UINT;
 			}
 		};
+
 	private:
+		void SetupShader();
+		void SetupState();
+		void SetupShaderRes();
+
+		HRESULT CompileShaderFromData(const void* data, int size, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
+
+		DirectX::SimpleMath::Matrix _transform;
+
 		ID3D11Device* _pDev;
 		ID3D11DeviceContext* _pCtx;
+		ComPtr<ID3D11VertexShader> _vs;
+		ComPtr<ID3D11PixelShader> _ps;
+		ComPtr<ID3D11InputLayout> _inputLayout;
+		ComPtr<ID3D11RasterizerState> _state;
+		ComPtr<ID3D11RasterizerState> _scissorState;
+		
+		DirectX::SimpleMath::Matrix _flip;
+		DirectX::SimpleMath::Matrix _world;
+		DirectX::SimpleMath::Matrix _viewProj;
+		ComPtr<ID3D11SamplerState> _sampler;
+		DirectX::ConstantBuffer<DirectX::XMMATRIX> _worldCB;
+		DirectX::ConstantBuffer<DirectX::XMMATRIX> _viewProjCB;
+
+		uint32_t _geometryIdGen;
+
+		unordered_map<uint32_t, GeometryData> _geometries;
+
+		LoadTextureFunc _loadTexFunc;
+		GenTextureFunc _genTexFunc;
+		ReleaseTextureFunc _releaseTexFunc;
+		GetTextureFunc _getTexFunc;
 	};
 }
