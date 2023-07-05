@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <wrl.h>
 #include "RmlUi/Core/RenderInterface.h"
-#include "../../DirectXTK-main/Inc/BufferHelpers.h"
-#include "../../DirectXTK-main/Inc/SimpleMath.h"
+#include "../DirectXTK-main/Inc/BufferHelpers.h"
+#include "../DirectXTK-main/Inc/SimpleMath.h"
 
 using Microsoft::WRL::ComPtr;
 using std::unordered_map;

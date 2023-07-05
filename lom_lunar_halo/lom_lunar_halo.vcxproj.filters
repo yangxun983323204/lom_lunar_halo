@@ -78,9 +78,6 @@
     <ClInclude Include="ProcessManager.h">
       <Filter>Process</Filter>
     </ClInclude>
-    <ClInclude Include="MyRmlUi\RmlUiUtility.h">
-      <Filter>RmlUI</Filter>
-    </ClInclude>
     <ClInclude Include="EventSystem.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -90,7 +87,10 @@
     <ClInclude Include="StringCodec.hpp">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="MyRmlUi\DX11RmlRenderer.h">
+    <ClInclude Include="DX11RmlRenderer.h">
+      <Filter>RmlUI</Filter>
+    </ClInclude>
+    <ClInclude Include="RmlUiUtility.h">
       <Filter>RmlUI</Filter>
     </ClInclude>
   </ItemGroup>
@@ -139,16 +139,16 @@
     <ClCompile Include="ProcessManager.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="MyRmlUi\RmlUiUtility.cpp">
-      <Filter>RmlUI</Filter>
-    </ClCompile>
     <ClCompile Include="EventSystem.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="tinyxml2.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="MyRmlUi\DX11RmlRenderer.cpp">
+    <ClCompile Include="DX11RmlRenderer.cpp">
+      <Filter>RmlUI</Filter>
+    </ClCompile>
+    <ClCompile Include="RmlUiUtility.cpp">
       <Filter>RmlUI</Filter>
     </ClCompile>
   </ItemGroup>

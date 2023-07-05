@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <unordered_map>
-#include "../Game.h"
+#include "Game.h"
 #include "DX11RmlRenderer.h"
 
 using std::unique_ptr;

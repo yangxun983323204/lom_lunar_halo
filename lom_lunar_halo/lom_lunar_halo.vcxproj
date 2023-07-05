@@ -184,6 +184,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DeviceResources.h" />
+    <ClInclude Include="DX11RmlRenderer.h" />
     <ClInclude Include="EventSystem.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameProcess.h" />
@@ -196,10 +197,9 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="LoginProcess.h" />
     <ClInclude Include="MirWorldRenderManager.h" />
-    <ClInclude Include="MyRmlUi\DX11RmlRenderer.h" />
-    <ClInclude Include="MyRmlUi\RmlUiUtility.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProcessManager.h" />
+    <ClInclude Include="RmlUiUtility.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SelectProcess.h" />
     <ClInclude Include="Setting.h" />
@@ -212,6 +212,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DeviceResources.cpp" />
+    <ClCompile Include="DX11RmlRenderer.cpp" />
     <ClCompile Include="EventSystem.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameProcess.cpp" />
@@ -223,8 +224,6 @@
     <ClCompile Include="LoginProcess.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MirWorldRenderManager.cpp" />
-    <ClCompile Include="MyRmlUi\DX11RmlRenderer.cpp" />
-    <ClCompile Include="MyRmlUi\RmlUiUtility.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -232,6 +231,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ProcessManager.cpp" />
+    <ClCompile Include="RmlUiUtility.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SelectProcess.cpp" />
     <ClCompile Include="Setting.cpp" />
