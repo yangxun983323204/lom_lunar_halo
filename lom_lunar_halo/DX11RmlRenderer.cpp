@@ -37,7 +37,7 @@ struct PS_INPUT
 	float4 position : SV_POSITION;
 	float4 color	: COLOR;
 	float2 uv		: TEXCOORD0;
-}
+};
 
 PS_INPUT VS(VS_INPUT input)
 {
@@ -61,26 +61,43 @@ DX11RmlRenderer::DX11RmlRenderer(ID3D11Device* pDev, ID3D11DeviceContext* pCtx):
 	_transform{},
 	_pDev{pDev}, _pCtx{pCtx},
 	_vs{}, _ps{}, _inputLayout{},
-	_state{}, _scissorState{},
+	_state{}, _scissorState{}, _depthState{}, _blendState{},
 	_flip{}, _world{}, _viewProj{}, _worldCB{ pDev }, _viewProjCB{ pDev },
 	_geometryIdGen{},
 	_geometries{},
 	_loadTexFunc{}, _genTexFunc{}, _releaseTexFunc{}
 {
-	D3D11_VIEWPORT vp;
-	pCtx->RSGetViewports(nullptr, &vp);
-	auto view = DirectX::SimpleMath::Matrix::CreateLookAt({ 0,0,-1 }, { 0,0,0 }, { 0,1,0 });
-	auto proj = DirectX::SimpleMath::Matrix::CreateOrthographic(vp.Width, vp.Height, 0.1, 10);
-	_viewProj = view * proj;
-	_flip = DirectX::SimpleMath::Matrix::CreateTranslation({ -vp.Width / 2, -vp.Height / 2, 0 }) *
-		DirectX::SimpleMath::Matrix::CreateScale({ 1,-1,1 });
-	_flip.Invert();
-	_viewProjCB.SetData(_pCtx, XMMatrixTranspose(_viewProj));
 	SetupShader();
 	SetupState();
 	SetupShaderRes();
 }
 YX::DX11RmlRenderer::~DX11RmlRenderer()
+{
+}
+void YX::DX11RmlRenderer::SetWindowSize(uint32_t width, uint32_t height)
+{
+	auto view = DirectX::SimpleMath::Matrix::CreateLookAt({ 0,0,-1 }, { 0,0,0 }, { 0,1,0 });
+	auto proj = DirectX::SimpleMath::Matrix::CreateOrthographic((float)width, (float)height, 0.1, 10);
+	_viewProj = view * proj;
+	_flip = DirectX::SimpleMath::Matrix::CreateTranslation({ -(float)width / 2, -(float)height / 2, 0 }) *
+		DirectX::SimpleMath::Matrix::CreateScale({ 1,-1,1 });
+	_flip.Invert();
+	_viewProjCB.SetData(_pCtx, XMMatrixTranspose(_viewProj));
+}
+void YX::DX11RmlRenderer::OnBeginRender()
+{
+	_pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	_pCtx->IASetInputLayout(_inputLayout.Get());
+	_pCtx->VSSetShader(_vs.Get(), 0, 0);
+	_pCtx->PSSetShader(_ps.Get(), 0, 0);
+	_pCtx->OMSetBlendState(_blendState.Get(), 0, 0xffffffff);
+	_pCtx->OMSetDepthStencilState(_depthState.Get(), 0);
+	_pCtx->PSSetSamplers(0, 1, _sampler.GetAddressOf());
+
+	auto vpCb = _viewProjCB.GetBuffer();
+	_pCtx->VSSetConstantBuffers(0, 1, &vpCb);
+}
+void YX::DX11RmlRenderer::OnEndRender()
 {
 }
 void DX11RmlRenderer::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture, const Rml::Vector2f& translation)
@@ -100,28 +117,24 @@ Rml::CompiledGeometryHandle DX11RmlRenderer::CompileGeometry(Rml::Vertex* vertic
 }
 void DX11RmlRenderer::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry, const Rml::Vector2f& translation)
 {
-	_pCtx->IASetInputLayout(_inputLayout.Get());
-	_pCtx->IASetVertexBuffers(0, 0, _geometries[geometry].vertexBuffer.GetAddressOf(), &_geometries[geometry].vertexStride, 0);
-	_pCtx->IASetIndexBuffer(_geometries[geometry].indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	auto g = _geometries[geometry];
+	_pCtx->IASetVertexBuffers(0, 0, g.vertexBuffer.GetAddressOf(), &g.vertexStride, 0);
+	_pCtx->IASetIndexBuffer(g.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	// set texture,sampler,constbuffer
 	if (_getTexFunc)
 	{
-		auto texSRV = _getTexFunc(_geometries[geometry].textureHandle);
+		auto texSRV = _getTexFunc(g.textureHandle);
 		if(texSRV)
 			_pCtx->PSSetShaderResources(0, 0, texSRV);
 	}
-	_pCtx->PSSetSamplers(0, 0, _sampler.GetAddressOf());
 	// 更新cbuffer
-	auto vpCb = _viewProjCB.GetBuffer();
-	_pCtx->VSSetConstantBuffers(0, 0, &vpCb);
-
 	_world = _flip * DirectX::SimpleMath::Matrix::CreateTranslation(translation.x, translation.y, 0);
 	_worldCB.SetData(_pCtx, XMMatrixTranspose(_world));// cpu是行主序，但是gpu是列主序。。。
 	_viewProjCB.SetData(_pCtx, XMMatrixTranspose(_viewProj));
 	auto wCb = _worldCB.GetBuffer();
-	_pCtx->VSSetConstantBuffers(1, 0, &wCb);
+	_pCtx->VSSetConstantBuffers(1, 1, &wCb);
 	//
-	_pCtx->DrawIndexed(_geometries[geometry].indexCount, 0, 0);
+	_pCtx->DrawIndexed(g.indexCount, 0, 0);
 }
 void DX11RmlRenderer::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
 {
@@ -206,7 +219,7 @@ void YX::DX11RmlRenderer::SetupShader()
 
 	{
 		ComPtr<ID3DBlob> psBlob = nullptr;
-		auto hr = CompileShaderFromData(SHADER_STRING.c_str(), SHADER_STRING.size(), "PS", "vs_4_0", psBlob.GetAddressOf());
+		auto hr = CompileShaderFromData(SHADER_STRING.c_str(), SHADER_STRING.size(), "PS", "ps_4_0", psBlob.GetAddressOf());
 		if (FAILED(hr))
 		{
 			MessageBox(nullptr,
@@ -222,6 +235,29 @@ void YX::DX11RmlRenderer::SetupShader()
 
 void YX::DX11RmlRenderer::SetupState()
 {
+	D3D11_BLEND_DESC blendDesc{};
+	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	_pDev->CreateBlendState(&blendDesc, _blendState.GetAddressOf());
+
+	D3D11_DEPTH_STENCIL_DESC dsDesc{};
+	dsDesc.DepthEnable = false;
+	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ZERO;
+	dsDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_ALWAYS;
+	dsDesc.StencilEnable = false;
+	dsDesc.StencilReadMask = 0;
+	dsDesc.StencilWriteMask = 0;
+	dsDesc.FrontFace = {};
+	dsDesc.BackFace = {};
+	_pDev->CreateDepthStencilState(&dsDesc, _depthState.GetAddressOf());
+
 	D3D11_RASTERIZER_DESC rsDesc{};
 	rsDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
 	rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;

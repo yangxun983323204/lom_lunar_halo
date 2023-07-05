@@ -90,7 +90,10 @@
     <ClInclude Include="DX11RmlRenderer.h">
       <Filter>RmlUI</Filter>
     </ClInclude>
-    <ClInclude Include="RmlUiUtility.h">
+    <ClInclude Include="RmlUiAdapter.h">
+      <Filter>RmlUI</Filter>
+    </ClInclude>
+    <ClInclude Include="RmlUi_Platform_Win32.h">
       <Filter>RmlUI</Filter>
     </ClInclude>
   </ItemGroup>
@@ -148,7 +151,10 @@
     <ClCompile Include="DX11RmlRenderer.cpp">
       <Filter>RmlUI</Filter>
     </ClCompile>
-    <ClCompile Include="RmlUiUtility.cpp">
+    <ClCompile Include="RmlUiAdapter.cpp">
+      <Filter>RmlUI</Filter>
+    </ClCompile>
+    <ClCompile Include="RmlUi_Platform_Win32.cpp">
       <Filter>RmlUI</Filter>
     </ClCompile>
   </ItemGroup>

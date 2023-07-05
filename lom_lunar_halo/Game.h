@@ -15,6 +15,7 @@
 #include "WilSpriteManager.h"
 #include "SpriteHandleHolder.hpp"
 #include "ProcessManager.h"
+#include "RmlUiAdapter.h"
 
 using namespace Mir;
 
@@ -68,6 +69,7 @@ public:
     inline std::shared_ptr<WilSpriteManager> GetMapSpriteManager() { return _mapSpriteManager; }
     inline std::shared_ptr<WilSpriteManager> GetActorSpriteManager() { return _actorSpriteManager; }
     inline std::shared_ptr<WilSpriteManager> GetUiSpriteManager() { return _uiSpriteManager; }
+    inline std::shared_ptr<YX::RmlUiAdapter> GetRmlUiAdapter() { return _rmlUiAdapter; }
 private:
     void SetWindowSize(int width, int height);
     void Update(DX::StepTimer const& timer);
@@ -92,5 +94,6 @@ private:
     std::shared_ptr<WilSpriteManager> _uiSpriteManager;
     std::shared_ptr<MirWorldRenderManager> _worldRenderMgr;
 
+    std::shared_ptr<YX::RmlUiAdapter> _rmlUiAdapter;
     std::shared_ptr<ProcessManager> _procMgr;
 };

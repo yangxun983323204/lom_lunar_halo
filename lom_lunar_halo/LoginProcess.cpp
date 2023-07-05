@@ -6,6 +6,7 @@
 #include "Game.h"
 #include "GUI/LayoutLoader.h"
 #include "StringCodec.hpp"
+#include "RmlUiAdapter.h"
 
 using DirectX::Keyboard;
 
@@ -13,6 +14,8 @@ void LoginProcess::StartEnter()
 {
 	_game->SetWindowAsLogin();
 	_testUI = YX::GUI::LayoutLoader::Parse(_W(_game->GetSetting()->GetUILayoutDir() + "login.xml"));
+	string rmlPath = _game->GetSetting()->GetUILayoutDir() + "hello_world.rml";
+	_game->GetRmlUiAdapter()->GetContext()->LoadDocument(rmlPath)->Show();
 	_state = IProcess::State::Entered;
 }
 

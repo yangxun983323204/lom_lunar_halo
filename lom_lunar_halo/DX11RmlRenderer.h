@@ -35,10 +35,14 @@ namespace YX {
 		DX11RmlRenderer(ID3D11Device* pDev, ID3D11DeviceContext* pCtx);
 		virtual ~DX11RmlRenderer() override;
 
+		void SetWindowSize(uint32_t width, uint32_t height);
 		inline void SetLoadTextureFunc(LoadTextureFunc func) { _loadTexFunc = func; }
 		inline void SetGenTextureFunc(GenTextureFunc func) { _genTexFunc = func; }
 		inline void SetReleaseTextureFunc(ReleaseTextureFunc func) { _releaseTexFunc = func; }
 		inline void SetGetTextureFunc(GetTextureFunc func) { _getTexFunc = func; }
+		//
+		void OnBeginRender();
+		void OnEndRender();
 		// RenderInterface的虚函数实现
 		virtual void RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture, const Rml::Vector2f& translation) override;
 		virtual Rml::CompiledGeometryHandle CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture) override;
@@ -69,17 +73,15 @@ namespace YX {
 				textureHandle{}
 			{}
 			GeometryData(ID3D11Device* device,const Rml::Vertex* vertices, int verticesSize, int* indices, int indicesSize, Rml::TextureHandle texture): 
-				vertexBuffer(nullptr), vertexStride(0), vertexCount(0), 
-				indexBuffer(nullptr), indexCount(0), indexFormat(DXGI_FORMAT::DXGI_FORMAT_UNKNOWN),
+				vertexBuffer(nullptr), vertexStride(0), vertexCount(verticesSize),
+				indexBuffer(nullptr), indexCount(indicesSize), indexFormat(DXGI_FORMAT::DXGI_FORMAT_UNKNOWN),
 				textureHandle(texture)
 			{
 				DirectX::CreateStaticBuffer(device, (const char*)vertices, verticesSize, sizeof(Rml::Vertex), D3D11_BIND_VERTEX_BUFFER, vertexBuffer.GetAddressOf());
 				vertexStride = sizeof(Rml::Vertex);
-				vertexCount = verticesSize;
 
 				DirectX::CreateStaticBuffer(device, (const char*)indices, indicesSize, sizeof(int), D3D11_BIND_INDEX_BUFFER, indexBuffer.GetAddressOf());
-				indexCount = indicesSize;
-				indexFormat = DXGI_FORMAT_R32_UINT;
+				indexFormat = DXGI_FORMAT_R32_SINT;
 			}
 		};
 
@@ -99,6 +101,8 @@ namespace YX {
 		ComPtr<ID3D11InputLayout> _inputLayout;
 		ComPtr<ID3D11RasterizerState> _state;
 		ComPtr<ID3D11RasterizerState> _scissorState;
+		ComPtr<ID3D11DepthStencilState> _depthState;
+		ComPtr<ID3D11BlendState> _blendState;
 		
 		DirectX::SimpleMath::Matrix _flip;
 		DirectX::SimpleMath::Matrix _world;

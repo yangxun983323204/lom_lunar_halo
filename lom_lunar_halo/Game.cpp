@@ -77,6 +77,7 @@ void Game::Update(DX::StepTimer const& timer)
         _procMgr->Update(timer);
 
     _worldRenderMgr->Update(timer);
+    _rmlUiAdapter->Update();
 }
 #pragma endregion
 
@@ -101,6 +102,7 @@ void Game::Render()
     YX::GUI::Canvas::DrawAll();
     _batch->End();
 
+    _rmlUiAdapter->Render();
     m_deviceResources->PIXEndEvent();
 
     // Show the new frame.
@@ -172,6 +174,7 @@ void Game::OnWindowSizeChanged(int width, int height)
     CreateWindowSizeDependentResources();
 
     // TODO: Game window is being resized.
+    _rmlUiAdapter->OnWindowSizeChanged(width, height);
 }
 
 // Properties
@@ -219,6 +222,8 @@ void Game::CreateDeviceDependentResources()
     _uiSpriteManager = std::make_shared<WilSpriteManager>(device, _W(_setting->GetRootDir()));
     _uiSpriteManager->SetCapacity(50);
     _worldRenderMgr = std::make_shared<MirWorldRenderManager>(m_deviceResources.get(), _mapSpriteManager);
+    
+    _rmlUiAdapter = std::make_shared<YX::RmlUiAdapter>(this);
     _procMgr = std::make_shared<ProcessManager>(this);
     _procMgr->StartEnter(_procMgr->GetLoginProcess());
 }
