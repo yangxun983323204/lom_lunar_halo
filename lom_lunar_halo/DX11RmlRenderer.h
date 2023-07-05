@@ -37,7 +37,7 @@ namespace YX {
 
 		void SetWindowSize(uint32_t width, uint32_t height);
 		inline void SetLoadTextureFunc(LoadTextureFunc func) { _loadTexFunc = func; }
-		inline void SetGenTextureFunc(GenTextureFunc func) { _genTexFunc = func; }
+		void SetGenTextureFunc(GenTextureFunc func);
 		inline void SetReleaseTextureFunc(ReleaseTextureFunc func) { _releaseTexFunc = func; }
 		inline void SetGetTextureFunc(GetTextureFunc func) { _getTexFunc = func; }
 		//
@@ -77,11 +77,11 @@ namespace YX {
 				indexBuffer(nullptr), indexCount(indicesSize), indexFormat(DXGI_FORMAT::DXGI_FORMAT_UNKNOWN),
 				textureHandle(texture)
 			{
-				DirectX::CreateStaticBuffer(device, (const char*)vertices, verticesSize, sizeof(Rml::Vertex), D3D11_BIND_VERTEX_BUFFER, vertexBuffer.GetAddressOf());
+				DirectX::CreateStaticBuffer(device, (const void*)vertices, verticesSize, sizeof(Rml::Vertex), D3D11_BIND_VERTEX_BUFFER, vertexBuffer.GetAddressOf());
 				vertexStride = sizeof(Rml::Vertex);
 
-				DirectX::CreateStaticBuffer(device, (const char*)indices, indicesSize, sizeof(int), D3D11_BIND_INDEX_BUFFER, indexBuffer.GetAddressOf());
-				indexFormat = DXGI_FORMAT_R32_SINT;
+				DirectX::CreateStaticBuffer(device, (const void*)indices, indicesSize, sizeof(int), D3D11_BIND_INDEX_BUFFER, indexBuffer.GetAddressOf());
+				indexFormat = DXGI_FORMAT_R32_UINT;
 			}
 		};
 
@@ -99,21 +99,24 @@ namespace YX {
 		ComPtr<ID3D11VertexShader> _vs;
 		ComPtr<ID3D11PixelShader> _ps;
 		ComPtr<ID3D11InputLayout> _inputLayout;
-		ComPtr<ID3D11RasterizerState> _state;
-		ComPtr<ID3D11RasterizerState> _scissorState;
+		ComPtr<ID3D11RasterizerState> _rsState;
+		ComPtr<ID3D11RasterizerState> _srScissorState;
 		ComPtr<ID3D11DepthStencilState> _depthState;
 		ComPtr<ID3D11BlendState> _blendState;
+		uint32_t _width;
+		uint32_t _height;
 		
-		DirectX::SimpleMath::Matrix _flip;
 		DirectX::SimpleMath::Matrix _world;
 		DirectX::SimpleMath::Matrix _viewProj;
 		ComPtr<ID3D11SamplerState> _sampler;
 		DirectX::ConstantBuffer<DirectX::XMMATRIX> _worldCB;
 		DirectX::ConstantBuffer<DirectX::XMMATRIX> _viewProjCB;
 
+		Rml::TextureHandle _whiteTex;
+
 		uint32_t _geometryIdGen;
 
-		unordered_map<uint32_t, GeometryData> _geometries;
+		unordered_map<uint32_t, shared_ptr<GeometryData>> _geometries;
 
 		LoadTextureFunc _loadTexFunc;
 		GenTextureFunc _genTexFunc;

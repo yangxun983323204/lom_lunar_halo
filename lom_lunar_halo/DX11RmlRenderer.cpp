@@ -61,8 +61,9 @@ DX11RmlRenderer::DX11RmlRenderer(ID3D11Device* pDev, ID3D11DeviceContext* pCtx):
 	_transform{},
 	_pDev{pDev}, _pCtx{pCtx},
 	_vs{}, _ps{}, _inputLayout{},
-	_state{}, _scissorState{}, _depthState{}, _blendState{},
-	_flip{}, _world{}, _viewProj{}, _worldCB{ pDev }, _viewProjCB{ pDev },
+	_rsState{}, _srScissorState{}, _depthState{}, _blendState{},
+	_width{}, _height{},
+	_world{}, _viewProj{}, _worldCB{ pDev }, _viewProjCB{ pDev },
 	_geometryIdGen{},
 	_geometries{},
 	_loadTexFunc{}, _genTexFunc{}, _releaseTexFunc{}
@@ -76,24 +77,43 @@ YX::DX11RmlRenderer::~DX11RmlRenderer()
 }
 void YX::DX11RmlRenderer::SetWindowSize(uint32_t width, uint32_t height)
 {
-	auto view = DirectX::SimpleMath::Matrix::CreateLookAt({ 0,0,-1 }, { 0,0,0 }, { 0,1,0 });
-	auto proj = DirectX::SimpleMath::Matrix::CreateOrthographic((float)width, (float)height, 0.1, 10);
+	_width = width;
+	_height = height;
+	auto view = DirectX::SimpleMath::Matrix::CreateLookAt({ 0,0,-10 }, { 0,0,1 }, { 0,1,0 });
+	auto proj = DirectX::SimpleMath::Matrix::CreateOrthographic((float)width, (float)height, 0.1, 100);
 	_viewProj = view * proj;
-	_flip = DirectX::SimpleMath::Matrix::CreateTranslation({ -(float)width / 2, -(float)height / 2, 0 }) *
-		DirectX::SimpleMath::Matrix::CreateScale({ 1,-1,1 });
-	_flip.Invert();
 	_viewProjCB.SetData(_pCtx, XMMatrixTranspose(_viewProj));
+
+	_world = DirectX::SimpleMath::Matrix::CreateScale({ 1,-1,1 }) * DirectX::SimpleMath::Matrix::CreateTranslation({ -(float)width / 2, (float)height / 2, 0 });
+}
+void YX::DX11RmlRenderer::SetGenTextureFunc(GenTextureFunc func)
+{
+	_genTexFunc = func;
+	if (_genTexFunc)
+	{
+		byte px[] = { 255,255,255,255 };
+		auto s = _genTexFunc(_whiteTex, px, { 1,1 });
+	}
 }
 void YX::DX11RmlRenderer::OnBeginRender()
 {
 	_pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	_pCtx->IASetInputLayout(_inputLayout.Get());
-	_pCtx->VSSetShader(_vs.Get(), 0, 0);
-	_pCtx->PSSetShader(_ps.Get(), 0, 0);
+	_pCtx->VSSetShader(_vs.Get(), nullptr, 0);
+	_pCtx->PSSetShader(_ps.Get(), nullptr, 0);
 	_pCtx->OMSetBlendState(_blendState.Get(), 0, 0xffffffff);
 	_pCtx->OMSetDepthStencilState(_depthState.Get(), 0);
 	_pCtx->PSSetSamplers(0, 1, _sampler.GetAddressOf());
+	D3D11_VIEWPORT viewport{};
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = _width;
+	viewport.Height = _height;
+	viewport.MinDepth = 0;
+	viewport.MaxDepth = 1;
+	_pCtx->RSSetViewports(1, &viewport);
 
+	_viewProjCB.SetData(_pCtx, XMMatrixTranspose(_viewProj));
 	auto vpCb = _viewProjCB.GetBuffer();
 	_pCtx->VSSetConstantBuffers(0, 1, &vpCb);
 }
@@ -106,7 +126,7 @@ void DX11RmlRenderer::RenderGeometry(Rml::Vertex* vertices, int num_vertices, in
 }
 Rml::CompiledGeometryHandle DX11RmlRenderer::CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture)
 {
-	GeometryData geometry = { _pDev, vertices, num_vertices, indices, num_indices, texture };
+	auto geometry = std::make_shared<GeometryData>( _pDev, vertices, num_vertices, indices, num_indices, texture );
 	++_geometryIdGen;
 	if (_geometryIdGen == 0)
 		_geometryIdGen = 1;
@@ -117,24 +137,31 @@ Rml::CompiledGeometryHandle DX11RmlRenderer::CompileGeometry(Rml::Vertex* vertic
 }
 void DX11RmlRenderer::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry, const Rml::Vector2f& translation)
 {
-	auto g = _geometries[geometry];
-	_pCtx->IASetVertexBuffers(0, 0, g.vertexBuffer.GetAddressOf(), &g.vertexStride, 0);
-	_pCtx->IASetIndexBuffer(g.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	auto s = _geometries.find(geometry);
+	if (s == _geometries.end())
+		return;
+	auto g = s->second;
+	ID3D11Buffer* const* addr = g->vertexBuffer.GetAddressOf();
+	constexpr UINT vertexOffset = 0;
+	_pCtx->IASetVertexBuffers(0, 1, addr, &g->vertexStride, &vertexOffset);
+	_pCtx->IASetIndexBuffer(g->indexBuffer.Get(), g->indexFormat, 0);
 	// set texture,sampler,constbuffer
 	if (_getTexFunc)
 	{
-		auto texSRV = _getTexFunc(g.textureHandle);
+		auto* const* texSRV = _getTexFunc(g->textureHandle);
 		if(texSRV)
-			_pCtx->PSSetShaderResources(0, 0, texSRV);
+			_pCtx->PSSetShaderResources(0, 1, texSRV);
+		else
+			_pCtx->PSSetShaderResources(0, 1, _getTexFunc(_whiteTex));
 	}
-	// 更新cbuffer
-	_world = _flip * DirectX::SimpleMath::Matrix::CreateTranslation(translation.x, translation.y, 0);
-	_worldCB.SetData(_pCtx, XMMatrixTranspose(_world));// cpu是行主序，但是gpu是列主序。。。
-	_viewProjCB.SetData(_pCtx, XMMatrixTranspose(_viewProj));
+	// 更新 world cbuffer
+	auto t = DirectX::SimpleMath::Matrix::CreateTranslation(translation.x, translation.y, 0);
+	auto w = t * _transform * _world;
+	_worldCB.SetData(_pCtx, XMMatrixTranspose(w));// cpu是行主序，但是gpu是列主序。。。
 	auto wCb = _worldCB.GetBuffer();
 	_pCtx->VSSetConstantBuffers(1, 1, &wCb);
 	//
-	_pCtx->DrawIndexed(g.indexCount, 0, 0);
+	_pCtx->DrawIndexed(g->indexCount, 0, 0);
 }
 void DX11RmlRenderer::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry)
 {
@@ -146,7 +173,7 @@ void DX11RmlRenderer::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geomet
 }
 void DX11RmlRenderer::EnableScissorRegion(bool enable)
 {
-	_pCtx->RSSetState(enable ? _scissorState.Get() : _state.Get());
+	_pCtx->RSSetState(enable ? _srScissorState.Get() : _rsState.Get());
 }
 void DX11RmlRenderer::SetScissorRegion(int x, int y, int width, int height)
 {
@@ -208,8 +235,8 @@ void YX::DX11RmlRenderer::SetupShader()
 
 		D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 			{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,		0, 0,	D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"COLOR",	 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 8,	D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,		0, 20,	D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"COLOR",	 0, DXGI_FORMAT_R8G8B8A8_UNORM,		0, 8,	D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,		0, 12,	D3D11_INPUT_PER_VERTEX_DATA, 0},
 		};
 
 		_pDev->CreateInputLayout(inputDesc, 3, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), _inputLayout.GetAddressOf());
@@ -237,40 +264,42 @@ void YX::DX11RmlRenderer::SetupState()
 {
 	D3D11_BLEND_DESC blendDesc{};
 	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
-	blendDesc.RenderTarget[0].BlendEnable = true;
-	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
 	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	_pDev->CreateBlendState(&blendDesc, _blendState.GetAddressOf());
 
 	D3D11_DEPTH_STENCIL_DESC dsDesc{};
-	dsDesc.DepthEnable = false;
+	dsDesc.DepthEnable = FALSE;
 	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ZERO;
-	dsDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_ALWAYS;
-	dsDesc.StencilEnable = false;
-	dsDesc.StencilReadMask = 0;
-	dsDesc.StencilWriteMask = 0;
-	dsDesc.FrontFace = {};
-	dsDesc.BackFace = {};
+	dsDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+	dsDesc.StencilEnable = FALSE;
+	dsDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+	dsDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+	dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	dsDesc.BackFace = dsDesc.FrontFace;
 	_pDev->CreateDepthStencilState(&dsDesc, _depthState.GetAddressOf());
 
 	D3D11_RASTERIZER_DESC rsDesc{};
 	rsDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
-	rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
-	rsDesc.FrontCounterClockwise = true;
-	rsDesc.DepthClipEnable = true;
-	rsDesc.ScissorEnable = false;
-	rsDesc.MultisampleEnable = true;
+	rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
+	rsDesc.DepthClipEnable = TRUE;
+	rsDesc.ScissorEnable = FALSE;
+	rsDesc.MultisampleEnable = TRUE;
 
 	D3D11_RASTERIZER_DESC rsScissorDesc = rsDesc;
-	rsDesc.ScissorEnable = true;
+	rsDesc.ScissorEnable = TRUE;
 
-	_pDev->CreateRasterizerState(&rsDesc, _state.GetAddressOf());
-	_pDev->CreateRasterizerState(&rsScissorDesc, _scissorState.GetAddressOf());
+	_pDev->CreateRasterizerState(&rsDesc, _rsState.GetAddressOf());
+	_pDev->CreateRasterizerState(&rsScissorDesc, _srScissorState.GetAddressOf());
 }
 
 void YX::DX11RmlRenderer::SetupShaderRes()

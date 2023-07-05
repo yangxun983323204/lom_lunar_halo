@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "RmlUiAdapter.h"
 #include "RmlUi/Core.h"
+#include "../deps/RmlUi-vs2017-win64/Include/RmlUi/Debugger.h"
 #include <sstream>
 #include <vector>
 #include <functional>
@@ -22,11 +23,11 @@ RmlUiAdapter::RmlUiAdapter(Game* game):
 	//MySystemInterface system_interface;
 	auto dr = game->GetDeviceResource();
 	_renderer = std::make_unique<DX11RmlRenderer>(dr->GetD3DDevice(), dr->GetD3DDeviceContext());
-	_renderer->SetWindowSize(DPI_S(w), DPI_S(h));
 	_renderer->SetLoadTextureFunc(std::bind(&RmlUiAdapter::LoadTexture, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	_renderer->SetGenTextureFunc(std::bind(&RmlUiAdapter::GenTexture, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	_renderer->SetReleaseTextureFunc(std::bind(&RmlUiAdapter::ReleaseTexture, this, std::placeholders::_1));
 	_renderer->SetGetTextureFunc(std::bind(&RmlUiAdapter::GetTexture, this, std::placeholders::_1));
+	_renderer->SetWindowSize(DPI_S(w), DPI_S(h));
 
 	_system = std::make_unique<SystemInterface_Win32>();
 	_system->SetWindow(dr->GetWindow());
@@ -47,6 +48,8 @@ RmlUiAdapter::RmlUiAdapter(Game* game):
 		Rml::Shutdown();
 		throw L"Rml::CreateContext失败";
 	}
+	Rml::Debugger::Initialise(_rmlCtx);
+	Rml::Debugger::SetVisible(true);
 	Rml::LoadFontFace("./font/NotoEmoji-Regular.ttf");
 	Rml::LoadFontFace("./font/LatoLatin-Bold.ttf");
 	Rml::LoadFontFace("./font/LatoLatin-BoldItalic.ttf");
@@ -118,6 +121,8 @@ bool YX::RmlUiAdapter::GenTexture(Rml::TextureHandle& texture_handle, const byte
 		(const D3D11_SUBRESOURCE_DATA)subData,
 		nullptr, sp->TextureSRV.GetAddressOf()));
 
+	sp->Pivot = { 0,0 };
+	sp->Rect = { 0,0,source_dimensions.x, source_dimensions.y };
 	texture_handle = ++_textureIdGen;
 	_dynamicTextures[texture_handle] = sp;
 

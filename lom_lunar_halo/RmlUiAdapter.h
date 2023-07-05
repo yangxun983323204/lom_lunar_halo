@@ -1,4 +1,6 @@
 #pragma once
+#pragma comment(lib,"RmlDebugger.lib")
+
 #include <memory>
 #include <unordered_map>
 #include "../deps/RmlUi-vs2017-win64/Include/RmlUi/Core/Context.h"
