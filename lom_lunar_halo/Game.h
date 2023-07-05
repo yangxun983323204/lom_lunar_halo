@@ -87,10 +87,10 @@ private:
     std::shared_ptr<Setting> _setting;
     std::unique_ptr<DirectX::SpriteBatch> _batch;
 
-    std::shared_ptr<MirWorldRenderManager> _worldRenderMgr;
-    std::shared_ptr<WilSpriteManager> _mapSpriteManager;
+    std::shared_ptr<WilSpriteManager> _mapSpriteManager; // SpriteManager需要比RenderManager后析构
     std::shared_ptr<WilSpriteManager> _actorSpriteManager;
     std::shared_ptr<WilSpriteManager> _uiSpriteManager;
+    std::shared_ptr<MirWorldRenderManager> _worldRenderMgr;
 
     std::shared_ptr<ProcessManager> _procMgr;
 };
