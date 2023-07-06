@@ -18,7 +18,7 @@ using std::string;
 class WilSpriteManager::Impl
 {
 public:
-	Impl(ID3D11Device* dev, wstring dir, WilSpriteManager* parent);
+	Impl(ID3D11Device* dev, string dir, WilSpriteManager* parent);
 	~Impl();
 	void SetCapacity(uint32_t sizeMb);
 	void PreloadSprite(WilSpriteKey key);
@@ -26,20 +26,21 @@ public:
 	void MakeSpace(uint32_t size);
 	void NotifyFreeSpace(uint32_t size);
 	inline uint32_t GetIdleSpace() { return _currentSize >= _capacitySize ? 0 : _capacitySize - _currentSize; }
+	uint32_t GetFileId(string name);
 private:
 	shared_ptr<SpriteResHandle> Find(WilSpriteKey key);
 
-	wstring _dir;
+	string _dir;
 	WilSpriteManager* _parent;
 	ID3D11Device* _dev;
 	LRUCache<WilSpriteKey, shared_ptr<SpriteResHandle>> _lru;
 	uint32_t _capacitySize;
 	uint32_t _currentSize;
-	unordered_map<uint32_t, wstring> _fileMap;
+	unordered_map<uint32_t, string> _fileMap;
 	unordered_map<uint32_t, ImageLib*> _imgLibs;
 };
 
-WilSpriteManager::Impl::Impl(ID3D11Device* dev, wstring dir, WilSpriteManager* parent) :
+WilSpriteManager::Impl::Impl(ID3D11Device* dev, string dir, WilSpriteManager* parent) :
 	_dir{dir}, _parent{ parent }, _dev{ dev },
 	_lru{ INT_MAX }, _capacitySize{ 0 }, _currentSize{ 0 },
 	_imgLibs{}
@@ -56,7 +57,7 @@ WilSpriteManager::Impl::Impl(ID3D11Device* dev, wstring dir, WilSpriteManager* p
 		int i = 0;
 		for (auto record : jObj) {
 			string r = record;
-			_fileMap[i] = _W(r.substr(2));
+			_fileMap[i] = r.substr(2);
 			++i;
 		}
 	}
@@ -82,7 +83,7 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 {
 	auto fileId = key.x;
 	auto imgId = key.y;
-	unordered_map<uint32_t, wstring>::iterator fileRecord;
+	unordered_map<uint32_t, string>::iterator fileRecord;
 	shared_ptr<SpriteResHandle> handle = Find(key);
 	if (handle)
 		goto LABEL_RET;
@@ -102,11 +103,11 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 		}
 		else {
 			imgLib = new ImageLib();
-			imgLib->Open(_dir + fileRecord->second);
+			imgLib->Open(_W(_dir + fileRecord->second));
 			_imgLibs[fileRecord->first] = imgLib;
 		}
 
-		if (!imgLib->IsOpened() || imgLib->GetCount() <= imgId || imgId < 0) {
+		if (!imgLib->IsOpened() || !imgLib->ImageValid(imgId)) {
 			handle = {};
 			goto LABEL_RET;
 		}
@@ -163,6 +164,18 @@ void WilSpriteManager::Impl::NotifyFreeSpace(uint32_t size)
 		_currentSize -= size;
 }
 
+uint32_t WilSpriteManager::Impl::GetFileId(string name)
+{
+	for (auto kv : _fileMap) {
+		if (kv.second == name)
+			return kv.first;
+	}
+	// 没有记录的文件，添加进来
+	const uint32_t id = _fileMap.size();
+	_fileMap.insert({ id, name });
+	return id;
+}
+
 shared_ptr<SpriteResHandle> WilSpriteManager::Impl::Find(WilSpriteKey key)
 {
 	shared_ptr<SpriteResHandle> p = {};
@@ -181,7 +194,7 @@ SpriteResHandle::~SpriteResHandle()
 	_mgr->_impl->NotifyFreeSpace(_size);
 }
 
-WilSpriteManager::WilSpriteManager(ID3D11Device* dev, wstring dir)
+WilSpriteManager::WilSpriteManager(ID3D11Device* dev, string dir)
 {
 	_impl = new WilSpriteManager::Impl(dev, dir, this);
 }
@@ -204,4 +217,9 @@ void WilSpriteManager::PreloadSprite(WilSpriteKey key)
 shared_ptr<SpriteResHandle> WilSpriteManager::LoadSprite(WilSpriteKey key)
 {
 	return _impl->LoadSprite(key);
+}
+
+uint32_t WilSpriteManager::GetFileId(string name)
+{
+	return _impl->GetFileId(name);
 }

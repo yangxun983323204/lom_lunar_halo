@@ -1,0 +1,25 @@
+<rml>
+<head>
+  <title>login</title>
+  <link type="text/rcss" href="rml.rcss"/>
+  <link type="text/rcss" href="window.rcss"/>
+  <link type="text/rcss" href="login.rcss"/>
+</head>
+<body>
+  <img class="full bg" src="wil://Data/Interface1c.wil?0"/>
+  <img id="loginBorder" class="z-99" src="wil://Data/Interface1c.wil?1">
+    <img id="btnLogin" src="wil://Data/Interface1c.wil?10"/>
+    <img id="btnNew" src="wil://Data/Interface1c.wil?12"/>
+    <img id="btnChange" src="wil://Data/Interface1c.wil?14"/>
+    <img id="btnExit" src="wil://Data/Interface1c.wil?16"/>
+
+    <img id="id" src="wil://Data/Interface1c.wil?2">
+      <input id="iptId" type="text"/>
+    </img>
+
+    <img id="pw" src="wil://Data/Interface1c.wil?2">
+      <input id="iptPw" type="text"/>
+    </img>
+  </img>
+</body>
+</rml>

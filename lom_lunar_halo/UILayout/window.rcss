@@ -1,14 +1,14 @@
 body {
   font-family: LatoLatin;
   font-size: 18px;
-  color: #02475e;
-  background: #fefecc;
+  color: #00000000;
+  background: #00000000;
   text-align: center;
   padding: 2em 1em;
   position: absolute;
   border: 2px #ccc;
-  width: 500px;
-  height: 200px;
+  width: 100%;
+  height: 100%;
   margin: auto;
 }
 
@@ -33,4 +33,22 @@ input.text {
   box-sizing: border-box;
   width: 200px;
   font-size: 0.9em;
+}
+
+.full {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bg {
+  z-index:-100;
+}
+
+.z-99 {
+  z-index:-99;
 }

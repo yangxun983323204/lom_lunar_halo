@@ -13,15 +13,16 @@ using DirectX::Keyboard;
 void LoginProcess::StartEnter()
 {
 	_game->SetWindowAsLogin();
-	_testUI = YX::GUI::LayoutLoader::Parse(_W(_game->GetSetting()->GetUILayoutDir() + "login.xml"));
-	string rmlPath = _game->GetSetting()->GetUILayoutDir() + "hello_world.rml";
+	//_testUI = YX::GUI::LayoutLoader::Parse(_W(_game->GetSetting()->GetUILayoutDir() + "login.xml"));
+	string rmlPath = _game->GetSetting()->GetUILayoutDir() + "login.rml";
 	_game->GetRmlUiAdapter()->GetContext()->LoadDocument(rmlPath)->Show();
 	_state = IProcess::State::Entered;
 }
 
 void LoginProcess::StartExit()
 {
-	_testUI.reset();
+	_game->GetRmlUiAdapter()->GetContext()->UnloadAllDocuments();
+	//_testUI.reset();
 	_state = IProcess::State::Exited;
 }
 

@@ -48,8 +48,10 @@ RmlUiAdapter::RmlUiAdapter(Game* game):
 		Rml::Shutdown();
 		throw L"Rml::CreateContext失败";
 	}
-	Rml::Debugger::Initialise(_rmlCtx);
-	Rml::Debugger::SetVisible(true);
+	// debugger
+	//Rml::Debugger::Initialise(_rmlCtx);
+	//Rml::Debugger::SetVisible(true);
+
 	Rml::LoadFontFace("./font/NotoEmoji-Regular.ttf");
 	Rml::LoadFontFace("./font/LatoLatin-Bold.ttf");
 	Rml::LoadFontFace("./font/LatoLatin-BoldItalic.ttf");
@@ -84,8 +86,8 @@ bool YX::RmlUiAdapter::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vect
 	auto path = source.substr(WIL_PROTO.size());
 	stringstream ss{ path };
 	string item{};
-	vector<string> split{ 2 };
-	while (std::getline(ss, item, '/'))
+	vector<string> split{};
+	while (std::getline(ss, item, '?'))
 	{
 		split.push_back(item);
 	}
@@ -93,7 +95,16 @@ bool YX::RmlUiAdapter::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vect
 	if (split.size() != 2)
 		return false;
 
-	uint32_t fileIdx = (uint32_t)std::stoi(split[0]);
+	auto file = split[0];
+	auto isNum = !file.empty() && std::find_if(file.begin(),
+		file.end(), [](unsigned char c) { return !std::isdigit(c); }) == file.end();
+
+	uint32_t fileIdx = 0;
+	if (!isNum)
+		fileIdx = _game->GetUiSpriteManager()->GetFileId(file);
+	else
+		fileIdx = (uint32_t)std::stoi(split[0]);
+
 	uint32_t imgIdx = (uint32_t)std::stoi(split[1]);
 	auto sp = _game->GetUiSpriteManager()->LoadSprite({ fileIdx, imgIdx });
 	if (!sp)

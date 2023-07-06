@@ -37,6 +37,7 @@ public:
 
 	uint32_t GetCount();
 	ImageInfo GetImageInfo(int idx);
+	bool ImageValid(int idx);
 	/// <summary>
 	/// 获取未解压的原始数据
 	/// </summary>

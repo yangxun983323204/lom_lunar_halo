@@ -19,6 +19,6 @@ public:
 	virtual void GetWindowSize(int& w, int& h) override;
 
 private:
-	std::shared_ptr<YX::GUI::Canvas> _testUI;
+	//std::shared_ptr<YX::GUI::Canvas> _testUI;
 };
 

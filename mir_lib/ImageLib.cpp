@@ -337,6 +337,17 @@ ImageLib::ImageInfo ImageLib::GetImageInfo(int idx)
 	return _impl->GetImageInfo(idx);
 }
 
+bool ImageLib::ImageValid(int idx)
+{
+	if (idx < 0 || idx >= GetCount())
+		return false;
+
+	if (idx >= _impl->_blockAddress.size())
+		return false;
+
+	return _impl->_blockAddress[idx] > 0;
+}
+
 vector<uint16_t> ImageLib::GetImageRaw(int idx)
 {
 	return _impl->GetImageRaw(idx);
