@@ -101,7 +101,10 @@ bool YX::RmlUiAdapter::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vect
 
 	texture_dimensions.x = sp->GetSprite()->Rect.width;
 	texture_dimensions.y = sp->GetSprite()->Rect.height;
-	texture_handle = ++_textureIdGen;
+	++_textureIdGen;
+	if (_textureIdGen == 0)
+		_textureIdGen = 1;
+	texture_handle = _textureIdGen;
 	_textures[texture_handle] = sp;
 	
 	return true;
@@ -123,7 +126,10 @@ bool YX::RmlUiAdapter::GenTexture(Rml::TextureHandle& texture_handle, const byte
 
 	sp->Pivot = { 0,0 };
 	sp->Rect = { 0,0,source_dimensions.x, source_dimensions.y };
-	texture_handle = ++_textureIdGen;
+	++_textureIdGen;
+	if (_textureIdGen == 0)
+		_textureIdGen = 1;
+	texture_handle = _textureIdGen;
 	_dynamicTextures[texture_handle] = sp;
 
 	return true;

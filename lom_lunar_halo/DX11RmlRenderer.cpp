@@ -79,7 +79,7 @@ void YX::DX11RmlRenderer::SetWindowSize(uint32_t width, uint32_t height)
 {
 	_width = width;
 	_height = height;
-	auto view = DirectX::SimpleMath::Matrix::CreateLookAt({ 0,0,-10 }, { 0,0,1 }, { 0,1,0 });
+	auto view = DirectX::SimpleMath::Matrix::CreateLookAt({ 0,0,10 }, { 0,0,-1 }, { 0,1,0 });
 	auto proj = DirectX::SimpleMath::Matrix::CreateOrthographic((float)width, (float)height, 0.1, 100);
 	_viewProj = view * proj;
 	_viewProjCB.SetData(_pCtx, XMMatrixTranspose(_viewProj));
@@ -291,7 +291,7 @@ void YX::DX11RmlRenderer::SetupState()
 	D3D11_RASTERIZER_DESC rsDesc{};
 	rsDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
 	rsDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_FRONT;
-	rsDesc.DepthClipEnable = TRUE;
+	rsDesc.DepthClipEnable = FALSE;
 	rsDesc.ScissorEnable = FALSE;
 	rsDesc.MultisampleEnable = TRUE;
 
