@@ -65,6 +65,12 @@ RmlUiAdapter::~RmlUiAdapter()
 	Rml::Shutdown();
 }
 
+void YX::RmlUiAdapter::Update()
+{
+
+	_rmlCtx->Update();
+}
+
 void YX::RmlUiAdapter::Render()
 {
 	_renderer->OnBeginRender();
@@ -177,4 +183,15 @@ ID3D11ShaderResourceView** YX::RmlUiAdapter::GetTexture(Rml::TextureHandle& text
 		}
 	}
 	return nullptr;
+}
+
+void YX::RmlWindowProcedure(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param)
+{
+	int count = Rml::GetNumContexts();
+	for (int i = 0; i < count; i++)
+	{
+		auto ctx = Rml::GetContext(i);
+		if (ctx)
+			RmlWin32::WindowProcedure(ctx, window_handle, message, w_param, l_param);
+	}
 }

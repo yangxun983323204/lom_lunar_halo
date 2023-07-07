@@ -3,13 +3,11 @@ body {
   font-size: 18px;
   color: #00000000;
   background: #00000000;
-  text-align: center;
-  padding: 2em 1em;
-  position: absolute;
-  border: 2px #ccc;
-  width: 100%;
-  height: 100%;
-  margin: auto;
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  width: 100vw;
+  height: 100vh;
 }
 
 h1 {
@@ -28,27 +26,93 @@ input.text {
   color: #555;
   border: 2px #999;
   padding: 5px;
-  tab-index: auto;
   cursor: text;
   box-sizing: border-box;
   width: 200px;
   font-size: 0.9em;
 }
 
-.full {
+input {
+  font-family: Noto Sans SC;
+}
+
+input.input_lite{
+  border: 0px;
+  padding: 0px;
+}
+/* 设计一个ui_root_layout来容纳所有ui元素，这样就可以基于原始尺寸来布局，然后在root上应用dpi缩放 */
+.ui_root_layout{
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  left: 0px;
+  top: 0px;
+  transform-origin: 0px 0px;
+  transform:scale(1);
+}
+
+.just_rect{
+  color: #00000000;
+}
+
+.fill_parent{
+  position: absolute;
+  left: 0px;
+  top: 0px;
   width: 100%;
   height: 100%;
 }
-
-.bg {
-  z-index:-100;
+/* 对窗体大小进行查询以确定ui布局缩放，需同时考虑登录时的640px和game时的800px */
+/* DPI 1 */
+@media (width:640px){
+  .ui_root_layout{
+      transform:scale(1);
+  }
 }
-
-.z-99 {
-  z-index:-99;
+@media (width:800px){
+  .ui_root_layout{
+      transform:scale(1);
+  }
+}
+/* DPI 1.5 */
+@media (width:960px){
+  .ui_root_layout{
+      transform:scale(1.5);
+  }
+}
+@media (width:1200px){
+  .ui_root_layout{
+      transform:scale(1.5);
+  }
+}
+/* DPI 2 */
+@media (width:1280px){
+  .ui_root_layout{
+      transform:scale(2);
+  }
+}
+@media (width:1600px){
+  .ui_root_layout{
+      transform:scale(2);
+  }
+}
+/* DPI 2.5 */
+@media (width:1600px){
+  .ui_root_layout{
+      transform:scale(2.5);
+  }
+}
+@media (width:2000px){
+  .ui_root_layout{
+      transform:scale(2.5);
+  }
+}
+/* DPI 3 */
+@media (width:1920px){
+  .ui_root_layout{
+      transform:scale(3);
+  }
+}
+@media (width:2400px){
+  .ui_root_layout{
+      transform:scale(3);
+  }
 }

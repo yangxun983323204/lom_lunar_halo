@@ -12,13 +12,16 @@ using DirectX::Keyboard;
 void SelectProcess::StartEnter()
 {
 	_game->SetWindowAsLogin();
-	_testUI = YX::GUI::LayoutLoader::Parse(_W(_game->GetSetting()->GetUILayoutDir() + "select.xml"));
+	//_testUI = YX::GUI::LayoutLoader::Parse(_W(_game->GetSetting()->GetUILayoutDir() + "select.xml"));
+	string rmlPath = _game->GetSetting()->GetUILayoutDir() + "select.rml";
+	_game->GetRmlUiAdapter()->GetContext()->LoadDocument(rmlPath)->Show();
 	_state = IProcess::State::Entered;
 }
 
 void SelectProcess::StartExit()
 {
-	_testUI = nullptr;
+	//_testUI = nullptr;
+	_game->GetRmlUiAdapter()->GetContext()->UnloadAllDocuments();
 	_state = IProcess::State::Exited;
 }
 

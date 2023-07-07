@@ -6,20 +6,33 @@
   <link type="text/rcss" href="login.rcss"/>
 </head>
 <body>
-  <img class="full bg" src="wil://Data/Interface1c.wil?0"/>
-  <img id="loginBorder" class="z-99" src="wil://Data/Interface1c.wil?1">
-    <img id="btnLogin" src="wil://Data/Interface1c.wil?10"/>
-    <img id="btnNew" src="wil://Data/Interface1c.wil?12"/>
-    <img id="btnChange" src="wil://Data/Interface1c.wil?14"/>
-    <img id="btnExit" src="wil://Data/Interface1c.wil?16"/>
+  <div id="layout" class="ui_root_layout">
+    <img id="bg" src="wil://Data/Interface1c.wil?0"/>
+    <div id="bottomGroup">
+      <img id="loginBorder" src="wil://Data/Interface1c.wil?1"/>
+      
+      <div id="inputGroup">
+        <img id="id_pw" src="wil://Data/Interface1c.wil?2"/>
+        <input id="iptId" class="input_lite" type="text" />
+        <input id="iptPw" class="input_lite" type="text" />
+      </div>
 
-    <img id="id" src="wil://Data/Interface1c.wil?2">
-      <input id="iptId" type="text"/>
-    </img>
+      <img id="btnLoginRect" class="just_rect" src="wil://Data/Interface1c.wil?10">
+        <button id="btnLogin" class="fill_parent"></button>
+      </img>
 
-    <img id="pw" src="wil://Data/Interface1c.wil?2">
-      <input id="iptPw" type="text"/>
-    </img>
-  </img>
+      <img id="btnNewRect" class="just_rect" src="wil://Data/Interface1c.wil?12">
+        <button id="btnNew" class="fill_parent"></button>
+      </img>
+
+      <img id="btnChangeRect" class="just_rect" src="wil://Data/Interface1c.wil?14">
+        <button id="btnChange" class="fill_parent"></button>
+      </img>
+
+      <img id="btnExitRect" class="just_rect" src="wil://Data/Interface1c.wil?16">
+        <button id="btnExit" class="fill_parent"></button>
+      </img>
+    </div>
+  </div>
 </body>
 </rml>

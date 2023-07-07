@@ -113,7 +113,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
     return static_cast<int>(msg.wParam);
 }
-
+// Rml模块的事件输入
+namespace YX {
+    void RmlWindowProcedure(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param);
+}
 // Windows procedure
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -318,6 +321,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
 
+    YX::RmlWindowProcedure(hWnd, message, wParam, lParam);
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 

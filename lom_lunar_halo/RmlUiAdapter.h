@@ -15,6 +15,8 @@ using std::unordered_map;
 
 class Game;
 namespace YX {
+	void RmlWindowProcedure(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param);
+
 	class RmlUiAdapter 
 	{
 	public:
@@ -23,10 +25,11 @@ namespace YX {
 
 		RmlUiAdapter(Game* game);
 		~RmlUiAdapter();
-		inline void Update() { _rmlCtx->Update(); }
+		void Update();
 		void Render();
 		inline Rml::Context* GetContext() { return _rmlCtx; }
 		void OnWindowSizeChanged(int width, int height);
+
 	private:
 		bool LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source);
 		bool GenTexture(Rml::TextureHandle& texture_handle, const byte* source, const Rml::Vector2i& source_dimensions);

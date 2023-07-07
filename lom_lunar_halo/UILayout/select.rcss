@@ -1,0 +1,12 @@
+#layout{
+    width: 640px;
+    height: 480px;
+}
+
+#bg {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 640px;
+    height: 480px;
+}

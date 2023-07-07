@@ -104,6 +104,7 @@ void YX::DX11RmlRenderer::OnBeginRender()
 	_pCtx->OMSetBlendState(_blendState.Get(), 0, 0xffffffff);
 	_pCtx->OMSetDepthStencilState(_depthState.Get(), 0);
 	_pCtx->PSSetSamplers(0, 1, _sampler.GetAddressOf());
+	EnableScissorRegion(false);
 	D3D11_VIEWPORT viewport{};
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
@@ -119,6 +120,7 @@ void YX::DX11RmlRenderer::OnBeginRender()
 }
 void YX::DX11RmlRenderer::OnEndRender()
 {
+	EnableScissorRegion(false);
 }
 void DX11RmlRenderer::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture, const Rml::Vector2f& translation)
 {
@@ -182,6 +184,17 @@ void DX11RmlRenderer::SetScissorRegion(int x, int y, int width, int height)
 	rect.right = x + width;
 	rect.top = y;
 	rect.bottom = y + height;
+	// tips: SetTransform的设置也影响剪刀区域，文档建议用模板缓冲。我这里因为ui没有旋转，直接算吧。
+	DirectX::SimpleMath::Vector4 lt = { (float)rect.left,(float)rect.top,0,1 };
+	DirectX::SimpleMath::Vector4 rb = { (float)rect.right,(float)rect.bottom,0,1 };
+	lt = DirectX::SimpleMath::Vector4::Transform(lt, _transform);
+	rb = DirectX::SimpleMath::Vector4::Transform(rb, _transform);
+	
+	rect.left = (long)lt.x;
+	rect.right = (long)rb.x;
+	rect.top = (long)lt.y;
+	rect.bottom = (long)rb.y;
+	//
 	_pCtx->RSSetScissorRects(1, &rect);
 }
 bool DX11RmlRenderer::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source)
@@ -265,10 +278,10 @@ void YX::DX11RmlRenderer::SetupState()
 	D3D11_BLEND_DESC blendDesc{};
 	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
 	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
@@ -296,7 +309,7 @@ void YX::DX11RmlRenderer::SetupState()
 	rsDesc.MultisampleEnable = TRUE;
 
 	D3D11_RASTERIZER_DESC rsScissorDesc = rsDesc;
-	rsDesc.ScissorEnable = TRUE;
+	rsScissorDesc.ScissorEnable = TRUE;
 
 	_pDev->CreateRasterizerState(&rsDesc, _rsState.GetAddressOf());
 	_pDev->CreateRasterizerState(&rsScissorDesc, _srScissorState.GetAddressOf());

@@ -216,7 +216,19 @@ bool RmlWin32::WindowProcedure(Rml::Context* context, HWND window_handle, UINT m
 		result = context->ProcessMouseButtonUp(2, RmlWin32::GetKeyModifierState());
 		break;
 	case WM_MOUSEMOVE:
-		result = context->ProcessMouseMove(static_cast<int>((short)LOWORD(l_param)), static_cast<int>((short)HIWORD(l_param)),
+	{
+		// 窗口最大化时文档逻辑宽高不会变化，因此需转换鼠标位置到逻辑宽高
+		RECT r;
+		GetClientRect(window_handle, &r);
+		auto rawWidth = r.right - r.left;
+		auto rawHeight = r.bottom - r.top;
+		auto vSize = context->GetDimensions();
+		auto rawX = (short)LOWORD(l_param);
+		auto rawY = (short)HIWORD(l_param);
+		int x = rawX / ((float)rawWidth / vSize.x);
+		int y = rawY / ((float)rawHeight / vSize.y);
+
+		result = context->ProcessMouseMove(x, y,
 			RmlWin32::GetKeyModifierState());
 
 		if (!tracking_mouse_leave)
@@ -227,7 +239,8 @@ bool RmlWin32::WindowProcedure(Rml::Context* context, HWND window_handle, UINT m
 			tme.hwndTrack = window_handle;
 			tracking_mouse_leave = TrackMouseEvent(&tme);
 		}
-		break;
+		break; 
+	}
 	case WM_MOUSEWHEEL:
 		result = context->ProcessMouseWheel(static_cast<float>((short)HIWORD(w_param)) / static_cast<float>(-WHEEL_DELTA),
 			RmlWin32::GetKeyModifierState());
