@@ -24,4 +24,79 @@ namespace Mir
 	const uint16_t TileAnimSpanMs[]{
 		150,200,250,300,350,400,420,450
 	};
+
+	// 值关系到8方向的精灵索引偏移
+	enum class Direction {
+		Bottom = 0,
+		BottomRight,
+		Right,
+		TopRight,
+		Top,
+		TopLeft,
+		Left,
+		BottomLeft,
+		
+		MAX,
+	};
+
+	enum class PlayerMotion {
+		Stand = 0,
+		ArrowAttack,
+		Spell_1,
+		Spell_2,
+		Hold,
+		PushBack,
+		PushBackFly,
+		Attack,
+		Cut,
+		OneVerticalSwing,
+		TwoVerticalSwing,
+		OneHorizontalSwing,
+		TowHorizontalSwing,
+		SpearVerticalSwing,
+		SpearHorizontalSwing,
+		Hitted,
+		WheelWind,
+		RandSwing,
+		BackDropKick,
+		Die,
+		SpecialDie,
+		Walk,
+		Run,
+		MoodEpo,
+		Roll,
+		FishStand,
+		FishHand,
+		FishThrow,
+		FishPull,
+		HorseStand,
+		HorseWalk,
+		HorseRun,
+		HorseHit,
+
+		MAX,
+	};
+
+	enum class MonsterMotion {
+		Stand = 0,
+		Walk,
+		Attack_A,
+		Hitted,
+		Die,
+		Attack_B,
+		Spell_A,
+		Speel_B,
+		Appear,
+		SpecialMotion,
+
+		MAX,
+	};
+
+	enum class NpcMotion {
+		Stand = 0,
+		Act01,
+		Act02,
+
+		MAX,
+	};
 }
