@@ -2,6 +2,7 @@
 // https://docs.microsoft.com/zh-cn/windows/uwp/gaming/handling-device-lost-scenarios
 #pragma once
 #include <memory>
+#include "../mir_lib/MirConst.h"
 #include "../mir_lib/ImageLib.h"
 
 using Microsoft::WRL::ComPtr;
@@ -15,7 +16,7 @@ namespace YX {
 		inline int16_t Height() { return _h; }
 		inline int16_t PivotX() { return _pivotX; }
 		inline int16_t PivotY() { return _pivotY; }
-		inline bool HasShadow() { return _hasShadow; }
+		inline Mir::ShadowType GetShadowType() { return _shadow; }
 		inline int16_t ShadowPosX() { return _shadowPosX; }
 		inline int16_t ShadowPosY() { return _shadowPosY; }
 		inline ComPtr<ID3D11Texture2D> Texture() { return _tex; }
@@ -27,7 +28,7 @@ namespace YX {
 	protected:
 		int16_t _w, _h;
 		int16_t _pivotX, _pivotY;
-		bool _hasShadow;
+		Mir::ShadowType _shadow;
 		int16_t _shadowPosX;
 		int16_t _shadowPosY;
 

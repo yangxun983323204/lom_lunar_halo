@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include "MirConst.h"
 
 using std::wstring;
 using std::unique_ptr;
@@ -22,10 +23,15 @@ public:
 		int16_t Height;
 		int16_t PivotX;
 		int16_t PivotY;
-		char HasShadow;
+		char Shadow;
 		int16_t ShadowPosX;
 		int16_t ShadowPosY;
 		int32_t ImgLength;
+
+		inline Mir::ShadowType GetShadowType() 
+		{ 
+			return Shadow < (int)Mir::ShadowType::Proj ? Mir::ShadowType::None : (Mir::ShadowType)Shadow;
+		}
 	};
 	#pragma pack()
 

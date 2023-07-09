@@ -16,7 +16,7 @@ class SceneNode:
 	public std::enable_shared_from_this<SceneNode>
 {
 public:
-	std::wstring Name;
+	std::string Name;
 	SceneNode();
 	inline DirectX::XMINT2 GetLocalPosition() { return _localPosition; }
 	inline void SetLocalPosition(DirectX::XMINT2 lPos) { _localPosition = lPos; }
@@ -33,6 +33,7 @@ public:
 #endif
 
 	void SetParent(weak_ptr<SceneNode> parent);
+	void ResetTRS();
 	weak_ptr<SceneNode> GetParent();
 	vector<weak_ptr<SceneNode>> GetChildren();
 	template<typename TComponent>

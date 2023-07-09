@@ -96,6 +96,12 @@
     <ClInclude Include="RmlUi_Platform_Win32.h">
       <Filter>RmlUI</Filter>
     </ClInclude>
+    <ClInclude Include="ActorView.h">
+      <Filter>SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorData.h">
+      <Filter>SceneManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -156,6 +162,12 @@
     </ClCompile>
     <ClCompile Include="RmlUi_Platform_Win32.cpp">
       <Filter>RmlUI</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorView.cpp">
+      <Filter>SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorData.cpp">
+      <Filter>SceneManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

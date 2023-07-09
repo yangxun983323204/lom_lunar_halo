@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <functional>
 #include "../RenderFramework/HashSupport.h"
 #include <unordered_map>
 #include "DeviceResources.h"
@@ -8,11 +9,13 @@
 #include "WilSpriteManager.h"
 #include "../mir_lib/MapData.h"
 #include "StepTimer.h"
+#include "ActorView.h"
 
 using std::shared_ptr;
 using std::unique_ptr;
 using std::vector;
 using std::unordered_map;
+using std::function;
 
 typedef DirectX::XMUINT2 WilSpriteKey;
 
@@ -35,8 +38,15 @@ public:
 	void SetMapData(shared_ptr<MapData> mapData);
 	DirectX::XMINT2 GetViewPoint();
 	void SetViewPoint(DirectX::XMINT2 coor);
-	SpriteRenderer* GetSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
-	void ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
+
+	SpriteRenderer* GetMapStaticSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
+	SpriteRenderer* GetMapAnimSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
+	ActorView* GetActorView(vector<ActorView*>& pool, int id, function<ActorView*()> createFunc);
+
+	void ReleaseMapStaticSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
+	void ReleaseMapAnimSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
+	void ReleaseActor(int id);
+
 	void Update(DX::StepTimer const& timer);
 	void Render();
 	void Clear();
@@ -52,7 +62,8 @@ private:
 	SpriteRenderLayer _mid1Use;
 	SpriteRenderLayer _mid2Use;
 	SpriteRenderLayer _topUse;
-	vector<SpriteRenderer*> _pool;
+
+	unordered_map<int, ActorView*> _actors;
 
 	DX::DeviceResources* _dr;
 	shared_ptr<MapData> _mapData;

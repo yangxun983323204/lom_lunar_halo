@@ -69,6 +69,15 @@ void SceneNode::SetParent(weak_ptr<SceneNode> parent)
     }
 }
 
+void SceneNode::ResetTRS()
+{
+    _localPosition = { 0,0 };
+    _localAngle = 0;
+#ifdef SCENE_NODE_SCALE
+    _localScale = { 1,1 };
+#endif
+}
+
 weak_ptr<SceneNode> SceneNode::GetParent()
 {
     return _parent;

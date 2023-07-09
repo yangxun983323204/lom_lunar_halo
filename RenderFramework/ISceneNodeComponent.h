@@ -21,6 +21,7 @@ public:
 	SCENE_NODE_COMPONENT('isnc');
 	bool Enable;
 	inline SceneNode* GetSceneNode() { return _node.expired() ? nullptr : _node.lock().get(); }
+	inline weak_ptr<SceneNode> GetSceneNodeWeakPtr() { return _node; }
 	template<typename TComponent>
 	TComponent* As();
 protected:

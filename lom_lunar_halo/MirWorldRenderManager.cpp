@@ -31,10 +31,10 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
             return;
         WilSpriteKey key = { (uint32_t)x,(uint32_t)y };
         WilSpriteKey bgKey = { (uint32_t)x / 2 * 2,(uint32_t)y / 2 * 2 };
-        this->ReleaseSpriteRenderer(_bgUse, bgKey);
-        this->ReleaseSpriteRenderer(_mid1Use, key);
-        this->ReleaseSpriteRenderer(_mid2Use, key);
-        this->ReleaseSpriteRenderer(_topUse, key);
+        this->ReleaseMapStaticSpriteRenderer(_bgUse, bgKey);
+        this->ReleaseMapAnimSpriteRenderer(_mid1Use, key);
+        this->ReleaseMapAnimSpriteRenderer(_mid2Use, key);
+        this->ReleaseMapAnimSpriteRenderer(_topUse, key);
         });
 
     _gridView->GetView()->SetCellShowCallback([this](int x, int y) {
@@ -76,23 +76,13 @@ void MirWorldRenderManager::SetViewPoint(DirectX::XMINT2 coor)
         _gridView->GetSceneNode()->SetLocalPosition(coor);
 }
 
-SpriteRenderer* MirWorldRenderManager::GetSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key)
+SpriteRenderer* MirWorldRenderManager::GetMapStaticSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key)
 {
     auto f = use.Record.find(key);
     if (f != use.Record.end())
         return f->second;
 
-    SpriteRenderer* sr = nullptr;
-    if (_pool.size() > 0) {
-        SpriteRenderer* last = *(--_pool.end());
-        _pool.pop_back();
-        sr = last;
-    }
-    else {
-        sr = _sceneMgr->CreateSpriteNode()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
-        sr->GetSceneNode()->AddComponent<SpriteHandleHolder>();
-        sr->GetSceneNode()->AddComponent<Animator>().lock()->Enable = false;
-    }
+    auto sr = _sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
 
     sr->SortLayer = use.Layer;
     sr->Depth = use.Depth;
@@ -101,7 +91,31 @@ SpriteRenderer* MirWorldRenderManager::GetSpriteRenderer(SpriteRenderLayer& use,
     return sr;
 }
 
-void MirWorldRenderManager::ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key)
+SpriteRenderer* MirWorldRenderManager::GetMapAnimSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key)
+{
+    auto f = use.Record.find(key);
+    if (f != use.Record.end())
+        return f->second;
+
+    auto sr = _sceneMgr->SpawnAnimSprite()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
+    sr->GetSceneNode()->GetComponent<Animator>().lock()->As<Animator>()->Enable = true;
+    sr->SortLayer = use.Layer;
+    sr->Depth = use.Depth;
+    sr->Enable = true;
+    use.Record[key] = sr;
+    return sr;
+}
+
+ActorView* MirWorldRenderManager::GetActorView(vector<ActorView*>& pool, int id, function<ActorView* ()> createFunc)
+{
+    auto f = _actors.find(id);
+    if (f != _actors.end())
+        return f->second;
+
+    return nullptr;
+}
+
+void MirWorldRenderManager::ReleaseMapStaticSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key)
 {
     auto f = use.Record.find(key);
     if (f == use.Record.end())
@@ -109,10 +123,48 @@ void MirWorldRenderManager::ReleaseSpriteRenderer(SpriteRenderLayer& use, WilSpr
 
     SpriteRenderer* sr = f->second;
     use.Record.erase(key);
-    _pool.push_back(sr);
-    sr->GetSceneNode()->GetComponent<Animator>().lock()->Enable = false;
-    sr->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
-    sr->Enable = false;
+    if (sr->GetSceneNodeWeakPtr().expired())
+        return;
+
+    _sceneMgr->ReleaseStaticSprite(sr->GetSceneNodeWeakPtr().lock());
+}
+
+void MirWorldRenderManager::ReleaseMapAnimSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key)
+{
+    auto f = use.Record.find(key);
+    if (f == use.Record.end())
+        return;
+
+    SpriteRenderer* sr = f->second;
+    use.Record.erase(key);
+    if (sr->GetSceneNodeWeakPtr().expired())
+        return;
+
+    _sceneMgr->ReleaseAnimSprite(sr->GetSceneNodeWeakPtr().lock());
+}
+
+void MirWorldRenderManager::ReleaseActor(int id)
+{
+    auto f = _actors.find(id);
+    if (f == _actors.end())
+        return;
+
+    ActorView* av = f->second;
+    _actors.erase(id);
+    switch (av->Type)
+    {
+    case (int)Mir::ActorType::Monster:
+        _sceneMgr->ReleaseMonster(av->GetSceneNodeWeakPtr().lock());
+        break;
+    case (int)Mir::ActorType::Npc:
+        _sceneMgr->ReleaseNpc(av->GetSceneNodeWeakPtr().lock());
+        break;
+    case (int)Mir::ActorType::Player:
+        _sceneMgr->ReleasePlayer(av->GetSceneNodeWeakPtr().lock());
+        break;
+    default:
+        break;
+    }
 }
 
 void MirWorldRenderManager::Update(DX::StepTimer const& timer)
@@ -146,11 +198,10 @@ void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
     auto spriteHandle = _spriteMgr->LoadSprite({ fileIdx, (uint32_t)imgIdx });
     if (!spriteHandle)
         return;
-    auto spRender = this->GetSpriteRenderer(_bgUse, key);
+    auto spRender = this->GetMapStaticSpriteRenderer(_bgUse, key);
     spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(key.x, key.y));
     spRender->Sprite = spriteHandle->GetSprite();
     spRender->Sprite.lock()->Pivot = { 0, 0 };
-    spRender->GetSceneNode()->GetComponent<Animator>().lock()->Enable = false;
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.push_back(spriteHandle);
 }
@@ -161,7 +212,7 @@ void MirWorldRenderManager::SetUpMid(WilSpriteKey key,int i, SpriteRenderLayer& 
     if (!cell.FileEnableOf(i))
         return;
 
-    auto spRender = this->GetSpriteRenderer(use, key);
+    auto spRender = this->GetMapAnimSpriteRenderer(use, key);
     spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(key.x, key.y));
     spRender->GetSceneNode()->GetComponent<Animator>().lock()->Enable = false;
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
@@ -199,8 +250,8 @@ void MirWorldRenderManager::SetUpMid(WilSpriteKey key,int i, SpriteRenderLayer& 
                 anim.AddFrame(spriteHandle->GetSprite());
                 spHolder->holder.push_back(spriteHandle);
             }
-            animator->Anims.push_back(anim);
-            animator->Current = &animator->Anims[0];
+            animator->Add("0",anim);
+            animator->SetCurrent("0");
             return;
         }
         // 地表物体图片的原点是左下角,对齐的也是cell的左下角

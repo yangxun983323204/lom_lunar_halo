@@ -25,6 +25,12 @@ namespace Mir
 		150,200,250,300,350,400,420,450
 	};
 
+	enum class ShadowType {
+		None = 0,
+		Proj = 49,
+		Orth = 50,
+	};
+
 	// 值关系到8方向的精灵索引偏移
 	enum class Direction {
 		Bottom = 0,
@@ -38,6 +44,27 @@ namespace Mir
 		
 		MAX,
 	};
+
+	const int StartHorseFrame = 2320;
+	const int HorseFrameSpan = 400;
+
+	const int HeroFrameSpan = 3000;
+
+	const int WeaponFrameSpan = 3000;
+
+	inline int FrameDirOffset(Direction dir) { return (int)dir * 10; }
+	
+	inline int GetHorseFrame(uint8_t horse, uint8_t dress, Direction dir)
+	{
+		//m_dwCurrHorseFrame = (m_stFeatureEx.bHorse * _MAX_HORSE_FRAME - _MAX_HORSE_FRAME) + (m_dwCurrFrame - (_MAX_HERO_FRAME * m_stFeature.bDress) - _START_HORSE_FRAME);
+		return (horse - 1) * HorseFrameSpan - HeroFrameSpan * dress - StartHorseFrame + FrameDirOffset(dir);
+	}
+
+	inline int GetWeaponFrame(uint8_t weapon, uint8_t dress, Direction dir)
+	{
+		//m_dwCurrWeaponFrame = (((m_stFeature.bWeapon-1)%10)*_MAX_WEAPON_FRAME)+(m_dwCurrFrame-(_MAX_HERO_FRAME*m_stFeature.bDress));
+		return (weapon-1)%10* WeaponFrameSpan - HeroFrameSpan * dress + FrameDirOffset(dir);
+	}
 
 	enum class PlayerMotion {
 		Stand = 0,

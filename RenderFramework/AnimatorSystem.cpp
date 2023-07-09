@@ -11,7 +11,7 @@ void AnimatorSystem::Update(uint64_t totalMs, uint32_t deltaMs)
 			continue;
 
 		auto animator = i->As<Animator>();
-		auto anim = animator->Current;
+		auto anim = animator->GetCurrent();
 		if (anim)
 		{
 			anim->Update(totalMs);

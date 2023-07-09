@@ -17,7 +17,7 @@ shared_ptr<Sprite_old> Sprite_old::CreateFromWIL(ID3D11Device* device, ImageLib:
 	sprite->_h = info.Height;
 	sprite->_pivotX = info.PivotX;
 	sprite->_pivotY = info.PivotY;
-	sprite->_hasShadow = info.HasShadow != '0';
+	sprite->_shadow = info.GetShadowType();
 	sprite->_shadowPosX = info.ShadowPosX;
 	sprite->_shadowPosY = info.ShadowPosY;
 
@@ -42,7 +42,7 @@ shared_ptr<Sprite_old> Sprite_old::CreateRenderTarget(ID3D11Device* device, int1
 	sprite->_h = h;
 	sprite->_pivotX = 0;
 	sprite->_pivotY = 0;
-	sprite->_hasShadow = false;
+	sprite->_shadow = Mir::ShadowType::None;
 	sprite->_shadowPosX = 0;
 	sprite->_shadowPosY = 0;
 

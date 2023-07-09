@@ -183,6 +183,8 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ActorData.h" />
+    <ClInclude Include="ActorView.h" />
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="DX11RmlRenderer.h" />
     <ClInclude Include="EventSystem.h" />
@@ -212,6 +214,8 @@
     <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ActorData.cpp" />
+    <ClCompile Include="ActorView.cpp" />
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="DX11RmlRenderer.cpp" />
     <ClCompile Include="EventSystem.cpp" />
