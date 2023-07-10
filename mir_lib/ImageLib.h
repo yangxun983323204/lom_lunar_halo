@@ -21,8 +21,8 @@ public:
 	{
 		int16_t Width;
 		int16_t Height;
-		int16_t PivotX;
-		int16_t PivotY;
+		int16_t OffsetX;
+		int16_t OffsetY;
 		char Shadow;
 		int16_t ShadowPosX;
 		int16_t ShadowPosY;
@@ -36,7 +36,7 @@ public:
 	#pragma pack()
 
 	ImageLib();
-	~ImageLib() { delete _impl; }
+	~ImageLib();
 	void Open(wstring wilPath);
 	void Close();
 	bool IsOpened();

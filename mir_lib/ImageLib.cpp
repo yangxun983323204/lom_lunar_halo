@@ -311,6 +311,11 @@ ImageLib::ImageLib()
 	_impl = new ImageLib::Impl();
 }
 
+ImageLib::~ImageLib()
+{
+	delete _impl;
+}
+
 void ImageLib::Open(wstring wilPath)
 {
 	auto wixPath = wilPath.substr(0, wilPath.length() - 4) + L".wix";

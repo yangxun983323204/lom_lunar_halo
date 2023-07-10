@@ -40,7 +40,7 @@ private:
 
 class SpriteResHandle
 {
-	friend struct WilSpriteManager::Impl;
+	friend class WilSpriteManager::Impl;
 public:
 	SpriteResHandle(WilSpriteManager* mgr, uint32_t size);
 	~SpriteResHandle();

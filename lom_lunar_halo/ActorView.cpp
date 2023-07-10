@@ -72,47 +72,71 @@ void ActorView::Clear()
 
 void ActorView::InitAs(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* resMgr)
 {
-	// 为人物的每个【部件】的每个【动作】生成动画
+	// 为人物的每个【部件】的每个【方向】的【动作】生成动画
+
 	auto actorType = hero.Gender;
 	string subName[] = {
 		Mir::PlayerSubPart::Weapon,
 		Mir::PlayerSubPart::Horse,
 		Mir::PlayerSubPart::Actor,
+		Mir::PlayerSubPart::Hair,
 		Mir::PlayerSubPart::Effect,
 		Mir::PlayerSubPart::Shield,
 	};
 
-	auto fileIdx = Mir::GetActorImgFileIdx(actorType, hero.Dress);
-	for (int i = 0; i < (int)Mir::PlayerMotion::MAX; i++)
+	auto weaponFileIdx = Mir::GetWeaponImgFileIdx(actorType, hero.Weapon);
+	auto horseFileIdx = Mir::GetHorseImgFileIdx(actorType);
+	auto actorFileIdx = Mir::GetActorImgFileIdx(actorType, hero.Dress);
+	auto hairFileIdx = Mir::GetHairImgFileIdx(actorType, hero.Hair);
+	auto fxFileIdx = Mir::GetEffectImgFileIdx();
+	auto shieldFileIdx = Mir::GetShieldImgFileIdx();
+	int fileIdx[] = { weaponFileIdx,horseFileIdx,actorFileIdx,hairFileIdx,fxFileIdx,shieldFileIdx };
+
+	for (int dir = 0; dir < (int)Mir::Direction::MAX; dir++)
 	{
-		auto motionAnimData = animDB.GetData((uint16_t)Mir::ActorRaceType::Player, i);
-		auto actorImgIdx = Mir::GetActorFirstImgIdx(motionAnimData, actorType, hero.Dress, hero.Dir);
-		auto weaponImgIdx = actorImgIdx + Mir::GetWeaponFrame(hero.Weapon, hero.Dress);
-		auto horseImgIdx = actorImgIdx + Mir::GetHorseFrame(hero.Horse, hero.Dress);
-		auto fxImgIdx = actorImgIdx + Mir::GetEffectFrame(hero.Horse, hero.Dress);
-		auto shieldImgIdx = actorImgIdx + Mir::GetShieldFrame(hero.Horse, hero.Dress);
-
-		int idx[] = { weaponImgIdx,horseImgIdx,actorImgIdx,fxImgIdx,shieldImgIdx };
-		for (int i = 0; i < 5; i++)
+		Mir::Direction direction = (Mir::Direction)dir;
+		for (int motion = 0; motion < (int)Mir::PlayerMotion::MAX; motion++)
 		{
-			string name = subName[i];
-			auto node = GetSubPart(name);
-			if (node.expired())
-				continue;
+			auto motionAnimData = animDB.GetData((uint16_t)Mir::ActorRaceType::Player, motion);
+			auto actorImgIdx = Mir::GetActorFirstImgIdx(motionAnimData, actorType, hero.Dress, direction);
+			auto weaponImgOffset = Mir::GetWeaponFrame(hero.Weapon, hero.Dress);
+			auto horseImgOffset = Mir::GetHorseFrame(hero.Horse, hero.Dress);
+			auto hairImgOffset = Mir::GetHairFrame(hero.Hair, hero.Dress);
+			auto fxImgOffset = Mir::GetEffectFrame(hero.Effect, hero.Dress);
+			auto shieldImgOffset = Mir::GetShieldFrame(hero.Shield, hero.Dress);
 
-			auto imgIdx = idx[i];
-			auto animator = node.lock()->GetComponent<Animator>().lock()->As<Animator>();
-			auto resHolder = node.lock()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>();
-
-			Animation anim{};
-			anim.SetSpan(motionAnimData.AnimSpanMs);
-			for (int frame = 0; frame < motionAnimData.FrameCount; frame++)
+			int idx[] = { weaponImgOffset,horseImgOffset,0,hairImgOffset,fxImgOffset,shieldImgOffset };
+			for (int sub = 0; sub < 6; sub++)
 			{
-				auto sp = resMgr->LoadSprite({ (uint32_t)fileIdx, (uint32_t)(imgIdx+ frame) });
-				anim.AddFrame(sp->GetSprite());
-				resHolder->Add(sp);
+				auto fIdx = fileIdx[sub];
+				string name = subName[sub];
+				auto node = GetSubPart(name);
+				auto imgIdx = idx[sub] += actorImgIdx;
+				if (node.expired() || fIdx<0 || imgIdx < 0)
+					continue;
+
+				auto animator = node.lock()->GetComponent<Animator>().lock()->As<Animator>();
+				node.lock()->GetComponent<SpriteRenderer>().lock()->Enable = true;
+				auto resHolder = node.lock()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>();
+
+				Animation anim{};
+				anim.SetSpan(motionAnimData.AnimSpanMs);
+				for (int frame = 0; frame < motionAnimData.FrameCount; frame++)
+				{
+					auto sp = resMgr->LoadSprite({ (uint32_t)fIdx, (uint32_t)(imgIdx + frame) });
+					if (sp)
+						anim.AddFrame(sp->GetSprite());
+					else
+						anim.AddFrame({});
+					resHolder->Add(sp);
+				}
+				animator->Add(std::to_string(dir)+"," + std::to_string(motion), anim);
 			}
-			animator->Add(std::to_string(i), anim);
 		}
 	}
+}
+
+void ActorView::SetDirAndMotion(int dir, int motion)
+{
+	PlayAnim(std::to_string(dir) + "," + std::to_string(motion));
 }

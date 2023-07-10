@@ -68,6 +68,7 @@ public:
     inline std::shared_ptr<MirWorldRenderManager> GetWorldRenderManager() { return _worldRenderMgr; }
     inline std::shared_ptr<WilSpriteManager> GetMapSpriteManager() { return _mapSpriteManager; }
     inline std::shared_ptr<WilSpriteManager> GetActorSpriteManager() { return _actorSpriteManager; }
+    inline std::shared_ptr<WilSpriteManager> GetItemSpriteManager() { return _itemSpriteManager; }
     inline std::shared_ptr<WilSpriteManager> GetUiSpriteManager() { return _uiSpriteManager; }
     inline std::shared_ptr<YX::RmlUiAdapter> GetRmlUiAdapter() { return _rmlUiAdapter; }
 private:

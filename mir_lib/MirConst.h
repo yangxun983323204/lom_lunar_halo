@@ -36,14 +36,14 @@ namespace Mir
 	// 值关系到8方向的精灵索引偏移
 	enum class Direction 
 	{
-		Bottom = 0,
-		BottomRight,
-		Right,
+		Top = 0,
 		TopRight,
-		Top,
-		TopLeft,
-		Left,
+		Right,
+		BottomRight,
+		Bottom,
 		BottomLeft,
+		Left,
+		TopLeft,
 		
 		MAX,
 	};
@@ -70,30 +70,6 @@ namespace Mir
 	const int HeroFrameGroupMax = 3000;
 
 	const int WeaponFrameGroupMax = 3000;
-
-	inline int FrameDirOffset(Direction dir) { return (int)dir * 10; }
-	
-	inline int GetHorseFrame(uint8_t horse, uint8_t dress)
-	{
-		//m_dwCurrHorseFrame = (m_stFeatureEx.bHorse * _MAX_HORSE_FRAME - _MAX_HORSE_FRAME) + (m_dwCurrFrame - (_MAX_HERO_FRAME * m_stFeature.bDress) - _START_HORSE_FRAME);
-		return (horse - 1) * HorseFrameGroupMax - HeroFrameGroupMax * dress - HorseFrameBegin;
-	}
-
-	inline int GetWeaponFrame(uint8_t weapon, uint8_t dress)
-	{
-		//m_dwCurrWeaponFrame = (((m_stFeature.bWeapon-1)%10)*_MAX_WEAPON_FRAME)+(m_dwCurrFrame-(_MAX_HERO_FRAME*m_stFeature.bDress));
-		return (weapon-1)%10* WeaponFrameGroupMax - HeroFrameGroupMax * dress;
-	}
-
-	inline int GetEffectFrame(uint8_t effect, uint8_t dress)
-	{
-		return -1;// todo
-	}
-
-	inline int GetShieldFrame(uint8_t shield, uint8_t dress)
-	{
-		return -1;// todo
-	}
 
 	enum class PlayerMotion 
 	{
@@ -157,6 +133,44 @@ namespace Mir
 		MAX,
 	};
 
-	int GetActorImgFileIdx(ActorType actorType, uint8_t Dress);
+	const int HeroFrameSpan = 3000;
+	const int MonsterFrameSpan = 1000;
+
+	int GetActorImgFileIdx(ActorType actorType, uint8_t dress);
+	int GetHairImgFileIdx(ActorType actorType, uint8_t hair);
+	int GetWeaponImgFileIdx(ActorType actorType, uint8_t weapon);
+
+	#define _IMAGE_HORSE				33
+	inline int GetHorseImgFileIdx(uint8_t horse) { return horse == 0 ? -1 : _IMAGE_HORSE; }
+	inline int GetEffectImgFileIdx() { return -1; }// todo
+	inline int GetShieldImgFileIdx() { return -1; }// todo
+
 	int GetActorFirstImgIdx(const AnimData& data, ActorType actorType, uint8_t dress, Direction& dir);
+	inline int GetHorseFrame(uint8_t horse, uint8_t dress)
+	{
+		//m_dwCurrHorseFrame = (m_stFeatureEx.bHorse * _MAX_HORSE_FRAME - _MAX_HORSE_FRAME) + (m_dwCurrFrame - (_MAX_HERO_FRAME * m_stFeature.bDress) - _START_HORSE_FRAME);
+		return (horse - 1) * HorseFrameGroupMax - HeroFrameGroupMax * dress - HorseFrameBegin;
+	}
+
+	inline int GetHairFrame(uint8_t hair, uint8_t dress)
+	{
+		//m_dwCurrHairFrame = (m_stFeature.bHair*_MAX_HERO_FRAME-_MAX_HERO_FRAME)+(m_dwCurrFrame-(_MAX_HERO_FRAME*m_stFeature.bDress));
+		return (hair - 1) * HeroFrameSpan - HeroFrameSpan * dress;
+	}
+
+	inline int GetWeaponFrame(uint8_t weapon, uint8_t dress)
+	{
+		//m_dwCurrWeaponFrame = (((m_stFeature.bWeapon-1)%10)*_MAX_WEAPON_FRAME)+(m_dwCurrFrame-(_MAX_HERO_FRAME*m_stFeature.bDress));
+		return (weapon - 1) % 10 * WeaponFrameGroupMax - HeroFrameGroupMax * dress;
+	}
+
+	inline int GetEffectFrame(uint8_t effect, uint8_t dress)
+	{
+		return -1;// todo
+	}
+
+	inline int GetShieldFrame(uint8_t shield, uint8_t dress)
+	{
+		return -1;// todo
+	}
 }

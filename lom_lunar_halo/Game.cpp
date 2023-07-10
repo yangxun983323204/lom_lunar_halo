@@ -224,7 +224,8 @@ void Game::CreateDeviceDependentResources()
     _uiSpriteManager = std::make_shared<WilSpriteManager>(device, _setting->GetRootDir());
     _uiSpriteManager->SetCapacity(50);
 
-    _worldRenderMgr = std::make_shared<MirWorldRenderManager>(m_deviceResources.get(), _mapSpriteManager);
+    _worldRenderMgr = std::make_shared<MirWorldRenderManager>(m_deviceResources.get(), 
+        _mapSpriteManager, _actorSpriteManager, _itemSpriteManager);
     
     _rmlUiAdapter = std::make_shared<YX::RmlUiAdapter>(this);
     _procMgr = std::make_shared<ProcessManager>(this);

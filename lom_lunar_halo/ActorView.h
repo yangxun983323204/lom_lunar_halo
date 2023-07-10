@@ -29,6 +29,7 @@ namespace Mir {
 		const string Weapon = "weapon";
 		const string Horse = "horse";
 		const string Actor = "actor";
+		const string Hair = "hair";
 		const string Effect = "effect";
 		const string Shield = "shield";
 	}
@@ -45,6 +46,7 @@ public:
 	weak_ptr<SceneNode> GetSubPart(string name);
 	void Clear();
 	void InitAs(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* resMgr);
+	void SetDirAndMotion(int dir, int motion);
 
 	int Id;
 	int Type;

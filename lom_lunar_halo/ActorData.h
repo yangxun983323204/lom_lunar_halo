@@ -23,6 +23,8 @@ public:
 	uint8_t Hair;
 	uint8_t Weapon;
 	uint8_t Horse;
+	uint8_t Effect;
+	uint8_t Shield;
 	Mir::PlayerMotion Motion;
 };
 

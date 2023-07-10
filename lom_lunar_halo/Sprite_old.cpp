@@ -15,8 +15,8 @@ shared_ptr<Sprite_old> Sprite_old::CreateFromWIL(ID3D11Device* device, ImageLib:
 
 	sprite->_w = info.Width;
 	sprite->_h = info.Height;
-	sprite->_pivotX = info.PivotX;
-	sprite->_pivotY = info.PivotY;
+	sprite->_pivotX = info.OffsetX;
+	sprite->_pivotY = info.OffsetY;
 	sprite->_shadow = info.GetShadowType();
 	sprite->_shadowPosX = info.ShadowPosX;
 	sprite->_shadowPosY = info.ShadowPosY;

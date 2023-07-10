@@ -25,22 +25,26 @@ void GameProcess::StartEnter()
     HeroData hero{};
     hero.NetId = 1;
     hero.Name = "小明";
-    hero.Pos = { 400,400 };
+    hero.Pos = { 405,414 };
     hero.Dir = Mir::Direction::Bottom;
-    hero.Dress = 1;
-    hero.Gender = Mir::ActorType::Man;
-    hero.Hair = 1;
-    hero.Weapon = 1;
+    hero.Dress = 6;
+    hero.Gender = Mir::ActorType::Woman;
+    hero.Hair = 3;
+    hero.Weapon = 3;
     hero.Horse = 0;
-    hero.Motion = Mir::PlayerMotion::Stand;
-    _game->GetWorldRenderManager()->AddHero(hero);
+    hero.Motion = Mir::PlayerMotion::Run;
+    _game->GetWorldRenderManager()->SetSelfHero(hero);
     //
+    string rmlPath = _game->GetSetting()->GetUILayoutDir() + "game.rml";
+    _game->GetRmlUiAdapter()->GetContext()->LoadDocument(rmlPath)->Show();
+
 	_state = IProcess::State::Entered;
 }
 
 void GameProcess::StartExit()
 {
     _state = IProcess::State::Exiting;
+    _game->GetRmlUiAdapter()->GetContext()->UnloadAllDocuments();
     _game->GetWorldRenderManager()->Clear();
 	_state = IProcess::State::Exited;
 }
@@ -53,22 +57,32 @@ void GameProcess::Update(DX::StepTimer const& timer)
         auto pos = _game->GetWorldRenderManager()->GetViewPoint();
         pos.x -= 4;
         _game->GetWorldRenderManager()->SetViewPoint(pos);
+        _game->GetWorldRenderManager()->SetSelfHeroDirection(Mir::Direction::Left);
     }
     else if (state.IsKeyDown(Keyboard::Keys::D)) {
         auto pos = _game->GetWorldRenderManager()->GetViewPoint();
         pos.x += 4;
         _game->GetWorldRenderManager()->SetViewPoint(pos);
+        _game->GetWorldRenderManager()->SetSelfHeroDirection(Mir::Direction::Right);
     }
     else if (state.IsKeyDown(Keyboard::Keys::W)) {
         auto pos = _game->GetWorldRenderManager()->GetViewPoint();
         pos.y += 4;
         _game->GetWorldRenderManager()->SetViewPoint(pos);
+        _game->GetWorldRenderManager()->SetSelfHeroDirection(Mir::Direction::Top);
     }
     else if (state.IsKeyDown(Keyboard::Keys::S)) {
         auto pos = _game->GetWorldRenderManager()->GetViewPoint();
         pos.y -= 4;
         _game->GetWorldRenderManager()->SetViewPoint(pos);
+        _game->GetWorldRenderManager()->SetSelfHeroDirection(Mir::Direction::Bottom);
     }
+
+    auto vp = _game->GetWorldRenderManager()->GetViewPoint();
+    float x = (float)vp.x / Mir::CellW;
+    float y = (float)vp.y / Mir::CellH;
+    auto debug = _game->GetRmlUiAdapter()->GetContext()->GetDocument(0)->GetElementById("debug");
+    debug->SetInnerRML("视点:(" + std::to_string(x) + "," + std::to_string(y) + ")");
 }
 
 void GameProcess::GetWindowSize(int& w, int& h)

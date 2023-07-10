@@ -8,17 +8,16 @@
 <body>
   <div id="layout" class="ui_root_layout">
     <img id="bg" src="wil://Data/Interface1c.wil?50"/>
-      <img id="loginBorder" src="wil://Data/Interface1c.wil?1"/>
-      <img id="btnLogin" src="wil://Data/Interface1c.wil?10"/>
-      <img id="btnNew" src="wil://Data/Interface1c.wil?12"/>
-      <img id="btnChange" src="wil://Data/Interface1c.wil?14"/>
-      <img id="btnExit" src="wil://Data/Interface1c.wil?16"/>
+    <img id="loginBorder" src="wil://Data/Interface1c.wil?1"/>
+    <img id="btnLogin" src="wil://Data/Interface1c.wil?10"/>
+    <img id="btnNew" src="wil://Data/Interface1c.wil?12"/>
+    <img id="btnChange" src="wil://Data/Interface1c.wil?14"/>
+    <img id="btnExit" src="wil://Data/Interface1c.wil?16"/>
 
-      <div id="inputGroup">
-        <img id="id_pw" src="wil://Data/Interface1c.wil?2"/>
-        <input id="iptId" type="text"/>
-        <input id="iptPw" type="text"/>
-      </div>
+    <div id="inputGroup">
+      <img id="id_pw" src="wil://Data/Interface1c.wil?2"/>
+      <input id="iptId" type="text"/>
+      <input id="iptPw" type="text"/>
     </div>
   </div>
 </body>

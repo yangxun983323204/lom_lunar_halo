@@ -20,10 +20,10 @@ MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr,
     auto renderFunc = std::bind(&MirWorldRenderManager::Draw, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     _renderSystem->SetRenderFunc(renderFunc);
 
-    auto cameraNode = _sceneMgr->CreateCameraNode();
-    cameraNode->SetLocalPosition(Mir::GetCellCenter(400, 400));
+    _camera = _sceneMgr->CreateCameraNode();
+    _camera->SetLocalPosition(Mir::GetCellCenter(400, 400));
     //
-    _gridView = cameraNode->AddComponent<GridViewComponent>().lock();
+    _gridView = _camera->AddComponent<GridViewComponent>().lock();
     _animDB = std::make_unique<AnimDatabase>();
     _animDB->LoadFromXml("./AnimData.xml");
 }
@@ -195,13 +195,37 @@ void MirWorldRenderManager::Clear()
 
 void MirWorldRenderManager::AddHero(HeroData& data)
 {
-    _heros.insert({ data.NetId, data });
+    _heros[data.NetId] = data;
     ActorView* view = nullptr;
     auto s = GetActorView(data.NetId, _sceneMgr->GetSpawnPlayerFunctor());
     s->Clear();
     s->GetSceneNode()->SetLocalPosition(Mir::GetCellCenter(data.Pos.x, data.Pos.y));
     s->InitAs(data, *_animDB, _actorResMgr.get());
     s->PlayAnim(std::to_string((int)data.Motion));
+}
+
+void MirWorldRenderManager::SetSelfHero(HeroData& data)
+{
+    AddHero(data);
+    auto s = GetActorView(data.NetId, _sceneMgr->GetSpawnPlayerFunctor());
+    s->GetSceneNode()->SetParent(_camera);
+    s->GetSceneNode()->ResetTRS();
+    s->GetSceneNode()->SetLocalPosition({ -Mir::CellWHalf, -Mir::CellHHalf });
+    _selfHeroId = data.NetId;
+}
+
+void MirWorldRenderManager::SetSelfHeroDirection(Mir::Direction dir)
+{
+    _heros[_selfHeroId].Dir = dir;
+    auto s = GetActorView(_selfHeroId, _sceneMgr->GetSpawnPlayerFunctor());
+    s->SetDirAndMotion((int)_heros[_selfHeroId].Dir, (int)_heros[_selfHeroId].Motion);
+}
+
+void MirWorldRenderManager::SetSelfHeroMotion(Mir::PlayerMotion motion)
+{
+    _heros[_selfHeroId].Motion = motion;
+    auto s = GetActorView(_selfHeroId, _sceneMgr->GetSpawnPlayerFunctor());
+    s->SetDirAndMotion((int)_heros[_selfHeroId].Dir, (int)_heros[_selfHeroId].Motion);
 }
 
 void MirWorldRenderManager::SetUpBg(WilSpriteKey key)

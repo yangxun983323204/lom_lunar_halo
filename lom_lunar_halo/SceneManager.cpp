@@ -150,18 +150,21 @@ shared_ptr<SceneNode> SceneManager::SpawnPlayer()
     auto weapon = SpawnAnimSprite();
     auto horse = SpawnAnimSprite();
     auto actor = SpawnAnimSprite();
+    auto hair = SpawnAnimSprite();
     auto effect = SpawnAnimSprite();
     auto shield = SpawnAnimSprite();
 
     weapon->SetParent(root); weapon->ResetTRS();
     horse->SetParent(root); horse->ResetTRS();
     actor->SetParent(root); actor->ResetTRS();
+    hair->SetParent(root); hair->ResetTRS();
     effect->SetParent(root); effect->ResetTRS();
     shield->SetParent(root); shield->ResetTRS();
 
     weapon->Name = Mir::PlayerSubPart::Weapon;
     horse->Name = Mir::PlayerSubPart::Horse;
     actor->Name = Mir::PlayerSubPart::Actor;
+    hair->Name = Mir::PlayerSubPart::Hair;
     effect->Name = Mir::PlayerSubPart::Effect;
     shield->Name = Mir::PlayerSubPart::Shield;
 

@@ -48,6 +48,9 @@ public:
 	void Clear();
 
 	void AddHero(HeroData& data);
+	void SetSelfHero(HeroData& data);
+	void SetSelfHeroDirection(Mir::Direction dir);
+	void SetSelfHeroMotion(Mir::PlayerMotion motion);
 private:
 	SpriteRenderer* GetMapStaticSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
 	SpriteRenderer* GetMapAnimSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
@@ -68,6 +71,7 @@ private:
 	SpriteRenderLayer _mid2Use;
 	SpriteRenderLayer _topUse;
 
+	int _selfHeroId;
 	unordered_map<int, HeroData> _heros;
 	unordered_map<int, ActorView*> _actorViews;
 
@@ -81,6 +85,7 @@ private:
 	shared_ptr<WilSpriteManager> _actorResMgr;
 	shared_ptr<WilSpriteManager> _itemResMgr;
 
+	shared_ptr<SceneNode> _camera;
 	shared_ptr<GridViewComponent> _gridView;
 
 	unique_ptr<AnimDatabase> _animDB;
