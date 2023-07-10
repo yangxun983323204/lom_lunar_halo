@@ -36,6 +36,7 @@ public:
 	void ResetTRS();
 	weak_ptr<SceneNode> GetParent();
 	vector<weak_ptr<SceneNode>> GetChildren();
+	SceneNode* FindChild(std::string name);
 	template<typename TComponent>
 	weak_ptr<TComponent> AddComponent();
 	template<typename TComponent>

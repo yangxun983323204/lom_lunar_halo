@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <functional>
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include "DeviceResources.h"
@@ -13,27 +14,6 @@ using std::unique_ptr;
 using DirectX::XMFLOAT4;
 
 typedef shared_ptr<SceneNode> SceneNodeRef;
-
-namespace Mir {
-	enum class ActorType {
-		Monster = 0,
-		Player,
-		Npc
-	};
-
-	namespace MonsterSubPart {
-		const string Actor = "actor";
-		const string Shadow = "shadow";
-	}
-
-	namespace PlayerSubPart {
-		const string Weapon = "weapon";
-		const string Horse = "horse";
-		const string Actor = "actor";
-		const string Effect = "effect";
-		const string Shield = "shield";
-	}
-}
 
 class SceneManager
 {
@@ -59,6 +39,10 @@ public:
 	void ReleasePlayer(shared_ptr<SceneNode> ptr);
 
 	void Clear();
+
+	inline function<shared_ptr<SceneNode>()> GetSpawnMonsterFunctor() { return _spawnMonsterFunc; }
+	inline function<shared_ptr<SceneNode>()> GetSpawnPlayerFunctor() { return _spawnPlayerFunc; }
+	inline function<shared_ptr<SceneNode>()> GetSpawnNpcFunctor() { return _spawnNpcFunc; }
 private:
 	shared_ptr<SceneNode> CreateRawSpriteNode();
 
@@ -68,5 +52,9 @@ private:
 	vector<SceneNodeRef> _monsterPool;
 	vector<SceneNodeRef> _npcPool;
 	vector<SceneNodeRef> _playerPool;
+
+	function<shared_ptr<SceneNode>()> _spawnMonsterFunc;
+	function<shared_ptr<SceneNode>()> _spawnPlayerFunc;
+	function<shared_ptr<SceneNode>()> _spawnNpcFunc;
 };
 

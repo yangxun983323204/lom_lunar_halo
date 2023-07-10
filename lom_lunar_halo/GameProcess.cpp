@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "StringCodec.hpp"
 #include "../DirectXTK-main/Inc/Keyboard.h"
+#include "ActorData.h"
 
 using DirectX::Keyboard;
 
@@ -20,7 +21,20 @@ void GameProcess::StartEnter()
     else {
         MessageBox(_game->GetDeviceResource()->GetWindow(), _W("加载map失败").c_str(), _W("测试map加载").c_str(), 0);
     }
-
+    // 测试添加一个角色
+    HeroData hero{};
+    hero.NetId = 1;
+    hero.Name = "小明";
+    hero.Pos = { 400,400 };
+    hero.Dir = Mir::Direction::Bottom;
+    hero.Dress = 1;
+    hero.Gender = Mir::ActorType::Man;
+    hero.Hair = 1;
+    hero.Weapon = 1;
+    hero.Horse = 0;
+    hero.Motion = Mir::PlayerMotion::Stand;
+    _game->GetWorldRenderManager()->AddHero(hero);
+    //
 	_state = IProcess::State::Entered;
 }
 

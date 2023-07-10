@@ -1,0 +1,54 @@
+<AnimData>
+    <Group id="1" name="Hero">
+        <Anim id="0"    start="0"     count="4"   span="200"    name="_MT_STAND"/>
+        <Anim id="1"    start="80"    count="6"   span="100"    name="_MT_ARROWATTACK"/>
+        <Anim id="2"    start="160"   count="5"   span="80"     name="_MT_SPELL1"/>
+        <Anim id="3"    start="240"   count="5"   span="80"     name="_MT_SPELL2"/>
+        <Anim id="4"    start="320"   count="1"   span="100"    name="_MT_HOLD"/>
+        <Anim id="5"    start="400"   count="1"   span="100"    name="_MT_PUSHBACK"/>
+        <Anim id="6"    start="480"   count="1"   span="100"    name="_MT_PUSHBACKFLY"/>
+        <Anim id="7"    start="560"   count="3"   span="200"    name="_MT_ATTACKMODE"/>
+        <Anim id="8"    start="640"   count="2"   span="300"    name="_MT_CUT"/>
+        <Anim id="9"    start="720"   count="6"   span="85"     name="_MT_ONEVSWING"/>
+        <Anim id="10"   start="800"   count="6"   span="85"     name="_MT_TWOVSWING"/>
+        <Anim id="11"   start="880"   count="6"   span="85"     name="_MT_ONEHSWING"/>
+        <Anim id="12"   start="960"   count="6"   span="85"     name="_MT_TWOHSWING"/>
+        <Anim id="13"   start="1040"  count="6"   span="85"     name="_MT_SPEARVSWING"/>
+        <Anim id="14"   start="1120"  count="6"   span="85"     name="_MT_SPEARHSWING"/>
+        <Anim id="15"   start="1200"  count="3"   span="100"    name="_MT_HITTED"/>
+        <Anim id="16"   start="1280"  count="10"  span="70"     name="_MT_WHEELWIND"/>
+        <Anim id="17"   start="1360"  count="10"  span="90"     name="_MT_RANDSWING"/>
+        <Anim id="18"   start="1440"  count="10"  span="100"    name="_MT_BACKDROPKICK"/>
+        <Anim id="19"   start="1520"  count="10"  span="120"    name="_MT_DIE"/>
+        <Anim id="20"   start="1600"  count="10"  span="100"    name="_MT_SPECIALDIE"/>
+        <Anim id="21"   start="1680"  count="6"   span="90"     name="_MT_WALK"/>
+        <Anim id="22"   start="1760"  count="6"   span="120"    name="_MT_RUN"/>
+        <Anim id="23"   start="1840"  count="6"   span="100"    name="_MT_MOODEPO"/>
+        <Anim id="24"   start="1920"  count="10"  span="100"    name="_MT_ROLL"/>
+        <Anim id="25"   start="2000"  count="4"   span="180"    name="_MT_FISHSTAND"/>
+        <Anim id="26"   start="2080"  count="3"   span="180"    name="_MT_FISHHAND"/>
+        <Anim id="27"   start="2160"  count="8"   span="180"    name="_MT_FISHTHROW"/>
+        <Anim id="28"   start="2240"  count="8"   span="180"    name="_MT_FISHPULL"/>
+        <Anim id="29"   start="2320"  count="4"   span="200"    name="_MT_HORSESTAND"/>
+        <Anim id="30"   start="2400"  count="6"   span="100"    name="_MT_HORSEWALK"/>
+        <Anim id="31"   start="2480"  count="6"   span="100"    name="_MT_HORSERUN"/>
+        <Anim id="32"   start="2560"  count="3"   span="100"    name="_MT_HORSEHIT"/>
+    </Group>
+    <Group id="0" name="Monster">
+        <Anim id="0"    start="0"     count="4"   span="300"    name="_MT_MON_STAND"/>
+        <Anim id="1"    start="80"    count="6"   span="130"    name="_MT_MON_WALK"/>
+        <Anim id="2"    start="160"   count="6"   span="120"    name="_MT_MON_ATTACK_A"/>
+        <Anim id="3"    start="240"   count="2"   span="300"    name="_MT_MON_HITTED"/>
+        <Anim id="4"    start="320"   count="10"  span="150"    name="_MT_MON_DIE"/>
+        <Anim id="5"    start="400"   count="6"   span="150"    name="_MT_MON_ATTACK_B1"/>
+        <Anim id="6"    start="480"   count="10"  span="150"    name="_MT_MON_SPELL_A2"/>
+        <Anim id="7"    start="560"   count="10"  span="150"    name="_MT_MON_SPELL_B"/>
+        <Anim id="8"    start="640"   count="6"   span="150"    name="_MT_MON_APPEAR"/>
+        <Anim id="9"    start="880"   count="1"   span="150"    name="_MT_MON_SPECIAL_MTN"/>
+    </Group>
+    <Group id="2" name="Npc">
+        <Anim id="0"    start="0"     count="4"   span="300"    name="_MT_NPC_STAND"/>
+        <Anim id="1"    start="30"    count="10"  span="300"    name="_MT_NPC_ACT01"/>
+        <Anim id="2"    start="60"    count="6"   span="300"    name="_MT_NPC_ACT02"/>
+    </Group>
+</AnimData>

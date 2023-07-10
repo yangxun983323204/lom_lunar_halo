@@ -44,10 +44,10 @@
     <ClCompile Include="MapData.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MirConst.h.cpp">
+    <ClCompile Include="MirUtility.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MirUtility.cpp">
+    <ClCompile Include="MirConst.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

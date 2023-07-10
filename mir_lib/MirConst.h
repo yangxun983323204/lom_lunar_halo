@@ -21,18 +21,21 @@ namespace Mir
 	const uint16_t GameLayoutHHalf = 300;
 
 	// Tile有8种动画帧间间隔
-	const uint16_t TileAnimSpanMs[]{
+	const uint16_t TileAnimSpanMs[]
+	{
 		150,200,250,300,350,400,420,450
 	};
 
-	enum class ShadowType {
+	enum class ShadowType 
+	{
 		None = 0,
 		Proj = 49,
 		Orth = 50,
 	};
 
 	// 值关系到8方向的精灵索引偏移
-	enum class Direction {
+	enum class Direction 
+	{
 		Bottom = 0,
 		BottomRight,
 		Right,
@@ -45,28 +48,55 @@ namespace Mir
 		MAX,
 	};
 
-	const int StartHorseFrame = 2320;
-	const int HorseFrameSpan = 400;
+	enum ActorType 
+	{
+		Man = 0,
+		Woman = 1,
+		Monster = 3,
+		Npc = 5,
+	};
 
-	const int HeroFrameSpan = 3000;
+	class AnimData 
+	{
+	public:
+		uint16_t FirstFrame;
+		uint16_t FrameCount;
+		uint16_t AnimSpanMs;
+	};
 
-	const int WeaponFrameSpan = 3000;
+	const int HorseFrameBegin = 2320;
+	const int HorseFrameGroupMax = 400;
+
+	const int HeroFrameGroupMax = 3000;
+
+	const int WeaponFrameGroupMax = 3000;
 
 	inline int FrameDirOffset(Direction dir) { return (int)dir * 10; }
 	
-	inline int GetHorseFrame(uint8_t horse, uint8_t dress, Direction dir)
+	inline int GetHorseFrame(uint8_t horse, uint8_t dress)
 	{
 		//m_dwCurrHorseFrame = (m_stFeatureEx.bHorse * _MAX_HORSE_FRAME - _MAX_HORSE_FRAME) + (m_dwCurrFrame - (_MAX_HERO_FRAME * m_stFeature.bDress) - _START_HORSE_FRAME);
-		return (horse - 1) * HorseFrameSpan - HeroFrameSpan * dress - StartHorseFrame + FrameDirOffset(dir);
+		return (horse - 1) * HorseFrameGroupMax - HeroFrameGroupMax * dress - HorseFrameBegin;
 	}
 
-	inline int GetWeaponFrame(uint8_t weapon, uint8_t dress, Direction dir)
+	inline int GetWeaponFrame(uint8_t weapon, uint8_t dress)
 	{
 		//m_dwCurrWeaponFrame = (((m_stFeature.bWeapon-1)%10)*_MAX_WEAPON_FRAME)+(m_dwCurrFrame-(_MAX_HERO_FRAME*m_stFeature.bDress));
-		return (weapon-1)%10* WeaponFrameSpan - HeroFrameSpan * dress + FrameDirOffset(dir);
+		return (weapon-1)%10* WeaponFrameGroupMax - HeroFrameGroupMax * dress;
 	}
 
-	enum class PlayerMotion {
+	inline int GetEffectFrame(uint8_t effect, uint8_t dress)
+	{
+		return -1;// todo
+	}
+
+	inline int GetShieldFrame(uint8_t shield, uint8_t dress)
+	{
+		return -1;// todo
+	}
+
+	enum class PlayerMotion 
+	{
 		Stand = 0,
 		ArrowAttack,
 		Spell_1,
@@ -126,4 +156,7 @@ namespace Mir
 
 		MAX,
 	};
+
+	int GetActorImgFileIdx(ActorType actorType, uint8_t Dress);
+	int GetActorFirstImgIdx(const AnimData& data, ActorType actorType, uint8_t dress, Direction& dir);
 }

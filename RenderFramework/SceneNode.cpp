@@ -94,6 +94,17 @@ vector<weak_ptr<SceneNode>> SceneNode::GetChildren()
     return ret;
 }
 
+SceneNode* SceneNode::FindChild(std::string name)
+{
+    for (auto i : _children)
+    {
+        if (i->Name == name)
+            return i.get();
+    }
+
+    return nullptr;
+}
+
 weak_ptr<ISceneNodeComponent> SceneNode::GetComponent(int typeId)
 {
     for(auto i : _components) 

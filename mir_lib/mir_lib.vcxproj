@@ -149,7 +149,7 @@
   <ItemGroup>
     <ClCompile Include="ImageLib.cpp" />
     <ClCompile Include="MapData.cpp" />
-    <ClCompile Include="MirConst.h.cpp" />
+    <ClCompile Include="MirConst.cpp" />
     <ClCompile Include="MirUtility.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -102,6 +102,9 @@
     <ClInclude Include="ActorData.h">
       <Filter>SceneManager</Filter>
     </ClInclude>
+    <ClInclude Include="AnimDatabase.h">
+      <Filter>SceneManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -167,6 +170,9 @@
       <Filter>SceneManager</Filter>
     </ClCompile>
     <ClCompile Include="ActorData.cpp">
+      <Filter>SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimDatabase.cpp">
       <Filter>SceneManager</Filter>
     </ClCompile>
   </ItemGroup>

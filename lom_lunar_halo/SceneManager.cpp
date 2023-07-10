@@ -8,6 +8,9 @@ SceneManager::SceneManager():
     _monsterPool{}, _npcPool{}, _playerPool{}
 {
     _root = std::make_shared<SceneNode>();
+    _spawnMonsterFunc = std::bind(&SceneManager::SpawnMonster, this);
+    _spawnPlayerFunc = std::bind(&SceneManager::SpawnPlayer, this);
+    _spawnNpcFunc = std::bind(&SceneManager::SpawnNpc, this);
 }
 
 shared_ptr<SceneNode> SceneManager::CreateNode()
@@ -54,7 +57,7 @@ shared_ptr<SceneNode> SceneManager::SpawnStaticSprite()
 
 void SceneManager::ReleaseStaticSprite(shared_ptr<SceneNode> ptr)
 {
-    ptr->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
+    ptr->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
     ptr->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Enable = false;
     _staticSpritePool.push_back(ptr);
 }
@@ -77,7 +80,7 @@ shared_ptr<SceneNode> SceneManager::SpawnAnimSprite()
 void SceneManager::ReleaseAnimSprite(shared_ptr<SceneNode> ptr)
 {
     ptr->GetComponent<Animator>().lock()->As<Animator>()->Clear();
-    ptr->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->holder.clear();
+    ptr->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
     ptr->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Enable = false;
     _animSpritePool.push_back(ptr);
 }
