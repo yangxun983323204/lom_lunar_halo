@@ -10,7 +10,18 @@ string KEY_UILAYOUT = "UILayoutDir";
 bool Setting::Load()
 {
     struct _stat buffer;
-    if (_wstat(L"config.json", &buffer) == 0)
+    if (_wstat(L"config.local.json", &buffer) == 0)
+    {
+        std::ifstream cfg(L"config.local.json");
+        std::string str = std::string((std::istreambuf_iterator<char>(cfg)),
+            std::istreambuf_iterator<char>());
+
+        _setting = json::parse(str);
+        cfg.close();
+        Read();
+        return true;
+    }
+    else if (_wstat(L"config.json", &buffer) == 0)
     {
         std::ifstream cfg(L"config.json");
         std::string str = std::string((std::istreambuf_iterator<char>(cfg)),
