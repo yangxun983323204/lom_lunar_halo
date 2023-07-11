@@ -97,10 +97,13 @@ void Game::Render()
     auto context = m_deviceResources->GetD3DDeviceContext();
 
     // TODO: Add your rendering code here.
-    _batch->Begin();
     _worldRenderMgr->Render();
+
+    _batch->Begin();
     YX::GUI::Canvas::DrawAll();
     _batch->End();
+
+    _worldRenderMgr->RenderDebug();
 
     _rmlUiAdapter->Render();
     m_deviceResources->PIXEndEvent();
@@ -215,6 +218,7 @@ void Game::CreateDeviceDependentResources()
 
     // TODO: Initialize device dependent objects here (independent of window size).
     _batch.reset(new SpriteBatch{ m_deviceResources->GetD3DDeviceContext()});
+    _states = std::make_unique<CommonStates>(m_deviceResources->GetD3DDevice());
     _mapSpriteManager = std::make_shared<WilSpriteManager>(device, _setting->GetRootDir());
     _mapSpriteManager->SetCapacity(100);
     _actorSpriteManager = std::make_shared<WilSpriteManager>(device, _setting->GetRootDir());

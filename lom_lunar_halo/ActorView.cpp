@@ -91,6 +91,9 @@ void ActorView::InitAs(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* r
 	auto fxFileIdx = Mir::GetEffectImgFileIdx();
 	auto shieldFileIdx = Mir::GetShieldImgFileIdx();
 	int fileIdx[] = { weaponFileIdx,horseFileIdx,actorFileIdx,hairFileIdx,fxFileIdx,shieldFileIdx };
+	DirectX::XMFLOAT4 debugColor[] = { 
+		{1,0,0,1},{0,1,0,1},{0,0,1,1},
+		{1,1,0,1},{1,0,1,1},{0,1,1,1}, };
 
 	for (int dir = 0; dir < (int)Mir::Direction::MAX; dir++)
 	{
@@ -116,7 +119,14 @@ void ActorView::InitAs(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* r
 					continue;
 
 				auto animator = node.lock()->GetComponent<Animator>().lock()->As<Animator>();
-				node.lock()->GetComponent<SpriteRenderer>().lock()->Enable = true;
+				auto sr = node.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
+				sr->Enable = true;
+				sr->SortLayer = Layer;
+				if (true) {
+					sr->__debug = true;
+					sr->__debugColor = debugColor[sub];
+				}
+
 				auto resHolder = node.lock()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>();
 
 				Animation anim{};

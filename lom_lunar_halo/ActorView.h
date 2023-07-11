@@ -49,7 +49,8 @@ public:
 	void SetDirAndMotion(int dir, int motion);
 
 	int Id;
-	int Type;
+	Mir::ActorType Type;
+	int Layer;
 protected:
 };
 

@@ -4,7 +4,9 @@
 #include "SpriteRenderer.h"
 #include <iostream>
 #include <algorithm>
+#include <DirectXMath.h>
 #include "GridViewComponent.hpp"
+#include "../DirectXTK-main/Inc/BufferHelpers.h"
 
 using std::cout;
 
@@ -33,10 +35,10 @@ void SpriteRenderSystem::Render()
 	}
 }
 
-void SpriteRenderSystem::RenderCamera(Camera* camera)
+void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(SpriteRenderer*)> filter, bool debugMode)
 {
 	if (camera->ClearType == Camera::ClearType::Color) {
-		_clearFunc(camera->ClearColor);
+		Clear(camera->ClearColor);
 	}
 
 	auto spRenderers = ISystem::GetComponentsByType(SpriteRenderer::TypeId);
@@ -59,15 +61,196 @@ void SpriteRenderSystem::RenderCamera(Camera* camera)
 			return sa < sb;
 		});
 
+	BeginDraw();
 	for (auto spRenderer : spRenderers) {
 		auto sr = dynamic_cast<SpriteRenderer*>(spRenderer);
 		if (sr->Sprite.expired())
 			continue;
+		if (filter && !filter(sr))
+			continue;
 
+		auto wpos = sr->GetSceneNode()->GetWorldPosition();
 		auto viewRect = sr->GetWorldRect();
 		auto cameraWPos = camera->GetSceneNode()->GetWorldPosition();
 		viewRect.x -= cameraWPos.x;
 		viewRect.y -= cameraWPos.y;
-		_renderFunc(sr->Sprite.lock()->TextureSRV.Get(), viewRect, sr->Color);
+		wpos.x -= cameraWPos.x;
+		wpos.y -= cameraWPos.y;
+		if(!debugMode)
+			Draw(wpos, sr->Sprite.lock()->TextureSRV.Get(), viewRect, sr->Color);
+		else
+			DrawDebug(wpos, sr->Sprite.lock()->TextureSRV.Get(), viewRect, sr->__debugColor);
 	}
+	EndDraw();
+}
+
+void SpriteRenderSystem::RenderDebug()
+{
+	auto cameras = ISystem::GetComponentsByType(Camera::TypeId);
+	if (cameras.size() <= 0)
+	{
+		cout << "no camera!";
+		return;
+	}
+
+	cameras.sort([](ISceneNodeComponent* a, ISceneNodeComponent* b) {
+		return dynamic_cast<Camera*>(a)->Depth < dynamic_cast<Camera*>(b)->Depth;
+		});
+
+	for (auto camera : cameras)
+	{
+		RenderCamera(dynamic_cast<Camera*>(camera), [](SpriteRenderer* sr) {
+			return sr->__debug;
+			}, true);
+	}
+}
+
+void SpriteRenderSystem::BeginDraw()
+{
+	_batch->Begin();
+}
+
+void SpriteRenderSystem::EndDraw()
+{
+	_batch->End();
+}
+
+void SpriteRenderSystem::Draw(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
+{
+	// 目地：观察坐标->屏幕坐标
+	int offsetX = _vw / 2;
+	int offsetY = -_vh / 2;
+	// 变换到左上角
+	viewRect.x += offsetX;
+	viewRect.y += offsetY;
+	// y轴反向
+	viewRect.y *= -1;
+	RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
+	// todo 支持精灵颜色
+	sRect.left = sRect.left * _dpiScale;
+	sRect.right = sRect.right * _dpiScale;
+	sRect.bottom = sRect.bottom * _dpiScale;
+	sRect.top = sRect.top * _dpiScale;
+	_batch->Draw(srv, sRect);
+}
+
+void SpriteRenderSystem::DrawDebug(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
+{
+	// 目地：观察坐标->屏幕坐标
+	int offsetX = _vw / 2;
+	int offsetY = -_vh / 2;
+	// 变换到左上角
+	viewRect.x += offsetX;
+	viewRect.y += offsetY;
+	vpos.x += offsetX; vpos.y += offsetY;
+	// y轴反向
+	viewRect.y *= -1;
+	vpos.y *= -1;
+	RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
+
+	auto centerX = (sRect.right + sRect.left) / 2;
+	auto centerY = (sRect.bottom + sRect.top) / 2;
+	auto f4 = DirectX::XMLoadFloat4(&color);
+	// draw cross
+	RECT cross = GetDebugRect(vpos.x, vpos.y);
+	_batch->Draw(_debugImgCross->TextureSRV.Get(), cross, f4);
+	// draw left top
+	RECT lt = GetDebugRect(sRect.left, sRect.top);
+	_batch->Draw(_debugImgLT->TextureSRV.Get(), lt, f4);
+	// draw right top
+	RECT rt = GetDebugRect(sRect.right, sRect.top);
+	_batch->Draw(_debugImgRT->TextureSRV.Get(), rt, f4);
+	// draw right bottom
+	RECT rb = GetDebugRect(sRect.right, sRect.bottom);
+	_batch->Draw(_debugImgRB->TextureSRV.Get(), rb, f4);
+	// draw left bottom
+	RECT lb = GetDebugRect(sRect.left, sRect.bottom);
+	_batch->Draw(_debugImgLB->TextureSRV.Get(), lb, f4);
+}
+
+void SpriteRenderSystem::Clear(DirectX::XMFLOAT4 color)
+{
+	_ctx->ClearRenderTargetView(_rtv, (const FLOAT*)&color);
+	_ctx->ClearDepthStencilView(_dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+shared_ptr<Sprite> SpriteRenderSystem::GenTexture(const byte* source, uint32_t width, uint32_t height)
+{
+	auto sp = std::make_shared<Sprite>();
+	D3D11_SUBRESOURCE_DATA subData{ 0 };
+	subData.pSysMem = source;
+	subData.SysMemPitch = width * 4;
+	DirectX::CreateTextureFromMemory(
+		_dev,
+		width, height,
+		DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
+		(const D3D11_SUBRESOURCE_DATA)subData,
+		nullptr, sp->TextureSRV.GetAddressOf());
+
+	sp->Pivot = { 0.5,0.5 };
+	sp->Rect = { 0,0,(long)width, (long)width };
+	return sp;
+}
+void SpriteRenderSystem::CreateDebugRes()
+{
+#define col 255,255,255,255
+#define zer 0,0,0,0
+	byte cross[] = {
+		zer, zer, col, zer,	zer,
+		zer, zer, col, zer,	zer,
+		col, col, col, col,	col,
+		zer, zer, col, zer,	zer,
+		zer, zer, col, zer,	zer,
+	};
+	_debugImgCross = GenTexture(cross, 5, 5);
+	_debugImgCross->Pivot = { 0.5,0.5 };
+	
+	byte lt[] = {
+		col, col, col, col, col,
+		col, zer, zer, zer, zer,
+		col, zer, zer, zer, zer,
+		col, zer, zer, zer, zer,
+		col, zer, zer, zer, zer,
+	};
+	_debugImgLT = GenTexture(lt, 5, 5);
+	_debugImgLT->Pivot = { 0,1 };
+
+	byte rt[] = {
+		col, col, col, col, col,
+		zer, zer, zer, zer, col,
+		zer, zer, zer, zer, col,
+		zer, zer, zer, zer, col,
+		zer, zer, zer, zer, col,
+	};
+	_debugImgRT = GenTexture(rt, 5, 5);
+	_debugImgRT->Pivot = { 1,1 };
+
+	byte lb[] = {
+		col, zer, zer, zer, zer,
+		col, zer, zer, zer, zer,
+		col, zer, zer, zer, zer,
+		col, zer, zer, zer, zer,
+		col, col, col, col, col,
+	};
+	_debugImgLB = GenTexture(lb, 5, 5);
+	_debugImgLB->Pivot = { 0,0 };
+
+	byte rb[] = {
+		zer, zer, zer, zer, col,
+		zer, zer, zer, zer, col,
+		zer, zer, zer, zer, col,
+		zer, zer, zer, zer, col,
+		col, col, col, col, col,
+	};
+	_debugImgRB = GenTexture(rb, 5, 5);
+	_debugImgRB->Pivot = { 1,0 };
+}
+
+RECT SpriteRenderSystem::GetDebugRect(int x, int y)
+{
+	RECT rc{ x - 4, y - 4, x + 4, y + 4 };
+	rc.left *= _dpiScale;
+	rc.right *= _dpiScale;
+	rc.bottom *= _dpiScale;
+	rc.top *= _dpiScale;
+	return rc;
 }

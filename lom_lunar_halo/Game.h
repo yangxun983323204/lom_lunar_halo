@@ -7,6 +7,7 @@
 #include "DeviceResources.h"
 #include "StepTimer.h"
 #include "../DirectXTK-main/Inc/SpriteBatch.h"
+#include "../DirectXTK-main/Inc/CommonStates.h"
 #include "Sprite_old.h"
 #include "./GUI/Canvas.h"
 #include "Setting.h"
@@ -89,6 +90,7 @@ private:
     
     std::shared_ptr<Setting> _setting;
     std::unique_ptr<DirectX::SpriteBatch> _batch;
+    std::unique_ptr<DirectX::CommonStates> _states;
 
     std::shared_ptr<WilSpriteManager> _mapSpriteManager; // SpriteManager需要比RenderManager后析构
     std::shared_ptr<WilSpriteManager> _actorSpriteManager;

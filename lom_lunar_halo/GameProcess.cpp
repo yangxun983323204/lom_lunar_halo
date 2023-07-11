@@ -32,7 +32,7 @@ void GameProcess::StartEnter()
     hero.Hair = 3;
     hero.Weapon = 3;
     hero.Horse = 0;
-    hero.Motion = Mir::PlayerMotion::Run;
+    hero.Motion = Mir::PlayerMotion::Walk;
     _game->GetWorldRenderManager()->SetSelfHero(hero);
     //
     string rmlPath = _game->GetSetting()->GetUILayoutDir() + "game.rml";

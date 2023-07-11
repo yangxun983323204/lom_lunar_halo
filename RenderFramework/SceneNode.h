@@ -5,7 +5,7 @@
 #include <DirectXMath.h>
 #include "ISceneNodeComponent.h"
 
-#define SCENE_NODE_SCALE
+//#define SCENE_NODE_SCALE
 
 using std::unique_ptr;
 using std::shared_ptr;

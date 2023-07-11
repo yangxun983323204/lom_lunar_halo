@@ -105,9 +105,7 @@ shared_ptr<SceneNode> SceneManager::SpawnMonster()
 
     actor->Name = Mir::MonsterSubPart::Actor;
     shadow->Name = Mir::MonsterSubPart::Shadow;
-
     root->AddComponent<ActorView>();
-
     return root;
 }
 

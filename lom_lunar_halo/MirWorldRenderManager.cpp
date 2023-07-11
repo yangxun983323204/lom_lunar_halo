@@ -14,11 +14,9 @@ MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr,
 {
     _sceneMgr = std::make_unique<SceneManager>();
     _animatorSystem = std::make_unique<AnimatorSystem>();
-    _renderSystem = std::make_unique<SpriteRenderSystem>();
-    auto clearFunc = std::bind(&MirWorldRenderManager::ClearScreen, this, std::placeholders::_1);
-    _renderSystem->SetClearFunc(clearFunc);
-    auto renderFunc = std::bind(&MirWorldRenderManager::Draw, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-    _renderSystem->SetRenderFunc(renderFunc);
+    _renderSystem = std::make_unique<SpriteRenderSystem>(dr->GetWindow(), dr->GetD3DDevice(), dr->GetD3DDeviceContext(),
+        dr->GetRenderTargetView(), dr->GetDepthStencilView(), 
+        Mir::GameLayoutW, Mir::GameLayoutH, DpiScale* UserScale);
 
     _camera = _sceneMgr->CreateCameraNode();
     _camera->SetLocalPosition(Mir::GetCellCenter(400, 400));
@@ -121,6 +119,7 @@ ActorView* MirWorldRenderManager::GetActorView(int id, function<shared_ptr<Scene
     auto node = createFunc();
     auto v = node->GetComponent<ActorView>().lock()->As<ActorView>();
     _actorViews.insert({id, v});
+    v->Layer = 1;
     return v;
 }
 
@@ -162,14 +161,14 @@ void MirWorldRenderManager::ReleaseActor(int id)
     _actorViews.erase(id);
     switch (av->Type)
     {
-    case (int)Mir::ActorType::Monster:
+    case Mir::ActorType::Monster:
         _sceneMgr->ReleaseMonster(av->GetSceneNodeWeakPtr().lock());
         break;
-    case (int)Mir::ActorType::Npc:
+    case Mir::ActorType::Npc:
         _sceneMgr->ReleaseNpc(av->GetSceneNodeWeakPtr().lock());
         break;
-    case (int)Mir::ActorType::Man:
-    case (int)Mir::ActorType::Woman:
+    case Mir::ActorType::Man:
+    case Mir::ActorType::Woman:
         _sceneMgr->ReleasePlayer(av->GetSceneNodeWeakPtr().lock());
         break;
     default:
@@ -187,6 +186,11 @@ void MirWorldRenderManager::Render()
     _renderSystem->Render();
 }
 
+void MirWorldRenderManager::RenderDebug()
+{
+    _renderSystem->RenderDebug();
+}
+
 void MirWorldRenderManager::Clear()
 {
     _mapData = nullptr;
@@ -199,6 +203,7 @@ void MirWorldRenderManager::AddHero(HeroData& data)
     ActorView* view = nullptr;
     auto s = GetActorView(data.NetId, _sceneMgr->GetSpawnPlayerFunctor());
     s->Clear();
+    s->Type = data.Gender;
     s->GetSceneNode()->SetLocalPosition(Mir::GetCellCenter(data.Pos.x, data.Pos.y));
     s->InitAs(data, *_animDB, _actorResMgr.get());
     s->PlayAnim(std::to_string((int)data.Motion));
@@ -324,14 +329,15 @@ extern void DrawTexture(ID3D11ShaderResourceView* srv, RECT rect);
 
 void MirWorldRenderManager::Draw(ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, XMFLOAT4 color)
 {
-    // 观察坐标->屏幕坐标
+    // 目地：观察坐标->屏幕坐标
+
     int offsetX = Mir::GameLayoutWHalf;
-    int offsetY = Mir::GameLayoutHHalf;
-    // 变换到左下角
+    int offsetY = -Mir::GameLayoutHHalf;
+    // 变换到左上角
     viewRect.x += offsetX;
     viewRect.y += offsetY;
-    // 变换到左上角
-    viewRect.y = Mir::GameLayoutH - viewRect.y;
+    // y轴反向
+    viewRect.y *= -1;
     RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
     // todo 支持精灵颜色
     DrawTexture(srv, sRect);

@@ -127,7 +127,10 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 		auto rgba32 = imgLib->GetImageRGBA32(imgId);
 		handle = std::make_shared<SpriteResHandle>(_parent, rgba32.size());
 		handle->GetSprite()->Rect = { 0,0,info.Width,info.Height };
-		handle->GetSprite()->Pivot = { -(float)info.OffsetX / info.Width, (float)info.OffsetY / info.Height };// todo此处不对，因为部件的offset是相对于actor的
+		// offset是相对于图片左上角为原点，y轴正方向向下坐标系的偏移
+		auto ox = info.OffsetX;
+		auto oy = -(info.OffsetY + info.Height);
+		handle->GetSprite()->Pivot = { -(float)ox / info.Width, -(float)oy / info.Height };
 		D3D11_SUBRESOURCE_DATA subData{ 0 };
 		subData.pSysMem = rgba32.data();
 		subData.SysMemPitch = info.Width * 4;
