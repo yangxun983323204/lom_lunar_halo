@@ -60,6 +60,9 @@
     <ClInclude Include="AnimatorSystem.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SimpleSpriteDraw.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SpriteRenderer.cpp">
@@ -90,6 +93,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="AnimatorSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleSpriteDraw.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

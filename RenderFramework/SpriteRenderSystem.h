@@ -11,6 +11,7 @@
 #include <DirectXMath.h>
 #include "../DirectXTK-main/Inc/SpriteBatch.h"
 #include <wrl.h>
+#include "SimpleSpriteDraw.h"
 
 using std::function;
 using std::shared_ptr;
@@ -26,7 +27,8 @@ public:
 		_hwnd{ hwnd }, _dev{ dev }, _ctx{ ctx }, _rtv{ rtv }, _dsv{ dsv }, 
 		_vw{ layoutW }, _vh{ layoutH }, _dpiScale{ dpiScale }
 	{
-		_batch = std::make_unique<DirectX::SpriteBatch>(ctx);
+		_draw = std::make_unique<SimpleSpriteDraw>(ctx);
+		_shadowColor = { 0,0,0,0.5 };
 		CreateDebugRes();
 	}
 
@@ -51,7 +53,9 @@ private:
 	ID3D11RenderTargetView* _rtv;
 	ID3D11DepthStencilView* _dsv;
 
-	unique_ptr<DirectX::SpriteBatch> _batch;
+	unique_ptr<SimpleSpriteDraw> _draw;
+
+	DirectX::XMFLOAT4 _shadowColor;
 
 	int _vw, _vh;
 	float _dpiScale;

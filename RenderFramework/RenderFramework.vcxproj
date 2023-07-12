@@ -31,6 +31,7 @@
     <ClInclude Include="LRU.hpp" />
     <ClInclude Include="RenderFramework.h" />
     <ClInclude Include="SceneNode.h" />
+    <ClInclude Include="SimpleSpriteDraw.h" />
     <ClInclude Include="Sprite.hpp" />
     <ClInclude Include="SpriteRenderer.h" />
     <ClInclude Include="SpriteRenderSystem.h" />
@@ -44,6 +45,7 @@
     <ClCompile Include="ISceneNodeComponent.cpp" />
     <ClCompile Include="ISystem.cpp" />
     <ClCompile Include="SceneNode.cpp" />
+    <ClCompile Include="SimpleSpriteDraw.cpp" />
     <ClCompile Include="SpriteRenderer.cpp" />
     <ClCompile Include="SpriteRenderSystem.cpp" />
   </ItemGroup>

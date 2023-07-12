@@ -130,7 +130,21 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 		// offset是相对于图片左上角为原点，y轴正方向向下坐标系的偏移
 		auto ox = info.OffsetX;
 		auto oy = -(info.OffsetY + info.Height);
-		handle->GetSprite()->Pivot = { -(float)ox / info.Width, -(float)oy / info.Height };
+		auto sprite = handle->GetSprite();
+		sprite->Pivot = { -(float)ox / info.Width, -(float)oy / info.Height };
+		auto shType = info.GetShadowType();
+		if (shType == Mir::ShadowType::Orth)
+		{
+			sprite->GenerateShadow = true;
+			sprite->ShadowInfo.InitSizeAsOrth();
+		}
+		else if (shType == Mir::ShadowType::Proj)
+		{
+			sprite->GenerateShadow = true;
+			sprite->ShadowInfo.InitSizeAsProj();
+		}
+		sprite->ShadowInfo.OffsetX = info.ShadowPosX;
+		sprite->ShadowInfo.OffsetY = info.ShadowPosY;
 		D3D11_SUBRESOURCE_DATA subData{ 0 };
 		subData.pSysMem = rgba32.data();
 		subData.SysMemPitch = info.Width * 4;
@@ -139,7 +153,7 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 			info.Width, info.Height,
 			DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
 			(const D3D11_SUBRESOURCE_DATA)subData,
-			nullptr, handle->GetSprite()->TextureSRV.GetAddressOf()));
+			nullptr, sprite->TextureSRV.GetAddressOf()));
 		_currentSize += needSize;
 	}
 

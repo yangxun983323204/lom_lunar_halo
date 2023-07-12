@@ -11,7 +11,8 @@ class SpriteRenderer : public ISceneNodeComponent
 {
 public:
 	SCENE_NODE_COMPONENT('sr');
-	SpriteRenderer() :__debug{ false } 
+	SpriteRenderer() :
+		__debug{ false }
 	{
 		Color = DirectX::XMFLOAT4{ 1,1,1,1 };
 		__debugColor = DirectX::XMFLOAT4{ 1,1,1,1 };

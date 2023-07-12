@@ -76,10 +76,20 @@ void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(SpriteRender
 		viewRect.y -= cameraWPos.y;
 		wpos.x -= cameraWPos.x;
 		wpos.y -= cameraWPos.y;
-		if(!debugMode)
-			Draw(wpos, sr->Sprite.lock()->TextureSRV.Get(), viewRect, sr->Color);
+		auto sprite = sr->Sprite.lock();
+		if (!debugMode) {
+			if (sprite->GenerateShadow) {
+				DirectX::SimpleMath::Rectangle shadowRect = {
+					viewRect.x + sprite->ShadowInfo.OffsetX, viewRect.y + sprite->ShadowInfo.OffsetY,
+					sprite->ShadowInfo.Width(viewRect.width, viewRect.height), sprite->ShadowInfo.Height(viewRect.width, viewRect.height)
+				};
+
+				Draw(wpos, sprite->TextureSRV.Get(), shadowRect, _shadowColor);
+			}
+			Draw(wpos, sprite->TextureSRV.Get(), viewRect, sr->Color);
+		}
 		else
-			DrawDebug(wpos, sr->Sprite.lock()->TextureSRV.Get(), viewRect, sr->__debugColor);
+			DrawDebug(wpos, sprite->TextureSRV.Get(), viewRect, sr->__debugColor);
 	}
 	EndDraw();
 }
@@ -107,12 +117,12 @@ void SpriteRenderSystem::RenderDebug()
 
 void SpriteRenderSystem::BeginDraw()
 {
-	_batch->Begin();
+	_draw->Begin();
 }
 
 void SpriteRenderSystem::EndDraw()
 {
-	_batch->End();
+	_draw->End();
 }
 
 void SpriteRenderSystem::Draw(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
@@ -126,12 +136,12 @@ void SpriteRenderSystem::Draw(XMINT2 vpos, ID3D11ShaderResourceView* srv, Direct
 	// y轴反向
 	viewRect.y *= -1;
 	RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
-	// todo 支持精灵颜色
+	auto f4 = DirectX::XMLoadFloat4(&color);
 	sRect.left = sRect.left * _dpiScale;
 	sRect.right = sRect.right * _dpiScale;
 	sRect.bottom = sRect.bottom * _dpiScale;
 	sRect.top = sRect.top * _dpiScale;
-	_batch->Draw(srv, sRect);
+	_draw->Draw(srv, sRect, f4);
 }
 
 void SpriteRenderSystem::DrawDebug(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
@@ -153,19 +163,19 @@ void SpriteRenderSystem::DrawDebug(XMINT2 vpos, ID3D11ShaderResourceView* srv, D
 	auto f4 = DirectX::XMLoadFloat4(&color);
 	// draw cross
 	RECT cross = GetDebugRect(vpos.x, vpos.y);
-	_batch->Draw(_debugImgCross->TextureSRV.Get(), cross, f4);
+	_draw->Draw(_debugImgCross->TextureSRV.Get(), cross, f4);
 	// draw left top
 	RECT lt = GetDebugRect(sRect.left, sRect.top);
-	_batch->Draw(_debugImgLT->TextureSRV.Get(), lt, f4);
+	_draw->Draw(_debugImgLT->TextureSRV.Get(), lt, f4);
 	// draw right top
 	RECT rt = GetDebugRect(sRect.right, sRect.top);
-	_batch->Draw(_debugImgRT->TextureSRV.Get(), rt, f4);
+	_draw->Draw(_debugImgRT->TextureSRV.Get(), rt, f4);
 	// draw right bottom
 	RECT rb = GetDebugRect(sRect.right, sRect.bottom);
-	_batch->Draw(_debugImgRB->TextureSRV.Get(), rb, f4);
+	_draw->Draw(_debugImgRB->TextureSRV.Get(), rb, f4);
 	// draw left bottom
 	RECT lb = GetDebugRect(sRect.left, sRect.bottom);
-	_batch->Draw(_debugImgLB->TextureSRV.Get(), lb, f4);
+	_draw->Draw(_debugImgLB->TextureSRV.Get(), lb, f4);
 }
 
 void SpriteRenderSystem::Clear(DirectX::XMFLOAT4 color)
@@ -193,52 +203,52 @@ shared_ptr<Sprite> SpriteRenderSystem::GenTexture(const byte* source, uint32_t w
 void SpriteRenderSystem::CreateDebugRes()
 {
 #define col 255,255,255,255
-#define zer 0,0,0,0
+#define nil 0,0,0,0
 	byte cross[] = {
-		zer, zer, col, zer,	zer,
-		zer, zer, col, zer,	zer,
+		nil, nil, col, nil,	nil,
+		nil, nil, col, nil,	nil,
 		col, col, col, col,	col,
-		zer, zer, col, zer,	zer,
-		zer, zer, col, zer,	zer,
+		nil, nil, col, nil,	nil,
+		nil, nil, col, nil,	nil,
 	};
 	_debugImgCross = GenTexture(cross, 5, 5);
 	_debugImgCross->Pivot = { 0.5,0.5 };
 	
 	byte lt[] = {
 		col, col, col, col, col,
-		col, zer, zer, zer, zer,
-		col, zer, zer, zer, zer,
-		col, zer, zer, zer, zer,
-		col, zer, zer, zer, zer,
+		col, nil, nil, nil, nil,
+		col, nil, nil, nil, nil,
+		col, nil, nil, nil, nil,
+		col, nil, nil, nil, nil,
 	};
 	_debugImgLT = GenTexture(lt, 5, 5);
 	_debugImgLT->Pivot = { 0,1 };
 
 	byte rt[] = {
 		col, col, col, col, col,
-		zer, zer, zer, zer, col,
-		zer, zer, zer, zer, col,
-		zer, zer, zer, zer, col,
-		zer, zer, zer, zer, col,
+		nil, nil, nil, nil, col,
+		nil, nil, nil, nil, col,
+		nil, nil, nil, nil, col,
+		nil, nil, nil, nil, col,
 	};
 	_debugImgRT = GenTexture(rt, 5, 5);
 	_debugImgRT->Pivot = { 1,1 };
 
 	byte lb[] = {
-		col, zer, zer, zer, zer,
-		col, zer, zer, zer, zer,
-		col, zer, zer, zer, zer,
-		col, zer, zer, zer, zer,
+		col, nil, nil, nil, nil,
+		col, nil, nil, nil, nil,
+		col, nil, nil, nil, nil,
+		col, nil, nil, nil, nil,
 		col, col, col, col, col,
 	};
 	_debugImgLB = GenTexture(lb, 5, 5);
 	_debugImgLB->Pivot = { 0,0 };
 
 	byte rb[] = {
-		zer, zer, zer, zer, col,
-		zer, zer, zer, zer, col,
-		zer, zer, zer, zer, col,
-		zer, zer, zer, zer, col,
+		nil, nil, nil, nil, col,
+		nil, nil, nil, nil, col,
+		nil, nil, nil, nil, col,
+		nil, nil, nil, nil, col,
 		col, col, col, col, col,
 	};
 	_debugImgRB = GenTexture(rb, 5, 5);
