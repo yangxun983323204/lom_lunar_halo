@@ -20,6 +20,11 @@ cbuffer cbNeverChanges : register( b0 )
 	float4 ShadowColor;
 };
 
+cbuffer cbPerObjChanges : register( b1 )
+{
+	int4 ShadowInfo;
+};
+
 struct VS_INPUT
 {
 	float2 position : POSITION;
@@ -44,6 +49,18 @@ PS_INPUT VS(VS_INPUT input)
 	return output;
 }
 
+PS_INPUT VS_Shadow(VS_INPUT input)
+{
+	PS_INPUT output = (PS_INPUT)0;
+    float x = input.position.x + ShadowInfo.x + ShadowInfo.z * (1-input.uv.y);
+	float y = input.position.y + ShadowInfo.y + ShadowInfo.w * (1-input.uv.y);
+	output.position = mul(float4(x,y,0,1), Matrix);
+	output.color = input.color;
+	output.uv = input.uv;
+
+	return output;
+}
+
 float4 PS(PS_INPUT input) : SV_Target
 {
 	return tex.Sample(samLinear, input.uv) * input.color;
@@ -51,12 +68,10 @@ float4 PS(PS_INPUT input) : SV_Target
 
 float4 PS_Shadow(PS_INPUT input) : SV_Target
 {
-	return ShadowColor;
-}
-
-float4 PS_ProjShadow(PS_INPUT input) : SV_Target
-{
-	return ShadowColor;
+	float4 c = tex.Sample(samLinear, input.uv);
+	c.xyz = ShadowColor.xyz;
+	c.w = c.w * ShadowColor.w;
+	return c;
 }
 )";
 }
@@ -75,12 +90,12 @@ namespace {
 static constexpr size_t MaxBufferSize = 2048;
 
 SimpleSpriteDraw::SimpleSpriteDraw(ID3D11DeviceContext* context):
-	_ctx{ context }, _readIdx{0}, _writeIdx{ 0 }
+	_ctx{ context }, _readIdx{ 0 }, _writeIdx{ 0 }, _mode{0}
 {
-	ID3D11Device* dev;
-	_ctx->GetDevice(&dev);
-	_states = std::make_unique<CommonStates>(dev);
-	_cbuffer = DirectX::ConstantBuffer<CBNeverChanges>{ dev };
+	_ctx->GetDevice(&_dev);
+	_states = std::make_unique<CommonStates>(_dev);
+	_cbuffer = DirectX::ConstantBuffer<CBNeverChanges>{ _dev };
+	_cbShadowInfo = DirectX::ConstantBuffer<DirectX::XMINT4>{ _dev };
 	Init();
 }
 
@@ -89,7 +104,7 @@ void SimpleSpriteDraw::Begin()
 	_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	_ctx->IASetInputLayout(_inputLayout.Get());
 	_ctx->VSSetShader(_vs.Get(), nullptr, 0);
-	_ctx->PSSetShader(_psNomal.Get(), nullptr, 0);
+	_ctx->PSSetShader(_psNomal.Get(), nullptr, 0); _mode = 0;
 	_ctx->RSSetState(_states->CullCounterClockwise());
 	_ctx->OMSetBlendState(_states->AlphaBlend(), 0, 0xffffffff);
 	_ctx->OMSetDepthStencilState(_states->DepthNone(), 0);
@@ -107,12 +122,12 @@ void SimpleSpriteDraw::Begin()
 		Matrix::CreateTranslation(-_halfW, _halfH, 0) *
 		Matrix::CreateScale(1.0 / _halfW, 1.0 / _halfH, 1);
 
-	CBNeverChanges cbData{};
-	cbData.Matrix = toNDC.Transpose();
-	cbData.ShadowColor = { 0,0,0,0.5 };
-	_cbuffer.SetData(_ctx, cbData);
+	_cbData.Matrix = toNDC.Transpose();
+	_cbData.ShadowColor = { 0,0,0,0.5 };
+	_cbuffer.SetData(_ctx, _cbData);
 	auto cb = _cbuffer.GetBuffer();
 	_ctx->VSSetConstantBuffers(0, 1, &cb);
+	_ctx->PSSetConstantBuffers(0, 1, &cb);
 	_ctx->IASetIndexBuffer(_ib.Get(), DXGI_FORMAT_R32_UINT, 0);
 }
 
@@ -129,17 +144,32 @@ void SimpleSpriteDraw::Draw(ID3D11ShaderResourceView* texture, RECT const& dstRe
 
 void SimpleSpriteDraw::SetModeNormal()
 {
+	if (_mode == 0) return;
+
+	_mode = 0;
+	_ctx->VSSetShader(_vs.Get(), nullptr, 0);
 	_ctx->PSSetShader(_psNomal.Get(), nullptr, 0);
 }
 
-void SimpleSpriteDraw::SetModeOrthShadow()
+void SimpleSpriteDraw::SetModeShadow()
 {
-	_ctx->PSSetShader(_psOrthShadow.Get(), nullptr, 0);
+	if (_mode == 1) return;
+
+	_mode = 1;
+	_ctx->VSSetShader(_vsShadow.Get(), nullptr, 0);
+	_ctx->PSSetShader(_psShadow.Get(), nullptr, 0);
 }
 
-void SimpleSpriteDraw::SetModeProjShadow()
+void SimpleSpriteDraw::SetShadowOffset(int offsetX, int offsetY, int projX, int projY)
 {
-	_ctx->PSSetShader(_psProjShadow.Get(), nullptr, 0);
+	DirectX::XMINT4 shadowInfo{};
+	shadowInfo.x = offsetX;
+	shadowInfo.y = offsetY;
+	shadowInfo.z = projX;
+	shadowInfo.w = projY;
+	_cbShadowInfo.SetData(_ctx, shadowInfo);
+	auto cb = _cbShadowInfo.GetBuffer();
+	_ctx->VSSetConstantBuffers(1, 1, &cb);
 }
 
 HRESULT SimpleSpriteDraw::CompileShaderFromData(const void* data, int size, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
@@ -169,9 +199,6 @@ HRESULT SimpleSpriteDraw::CompileShaderFromData(const void* data, int size, LPCS
 
 void SimpleSpriteDraw::Init()
 {
-	ID3D11Device* dev;
-	_ctx->GetDevice(&dev);
-
 	{
 		ComPtr<ID3DBlob> vsBlob = nullptr;
 		auto hr = CompileShaderFromData(SHADER_STRING.c_str(), SHADER_STRING.size(), "VS", "vs_4_0", vsBlob.GetAddressOf());
@@ -181,7 +208,7 @@ void SimpleSpriteDraw::Init()
 			return;
 		}
 
-		hr = dev->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, _vs.GetAddressOf());
+		hr = _dev->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, _vs.GetAddressOf());
 		if (FAILED(hr))
 			return;
 
@@ -191,7 +218,21 @@ void SimpleSpriteDraw::Init()
 			{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,		0, 24,	D3D11_INPUT_PER_VERTEX_DATA, 0},
 		};
 
-		dev->CreateInputLayout(inputDesc, 3, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), _inputLayout.GetAddressOf());
+		_dev->CreateInputLayout(inputDesc, 3, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), _inputLayout.GetAddressOf());
+	}
+
+	{
+		ComPtr<ID3DBlob> vsBlob = nullptr;
+		auto hr = CompileShaderFromData(SHADER_STRING.c_str(), SHADER_STRING.size(), "VS_Shadow", "vs_4_0", vsBlob.GetAddressOf());
+		if (FAILED(hr))
+		{
+			MessageBox(nullptr, L"The SHADER_STRING VS cannot be compiled.", L"Error", MB_OK);
+			return;
+		}
+
+		hr = _dev->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, _vsShadow.GetAddressOf());
+		if (FAILED(hr))
+			return;
 	}
 
 	{
@@ -203,7 +244,7 @@ void SimpleSpriteDraw::Init()
 			return;
 		}
 
-		hr = dev->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, _psNomal.GetAddressOf());
+		hr = _dev->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, _psNomal.GetAddressOf());
 	}
 
 	{
@@ -215,20 +256,9 @@ void SimpleSpriteDraw::Init()
 			return;
 		}
 
-		hr = dev->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, _psOrthShadow.GetAddressOf());
+		hr = _dev->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, _psShadow.GetAddressOf());
 	}
 
-	{
-		ComPtr<ID3DBlob> psBlob = nullptr;
-		auto hr = CompileShaderFromData(SHADER_STRING.c_str(), SHADER_STRING.size(), "PS_ProjShadow", "ps_4_0", psBlob.GetAddressOf());
-		if (FAILED(hr))
-		{
-			MessageBox(nullptr, L"The SHADER_STRING PS cannot be compiled.", L"Error", MB_OK);
-			return;
-		}
-
-		hr = dev->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, _psProjShadow.GetAddressOf());
-	}
 	_vertices[0] = { {0,0},{0,0,0,0},{0,1} };
 	_vertices[1] = { {0,0},{0,0,0,0},{0,0} };
 	_vertices[2] = { {0,0},{0,0,0,0},{1,0} };
@@ -240,10 +270,10 @@ void SimpleSpriteDraw::Init()
 	vbs.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER;
 	vbs.CPUAccessFlags = D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE;
 	vbs.StructureByteStride = sizeof(SpriteVertex);
-	dev->CreateBuffer(&vbs, 0, _vb.GetAddressOf());
+	_dev->CreateBuffer(&vbs, 0, _vb.GetAddressOf());
 
 	uint32_t ids[] = { 0,1,2,0,2,3 };
-	DirectX::CreateStaticBuffer(dev, ids, 6, sizeof(uint32_t), D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER, _ib.GetAddressOf());
+	DirectX::CreateStaticBuffer(_dev, ids, 6, sizeof(uint32_t), D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER, _ib.GetAddressOf());
 }
 
 void SimpleSpriteDraw::UpdateVB(RECT const& dstRect, FXMVECTOR color)

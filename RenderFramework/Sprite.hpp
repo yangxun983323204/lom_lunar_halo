@@ -11,34 +11,20 @@ class SpriteShadowInfo
 public:
 	int16_t OffsetX;
 	int16_t OffsetY;
-	// width = WidthFactorX*sprite.width + WidthFactorY*sprite.height;
-	// height = HeightFactorX*sprite.width + HeightFactorY*sprite.height;
 
-	float WidthFactorX;
-	float WidthFactorY;
-	float HeightFactorX;
-	float HeightFactorY;
-
-	inline long Width(long spriteWidth, long spriteHeight)
-	{
-		return WidthFactorX * spriteWidth + WidthFactorY * spriteHeight;
-	}
-
-	inline long Height(long spriteWidth, long spriteHeight)
-	{
-		return HeightFactorX * spriteWidth + HeightFactorY * spriteHeight;
-	}
+	int16_t ProjX;
+	int16_t ProjY;
 
 	inline void InitSizeAsOrth()
 	{
-		WidthFactorX = 1; WidthFactorY = 0;
-		HeightFactorX = 0; HeightFactorY = 1;
+		ProjX = 0;
+		ProjY = 0;
 	}
 
-	inline void InitSizeAsProj()
+	inline void InitSizeAsProj(int16_t w, int16_t h)
 	{
-		WidthFactorX = 1; WidthFactorY = 0.5;
-		HeightFactorX = 0; HeightFactorY = 1;
+		ProjX = h / 2;
+		ProjY = -h / 2;
 	}
 };
 

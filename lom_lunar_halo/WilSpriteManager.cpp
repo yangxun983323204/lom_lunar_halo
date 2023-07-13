@@ -141,10 +141,10 @@ shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
 		else if (shType == Mir::ShadowType::Proj)
 		{
 			sprite->GenerateShadow = true;
-			sprite->ShadowInfo.InitSizeAsProj();
+			sprite->ShadowInfo.InitSizeAsProj(info.Width, info.Height);
 		}
 		sprite->ShadowInfo.OffsetX = info.ShadowPosX;
-		sprite->ShadowInfo.OffsetY = info.ShadowPosY;
+		sprite->ShadowInfo.OffsetY = -info.ShadowPosY;
 		D3D11_SUBRESOURCE_DATA subData{ 0 };
 		subData.pSysMem = rgba32.data();
 		subData.SysMemPitch = info.Width * 4;

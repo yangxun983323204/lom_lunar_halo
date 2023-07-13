@@ -122,7 +122,8 @@ void ActorView::InitAs(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* r
 				auto sr = node.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
 				sr->Enable = true;
 				sr->SortLayer = Layer;
-				if (true) {
+				sr->Depth = Depth + sub;
+				if (false) {
 					sr->__debug = true;
 					sr->__debugColor = debugColor[sub];
 				}

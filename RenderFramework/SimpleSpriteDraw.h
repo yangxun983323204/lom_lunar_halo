@@ -21,14 +21,15 @@ public:
 	void End();
 	void Draw(ID3D11ShaderResourceView* texture, RECT const& dstRect, FXMVECTOR color);
 	void SetModeNormal();
-	void SetModeOrthShadow();
-	void SetModeProjShadow();
+	void SetModeShadow();
+	void SetShadowOffset(int offsetX, int offsetY, int projX, int projY);
 
 	HRESULT CompileShaderFromData(const void* data, int size, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 private:
 	void Init();
 	void UpdateVB(RECT const& dstRect, FXMVECTOR color);
 
+	ID3D11Device* _dev;
 	ID3D11DeviceContext* _ctx;
 	std::unique_ptr<CommonStates> _states;
 	long _width;
@@ -36,9 +37,9 @@ private:
 	DirectX::SimpleMath::Matrix _matrix;
 
 	ComPtr<ID3D11VertexShader> _vs;
+	ComPtr<ID3D11VertexShader> _vsShadow;
 	ComPtr<ID3D11PixelShader> _psNomal;
-	ComPtr<ID3D11PixelShader> _psOrthShadow;
-	ComPtr<ID3D11PixelShader> _psProjShadow;
+	ComPtr<ID3D11PixelShader> _psShadow;
 	ComPtr<ID3D11InputLayout> _inputLayout;
 
 	struct CBNeverChanges
@@ -46,12 +47,16 @@ private:
 		DirectX::XMMATRIX Matrix;
 		DirectX::XMFLOAT4 ShadowColor;
 	};
+
+	CBNeverChanges _cbData;
 	DirectX::ConstantBuffer<CBNeverChanges> _cbuffer;
+	DirectX::ConstantBuffer<DirectX::XMINT4> _cbShadowInfo;
 	
 	ComPtr<ID3D11Buffer> _vb;
 	ComPtr<ID3D11Buffer> _ib;
 
 	int _readIdx;
 	int _writeIdx;
+	int _mode;
 };
 

@@ -79,17 +79,16 @@ void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(SpriteRender
 		auto sprite = sr->Sprite.lock();
 		if (!debugMode) {
 			if (sprite->GenerateShadow) {
-				DirectX::SimpleMath::Rectangle shadowRect = {
-					viewRect.x + sprite->ShadowInfo.OffsetX, viewRect.y + sprite->ShadowInfo.OffsetY,
-					sprite->ShadowInfo.Width(viewRect.width, viewRect.height), sprite->ShadowInfo.Height(viewRect.width, viewRect.height)
-				};
-
-				Draw(wpos, sprite->TextureSRV.Get(), shadowRect, _shadowColor);
+				auto shadowInfo = sprite->ShadowInfo;
+				DrawShadow(wpos, sprite->TextureSRV.Get(), viewRect, 
+					{ shadowInfo.OffsetX, shadowInfo.OffsetY, shadowInfo.ProjX, shadowInfo.ProjY });
 			}
+			
 			Draw(wpos, sprite->TextureSRV.Get(), viewRect, sr->Color);
 		}
-		else
+		else {
 			DrawDebug(wpos, sprite->TextureSRV.Get(), viewRect, sr->__debugColor);
+		}
 	}
 	EndDraw();
 }
@@ -127,6 +126,7 @@ void SpriteRenderSystem::EndDraw()
 
 void SpriteRenderSystem::Draw(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
 {
+	_draw->SetModeNormal();
 	// 目地：观察坐标->屏幕坐标
 	int offsetX = _vw / 2;
 	int offsetY = -_vh / 2;
@@ -144,8 +144,38 @@ void SpriteRenderSystem::Draw(XMINT2 vpos, ID3D11ShaderResourceView* srv, Direct
 	_draw->Draw(srv, sRect, f4);
 }
 
+void SpriteRenderSystem::DrawShadow(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMINT4 shadowInfo)
+{
+	_draw->SetModeShadow();
+	// 目地：观察坐标->屏幕坐标
+	int offsetX = _vw / 2;
+	int offsetY = -_vh / 2;
+	// 变换到左上角
+	viewRect.x += offsetX;
+	viewRect.y += offsetY;
+	// y轴反向
+	viewRect.y *= -1;
+	shadowInfo.y *= -1;
+	shadowInfo.w *= -1;
+	//
+	RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
+	// dpi scale
+	sRect.left = sRect.left * _dpiScale;
+	sRect.right = sRect.right * _dpiScale;
+	sRect.bottom = sRect.bottom * _dpiScale;
+	sRect.top = sRect.top * _dpiScale;
+	shadowInfo.x *= _dpiScale;
+	shadowInfo.y *= _dpiScale;
+	shadowInfo.z *= _dpiScale;
+	shadowInfo.w *= _dpiScale;
+	//
+	_draw->SetShadowOffset(shadowInfo.x, shadowInfo.y, shadowInfo.z, shadowInfo.w);
+	_draw->Draw(srv, sRect, {0});
+}
+
 void SpriteRenderSystem::DrawDebug(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
 {
+	_draw->SetModeNormal();
 	// 目地：观察坐标->屏幕坐标
 	int offsetX = _vw / 2;
 	int offsetY = -_vh / 2;

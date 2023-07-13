@@ -51,6 +51,7 @@ public:
 	int Id;
 	Mir::ActorType Type;
 	int Layer;
+	int Depth;
 protected:
 };
 

@@ -9,7 +9,7 @@ MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr,
     shared_ptr<WilSpriteManager> actorResMgr,
     shared_ptr<WilSpriteManager> itemResMgr):
     _dr{ dr }, _mapResMgr{ mapResMgr }, _actorResMgr{ actorResMgr }, _itemResMgr{ itemResMgr },
-    _bgUse{0,0}, _mid1Use{1,0}, _mid2Use{1,1}, _topUse{2,0},
+    _bgUse{0,0}, _mid1Use{1,0}, _mid2Use{1,1}, _topUse{1,2},
     _animDB{}
 {
     _sceneMgr = std::make_unique<SceneManager>();
@@ -120,6 +120,7 @@ ActorView* MirWorldRenderManager::GetActorView(int id, function<shared_ptr<Scene
     auto v = node->GetComponent<ActorView>().lock()->As<ActorView>();
     _actorViews.insert({id, v});
     v->Layer = 1;
+    v->Depth = 3;
     return v;
 }
 

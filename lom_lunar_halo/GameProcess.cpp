@@ -30,7 +30,7 @@ void GameProcess::StartEnter()
     hero.Dress = 6;
     hero.Gender = Mir::ActorType::Woman;
     hero.Hair = 3;
-    hero.Weapon = 3;
+    hero.Weapon = 4;
     hero.Horse = 0;
     hero.Motion = Mir::PlayerMotion::Walk;
     _game->GetWorldRenderManager()->SetSelfHero(hero);
