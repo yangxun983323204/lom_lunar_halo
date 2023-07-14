@@ -103,8 +103,6 @@ void Game::Render()
     YX::GUI::Canvas::DrawAll();
     _batch->End();
 
-    _worldRenderMgr->RenderDebug();
-
     _rmlUiAdapter->Render();
     m_deviceResources->PIXEndEvent();
 

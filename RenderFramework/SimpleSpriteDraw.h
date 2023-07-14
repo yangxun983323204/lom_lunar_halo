@@ -8,26 +8,29 @@
 #include "../DirectXTK-main/Inc/SimpleMath.h"
 #include "../DirectXTK-main/Inc/BufferHelpers.h"
 #include <wrl.h>
+#include "IGraphic2D.h"
 
 using DirectX::FXMVECTOR;
 using DirectX::CommonStates;
 using Microsoft::WRL::ComPtr;
 
-class SimpleSpriteDraw
+class SimpleSpriteDraw: public IGraphic2D
 {
 public:
 	SimpleSpriteDraw(ID3D11DeviceContext* context);
-	void Begin();
+	void Begin(DirectX::XMINT2 viewPoint, float dpiScale);
 	void End();
-	void Draw(ID3D11ShaderResourceView* texture, RECT const& dstRect, FXMVECTOR color);
-	void SetModeNormal();
-	void SetModeShadow();
-	void SetShadowOffset(int offsetX, int offsetY, int projX, int projY);
+	virtual void Draw(ID3D11ShaderResourceView* texture, DirectX::SimpleMath::Rectangle const& rect, DirectX::XMFLOAT4 color) override;
+	virtual void SetModeNormal() override;
+	virtual void SetModeShadowOrth() override;
+	virtual void SetModeShadowProj() override;
+	virtual void SetShadowColor(DirectX::XMFLOAT4 color) override;
+	virtual void SetShadowProjOrigin(DirectX::XMINT2 origin) override;
 
 	HRESULT CompileShaderFromData(const void* data, int size, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 private:
 	void Init();
-	void UpdateVB(RECT const& dstRect, FXMVECTOR color);
+	void UpdateVB(DirectX::SimpleMath::Rectangle const& rect, DirectX::XMFLOAT4 color);
 
 	ID3D11Device* _dev;
 	ID3D11DeviceContext* _ctx;
@@ -37,8 +40,8 @@ private:
 	DirectX::SimpleMath::Matrix _matrix;
 
 	ComPtr<ID3D11VertexShader> _vs;
-	ComPtr<ID3D11VertexShader> _vsShadow;
-	ComPtr<ID3D11PixelShader> _psNomal;
+	ComPtr<ID3D11VertexShader> _vsShadowProj;
+	ComPtr<ID3D11PixelShader> _ps;
 	ComPtr<ID3D11PixelShader> _psShadow;
 	ComPtr<ID3D11InputLayout> _inputLayout;
 
@@ -50,13 +53,21 @@ private:
 
 	CBNeverChanges _cbData;
 	DirectX::ConstantBuffer<CBNeverChanges> _cbuffer;
-	DirectX::ConstantBuffer<DirectX::XMINT4> _cbShadowInfo;
+	DirectX::ConstantBuffer<DirectX::XMINT4> _cbShadowProjOrign;
 	
 	ComPtr<ID3D11Buffer> _vb;
 	ComPtr<ID3D11Buffer> _ib;
 
 	int _readIdx;
 	int _writeIdx;
-	int _mode;
+
+	enum DrawMode {
+		Normal,
+		ShadowOrth,
+		ShadowProj,
+	};
+
+	DrawMode _mode;
+	float _dpiScale;
 };
 

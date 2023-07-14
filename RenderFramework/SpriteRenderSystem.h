@@ -35,14 +35,9 @@ public:
 	inline void SetLayout(int w, int h) { _vw = w; _vh = h; }
 	inline void SetDPIScale(float s) { _dpiScale = s; }
 	void Render();
-	void RenderCamera(Camera* camera,function<bool(SpriteRenderer*)> filter=nullptr, bool debugMode = false);
-	void RenderDebug();
+	
 private:
-	void BeginDraw();
-	void EndDraw();
-	void Draw(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color);
-	void DrawShadow(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMINT4 shadowInfo);
-	void DrawDebug(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color);
+	void RenderCamera(Camera* camera, function<bool(IRenderer*)> filter, bool debugMode);
 	void Clear(DirectX::XMFLOAT4 color);
 	shared_ptr<Sprite> GenTexture(const byte* source, uint32_t width, uint32_t height);
 	void CreateDebugRes();

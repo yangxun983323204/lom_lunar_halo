@@ -187,11 +187,6 @@ void MirWorldRenderManager::Render()
     _renderSystem->Render();
 }
 
-void MirWorldRenderManager::RenderDebug()
-{
-    _renderSystem->RenderDebug();
-}
-
 void MirWorldRenderManager::Clear()
 {
     _mapData = nullptr;

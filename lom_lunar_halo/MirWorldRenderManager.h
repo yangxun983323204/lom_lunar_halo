@@ -45,7 +45,6 @@ public:
 	void SetViewPoint(DirectX::XMINT2 coor);
 	void Update(DX::StepTimer const& timer);
 	void Render();
-	void RenderDebug();
 	void Clear();
 
 	void AddHero(HeroData& data);

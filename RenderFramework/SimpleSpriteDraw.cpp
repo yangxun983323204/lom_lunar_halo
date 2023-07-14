@@ -22,7 +22,7 @@ cbuffer cbNeverChanges : register( b0 )
 
 cbuffer cbPerObjChanges : register( b1 )
 {
-	int4 ShadowInfo;
+	int4 ShadowProjOrign;
 };
 
 struct VS_INPUT
@@ -49,12 +49,14 @@ PS_INPUT VS(VS_INPUT input)
 	return output;
 }
 
-PS_INPUT VS_Shadow(VS_INPUT input)
+PS_INPUT VS_ShadowProj(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
-    float x = input.position.x + ShadowInfo.x + ShadowInfo.z * (1-input.uv.y);
-	float y = input.position.y + ShadowInfo.y + ShadowInfo.w * (1-input.uv.y);
-	output.position = mul(float4(x,y,0,1), Matrix);
+	float2 p2 = input.position - ShadowProjOrign.xy;
+	p2.x = p2.x + p2.y * 0.5;
+	p2.y = p2.y * 0.5;
+    p2 = ShadowProjOrign.xy + p2;
+	output.position = mul(float4(p2,0,1), Matrix);
 	output.color = input.color;
 	output.uv = input.uv;
 
@@ -90,21 +92,25 @@ namespace {
 static constexpr size_t MaxBufferSize = 2048;
 
 SimpleSpriteDraw::SimpleSpriteDraw(ID3D11DeviceContext* context):
-	_ctx{ context }, _readIdx{ 0 }, _writeIdx{ 0 }, _mode{0}
+	_ctx{ context }, _readIdx{ 0 }, _writeIdx{ 0 }, _mode{DrawMode::Normal}
 {
 	_ctx->GetDevice(&_dev);
 	_states = std::make_unique<CommonStates>(_dev);
 	_cbuffer = DirectX::ConstantBuffer<CBNeverChanges>{ _dev };
-	_cbShadowInfo = DirectX::ConstantBuffer<DirectX::XMINT4>{ _dev };
+	_cbShadowProjOrign = DirectX::ConstantBuffer<DirectX::XMINT4>{ _dev };
+	_cbData.ShadowColor = { 0,0,0,0.7 };
+	_dpiScale = 1;
 	Init();
 }
 
-void SimpleSpriteDraw::Begin()
+void SimpleSpriteDraw::Begin(DirectX::XMINT2 viewPoint, float dpiScale)
 {
+	_dpiScale = dpiScale;
 	_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	_ctx->IASetInputLayout(_inputLayout.Get());
 	_ctx->VSSetShader(_vs.Get(), nullptr, 0);
-	_ctx->PSSetShader(_psNomal.Get(), nullptr, 0); _mode = 0;
+	_ctx->PSSetShader(_ps.Get(), nullptr, 0); 
+	_mode = DrawMode::Normal;
 	_ctx->RSSetState(_states->CullCounterClockwise());
 	_ctx->OMSetBlendState(_states->AlphaBlend(), 0, 0xffffffff);
 	_ctx->OMSetDepthStencilState(_states->DepthNone(), 0);
@@ -118,12 +124,10 @@ void SimpleSpriteDraw::Begin()
 	_height = vp.Height;
 	auto _halfW = _width / 2.0;
 	auto _halfH = _height / 2.0;
-	auto toNDC = Matrix::CreateScale(1, -1, 1) *
-		Matrix::CreateTranslation(-_halfW, _halfH, 0) *
-		Matrix::CreateScale(1.0 / _halfW, 1.0 / _halfH, 1);
+	auto toNDC = Matrix::CreateTranslation(-viewPoint.x, -viewPoint.y, 0) *
+		Matrix::CreateScale(1.0 / _halfW * _dpiScale, 1.0 / _halfH * _dpiScale, 1);
 
 	_cbData.Matrix = toNDC.Transpose();
-	_cbData.ShadowColor = { 0,0,0,0.5 };
 	_cbuffer.SetData(_ctx, _cbData);
 	auto cb = _cbuffer.GetBuffer();
 	_ctx->VSSetConstantBuffers(0, 1, &cb);
@@ -135,40 +139,49 @@ void SimpleSpriteDraw::End()
 {
 }
 
-void SimpleSpriteDraw::Draw(ID3D11ShaderResourceView* texture, RECT const& dstRect, FXMVECTOR color)
+void SimpleSpriteDraw::Draw(ID3D11ShaderResourceView* texture, DirectX::SimpleMath::Rectangle const& rect, DirectX::XMFLOAT4 color)
 {
 	_ctx->PSSetShaderResources(0, 1, &texture);
-	UpdateVB(dstRect, color);
+	UpdateVB(rect, color);
 	_ctx->DrawIndexed(6, 0, _readIdx * 4);
 }
 
 void SimpleSpriteDraw::SetModeNormal()
 {
-	if (_mode == 0) return;
+	if (_mode == DrawMode::Normal) return;
 
-	_mode = 0;
+	_mode = DrawMode::Normal;
 	_ctx->VSSetShader(_vs.Get(), nullptr, 0);
-	_ctx->PSSetShader(_psNomal.Get(), nullptr, 0);
+	_ctx->PSSetShader(_ps.Get(), nullptr, 0);
 }
 
-void SimpleSpriteDraw::SetModeShadow()
+void SimpleSpriteDraw::SetModeShadowOrth()
 {
-	if (_mode == 1) return;
+	if (_mode == DrawMode::ShadowOrth) return;
 
-	_mode = 1;
-	_ctx->VSSetShader(_vsShadow.Get(), nullptr, 0);
+	_mode = DrawMode::ShadowOrth;
+	_ctx->VSSetShader(_vs.Get(), nullptr, 0);
 	_ctx->PSSetShader(_psShadow.Get(), nullptr, 0);
 }
 
-void SimpleSpriteDraw::SetShadowOffset(int offsetX, int offsetY, int projX, int projY)
+void SimpleSpriteDraw::SetModeShadowProj()
 {
-	DirectX::XMINT4 shadowInfo{};
-	shadowInfo.x = offsetX;
-	shadowInfo.y = offsetY;
-	shadowInfo.z = projX;
-	shadowInfo.w = projY;
-	_cbShadowInfo.SetData(_ctx, shadowInfo);
-	auto cb = _cbShadowInfo.GetBuffer();
+	if (_mode == DrawMode::ShadowOrth) return;
+
+	_mode = DrawMode::ShadowOrth;
+	_ctx->VSSetShader(_vsShadowProj.Get(), nullptr, 0);
+	_ctx->PSSetShader(_psShadow.Get(), nullptr, 0);
+}
+
+void SimpleSpriteDraw::SetShadowColor(DirectX::XMFLOAT4 color)
+{
+	_cbData.ShadowColor = color;
+	_cbuffer.SetData(_ctx, _cbData);
+}
+void SimpleSpriteDraw::SetShadowProjOrigin(DirectX::XMINT2 origin)
+{
+	_cbShadowProjOrign.SetData(_ctx, { origin.x, origin.y,0,0 });
+	auto cb = _cbShadowProjOrign.GetBuffer();
 	_ctx->VSSetConstantBuffers(1, 1, &cb);
 }
 
@@ -223,14 +236,14 @@ void SimpleSpriteDraw::Init()
 
 	{
 		ComPtr<ID3DBlob> vsBlob = nullptr;
-		auto hr = CompileShaderFromData(SHADER_STRING.c_str(), SHADER_STRING.size(), "VS_Shadow", "vs_4_0", vsBlob.GetAddressOf());
+		auto hr = CompileShaderFromData(SHADER_STRING.c_str(), SHADER_STRING.size(), "VS_ShadowProj", "vs_4_0", vsBlob.GetAddressOf());
 		if (FAILED(hr))
 		{
 			MessageBox(nullptr, L"The SHADER_STRING VS cannot be compiled.", L"Error", MB_OK);
 			return;
 		}
 
-		hr = _dev->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, _vsShadow.GetAddressOf());
+		hr = _dev->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, _vsShadowProj.GetAddressOf());
 		if (FAILED(hr))
 			return;
 	}
@@ -244,7 +257,7 @@ void SimpleSpriteDraw::Init()
 			return;
 		}
 
-		hr = _dev->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, _psNomal.GetAddressOf());
+		hr = _dev->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, _ps.GetAddressOf());
 	}
 
 	{
@@ -276,25 +289,24 @@ void SimpleSpriteDraw::Init()
 	DirectX::CreateStaticBuffer(_dev, ids, 6, sizeof(uint32_t), D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER, _ib.GetAddressOf());
 }
 
-void SimpleSpriteDraw::UpdateVB(RECT const& dstRect, FXMVECTOR color)
+void SimpleSpriteDraw::UpdateVB(DirectX::SimpleMath::Rectangle const& rect, DirectX::XMFLOAT4 color)
 {
-	XMFLOAT4 f4{};
-	DirectX::XMStoreFloat4(&f4, color);
-	float left = (float)dstRect.left;
-	float bottom = (float)dstRect.bottom;
-	float right = (float)dstRect.right;
-	float top = (float)dstRect.top;
+	float left = (float)rect.x;
+	float bottom = (float)rect.y;
+	float right = left + rect.width;
+	float top = bottom + rect.height;
+	
 	_vertices[0].position = { left, bottom };
-	_vertices[0].color = f4;
+	_vertices[0].color = color;
 
 	_vertices[1].position = { left, top };
-	_vertices[1].color = f4;
+	_vertices[1].color = color;
 
 	_vertices[2].position = { right, top };
-	_vertices[2].color = f4;
+	_vertices[2].color = color;
 
 	_vertices[3].position = { right, bottom };
-	_vertices[3].color = f4;
+	_vertices[3].color = color;
 
 	D3D11_MAPPED_SUBRESOURCE mappedBuffer{0};
 	D3D11_MAP mapType = (_writeIdx == 0) ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE_NO_OVERWRITE;

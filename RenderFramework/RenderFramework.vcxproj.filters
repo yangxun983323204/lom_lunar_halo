@@ -63,6 +63,12 @@
     <ClInclude Include="SimpleSpriteDraw.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="IRenderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IGraphic2D.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SpriteRenderer.cpp">

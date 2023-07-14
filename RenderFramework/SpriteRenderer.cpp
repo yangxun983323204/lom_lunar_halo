@@ -28,3 +28,15 @@ DirectX::SimpleMath::Rectangle SpriteRenderer::GetWorldRect()
 	rect.y += wPos.y + offsetY;
 	return rect;
 }
+
+void SpriteRenderer::OnRender(IGraphic2D* gfx)
+{
+	if (Sprite.expired())
+		return;
+
+	auto wpos = GetSceneNode()->GetWorldPosition();
+	auto wRect = GetWorldRect();
+	auto sprite = Sprite.lock();
+	gfx->SetModeNormal();
+	gfx->Draw(sprite->TextureSRV.Get(), wRect, Color);
+}

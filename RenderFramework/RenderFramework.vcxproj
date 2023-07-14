@@ -26,6 +26,8 @@
     <ClInclude Include="GridView.h" />
     <ClInclude Include="GridViewComponent.hpp" />
     <ClInclude Include="HashSupport.h" />
+    <ClInclude Include="IGraphic2D.h" />
+    <ClInclude Include="IRenderer.h" />
     <ClInclude Include="ISceneNodeComponent.h" />
     <ClInclude Include="ISystem.h" />
     <ClInclude Include="LRU.hpp" />

@@ -31,26 +31,26 @@ void SpriteRenderSystem::Render()
 
 	for (auto camera : cameras)
 	{
-		RenderCamera(dynamic_cast<Camera*>(camera));
+		RenderCamera(dynamic_cast<Camera*>(camera), nullptr, false);
 	}
 }
 
-void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(SpriteRenderer*)> filter, bool debugMode)
+void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRenderer*)> filter, bool debugMode)
 {
 	if (camera->ClearType == Camera::ClearType::Color) {
 		Clear(camera->ClearColor);
 	}
 
-	auto spRenderers = ISystem::GetComponentsByType(SpriteRenderer::TypeId);
-	spRenderers.sort([](ISceneNodeComponent*a, ISceneNodeComponent*b) {
-		auto sa = dynamic_cast<SpriteRenderer*>(a)->SortLayer;
-		auto sb = dynamic_cast<SpriteRenderer*>(b)->SortLayer;
+	auto renderers = ISystem::GetComponentsByType(IRenderer::TypeId);
+	renderers.sort([](ISceneNodeComponent*a, ISceneNodeComponent*b) {
+		auto sa = dynamic_cast<IRenderer*>(a)->SortLayer;
+		auto sb = dynamic_cast<IRenderer*>(b)->SortLayer;
 		if (sa == sb) {
 			auto wposA = a->GetSceneNode()->GetWorldPosition();
 			auto wposB = b->GetSceneNode()->GetWorldPosition();
 			if (wposA.y == wposB.y) {
 				if (wposA.x == wposB.x)
-					return dynamic_cast<SpriteRenderer*>(a)->Depth < dynamic_cast<SpriteRenderer*>(b)->Depth;
+					return dynamic_cast<IRenderer*>(a)->Depth < dynamic_cast<IRenderer*>(b)->Depth;
 				else
 					return wposA.x < wposB.x;
 			}
@@ -61,152 +61,55 @@ void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(SpriteRender
 			return sa < sb;
 		});
 
-	BeginDraw();
-	for (auto spRenderer : spRenderers) {
-		auto sr = dynamic_cast<SpriteRenderer*>(spRenderer);
-		if (sr->Sprite.expired())
+	auto cameraWPos = camera->GetSceneNode()->GetWorldPosition();
+	_draw->Begin(cameraWPos, _dpiScale);
+	for (auto renderer : renderers) {
+		auto sr = dynamic_cast<IRenderer*>(renderer);
+		if (!sr || !sr->Enable)
 			continue;
+
 		if (filter && !filter(sr))
 			continue;
 
-		auto wpos = sr->GetSceneNode()->GetWorldPosition();
-		auto viewRect = sr->GetWorldRect();
-		auto cameraWPos = camera->GetSceneNode()->GetWorldPosition();
-		viewRect.x -= cameraWPos.x;
-		viewRect.y -= cameraWPos.y;
-		wpos.x -= cameraWPos.x;
-		wpos.y -= cameraWPos.y;
-		auto sprite = sr->Sprite.lock();
-		if (!debugMode) {
-			if (sprite->GenerateShadow) {
-				auto shadowInfo = sprite->ShadowInfo;
-				DrawShadow(wpos, sprite->TextureSRV.Get(), viewRect, 
-					{ shadowInfo.OffsetX, shadowInfo.OffsetY, shadowInfo.ProjX, shadowInfo.ProjY });
-			}
-			
-			Draw(wpos, sprite->TextureSRV.Get(), viewRect, sr->Color);
-		}
-		else {
-			DrawDebug(wpos, sprite->TextureSRV.Get(), viewRect, sr->__debugColor);
-		}
+		sr->OnRender(_draw.get());
 	}
-	EndDraw();
-}
-
-void SpriteRenderSystem::RenderDebug()
-{
-	auto cameras = ISystem::GetComponentsByType(Camera::TypeId);
-	if (cameras.size() <= 0)
-	{
-		cout << "no camera!";
-		return;
-	}
-
-	cameras.sort([](ISceneNodeComponent* a, ISceneNodeComponent* b) {
-		return dynamic_cast<Camera*>(a)->Depth < dynamic_cast<Camera*>(b)->Depth;
-		});
-
-	for (auto camera : cameras)
-	{
-		RenderCamera(dynamic_cast<Camera*>(camera), [](SpriteRenderer* sr) {
-			return sr->__debug;
-			}, true);
-	}
-}
-
-void SpriteRenderSystem::BeginDraw()
-{
-	_draw->Begin();
-}
-
-void SpriteRenderSystem::EndDraw()
-{
 	_draw->End();
 }
 
-void SpriteRenderSystem::Draw(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
-{
-	_draw->SetModeNormal();
-	// 目地：观察坐标->屏幕坐标
-	int offsetX = _vw / 2;
-	int offsetY = -_vh / 2;
-	// 变换到左上角
-	viewRect.x += offsetX;
-	viewRect.y += offsetY;
-	// y轴反向
-	viewRect.y *= -1;
-	RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
-	auto f4 = DirectX::XMLoadFloat4(&color);
-	sRect.left = sRect.left * _dpiScale;
-	sRect.right = sRect.right * _dpiScale;
-	sRect.bottom = sRect.bottom * _dpiScale;
-	sRect.top = sRect.top * _dpiScale;
-	_draw->Draw(srv, sRect, f4);
-}
-
-void SpriteRenderSystem::DrawShadow(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMINT4 shadowInfo)
-{
-	_draw->SetModeShadow();
-	// 目地：观察坐标->屏幕坐标
-	int offsetX = _vw / 2;
-	int offsetY = -_vh / 2;
-	// 变换到左上角
-	viewRect.x += offsetX;
-	viewRect.y += offsetY;
-	// y轴反向
-	viewRect.y *= -1;
-	shadowInfo.y *= -1;
-	shadowInfo.w *= -1;
-	//
-	RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
-	// dpi scale
-	sRect.left = sRect.left * _dpiScale;
-	sRect.right = sRect.right * _dpiScale;
-	sRect.bottom = sRect.bottom * _dpiScale;
-	sRect.top = sRect.top * _dpiScale;
-	shadowInfo.x *= _dpiScale;
-	shadowInfo.y *= _dpiScale;
-	shadowInfo.z *= _dpiScale;
-	shadowInfo.w *= _dpiScale;
-	//
-	_draw->SetShadowOffset(shadowInfo.x, shadowInfo.y, shadowInfo.z, shadowInfo.w);
-	_draw->Draw(srv, sRect, {0});
-}
-
-void SpriteRenderSystem::DrawDebug(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
-{
-	_draw->SetModeNormal();
-	// 目地：观察坐标->屏幕坐标
-	int offsetX = _vw / 2;
-	int offsetY = -_vh / 2;
-	// 变换到左上角
-	viewRect.x += offsetX;
-	viewRect.y += offsetY;
-	vpos.x += offsetX; vpos.y += offsetY;
-	// y轴反向
-	viewRect.y *= -1;
-	vpos.y *= -1;
-	RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
-
-	auto centerX = (sRect.right + sRect.left) / 2;
-	auto centerY = (sRect.bottom + sRect.top) / 2;
-	auto f4 = DirectX::XMLoadFloat4(&color);
-	// draw cross
-	RECT cross = GetDebugRect(vpos.x, vpos.y);
-	_draw->Draw(_debugImgCross->TextureSRV.Get(), cross, f4);
-	// draw left top
-	RECT lt = GetDebugRect(sRect.left, sRect.top);
-	_draw->Draw(_debugImgLT->TextureSRV.Get(), lt, f4);
-	// draw right top
-	RECT rt = GetDebugRect(sRect.right, sRect.top);
-	_draw->Draw(_debugImgRT->TextureSRV.Get(), rt, f4);
-	// draw right bottom
-	RECT rb = GetDebugRect(sRect.right, sRect.bottom);
-	_draw->Draw(_debugImgRB->TextureSRV.Get(), rb, f4);
-	// draw left bottom
-	RECT lb = GetDebugRect(sRect.left, sRect.bottom);
-	_draw->Draw(_debugImgLB->TextureSRV.Get(), lb, f4);
-}
+//void SpriteRenderSystem::DrawDebug(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
+//{
+//	_draw->SetModeNormal();
+//	// 目地：观察坐标->屏幕坐标
+//	int offsetX = _vw / 2;
+//	int offsetY = -_vh / 2;
+//	// 变换到左上角
+//	viewRect.x += offsetX;
+//	viewRect.y += offsetY;
+//	vpos.x += offsetX; vpos.y += offsetY;
+//	// y轴反向
+//	viewRect.y *= -1;
+//	vpos.y *= -1;
+//	RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
+//
+//	auto centerX = (sRect.right + sRect.left) / 2;
+//	auto centerY = (sRect.bottom + sRect.top) / 2;
+//	auto f4 = DirectX::XMLoadFloat4(&color);
+//	// draw cross
+//	RECT cross = GetDebugRect(vpos.x, vpos.y);
+//	_draw->Draw(_debugImgCross->TextureSRV.Get(), cross, f4);
+//	// draw left top
+//	RECT lt = GetDebugRect(sRect.left, sRect.top);
+//	_draw->Draw(_debugImgLT->TextureSRV.Get(), lt, f4);
+//	// draw right top
+//	RECT rt = GetDebugRect(sRect.right, sRect.top);
+//	_draw->Draw(_debugImgRT->TextureSRV.Get(), rt, f4);
+//	// draw right bottom
+//	RECT rb = GetDebugRect(sRect.right, sRect.bottom);
+//	_draw->Draw(_debugImgRB->TextureSRV.Get(), rb, f4);
+//	// draw left bottom
+//	RECT lb = GetDebugRect(sRect.left, sRect.bottom);
+//	_draw->Draw(_debugImgLB->TextureSRV.Get(), lb, f4);
+//}
 
 void SpriteRenderSystem::Clear(DirectX::XMFLOAT4 color)
 {
