@@ -38,7 +38,7 @@ namespace Mir {
 class ActorView :public ISceneNodeComponent
 {
 public:
-	SCENE_NODE_COMPONENT('atv');
+	_SCENE_NODE_COMPONENT_ID(ActorView);
 
 	void PlayAnim(string name);
 	vector<string> GetSubPartNames();

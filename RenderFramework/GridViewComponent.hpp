@@ -6,7 +6,7 @@
 class GridViewComponent : public ISceneNodeComponent
 {
 public:
-	SCENE_NODE_COMPONENT('gvc');
+	_SCENE_NODE_COMPONENT_ID(GridViewComponent);
 	inline void Init(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols)
 	{
 		_gridView = std::make_unique<GridView>(cellWidth, cellHeight, rows, cols);

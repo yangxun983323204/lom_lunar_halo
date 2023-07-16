@@ -10,7 +10,17 @@ void ISceneNodeComponent::Reg()
 
 void ISceneNodeComponent::UnReg()
 {
-	auto v = __componentsReg[GetTypeId()];
+	UnRegWithId(GetTypeId());
+}
+
+void ISceneNodeComponent::RegWithId(uint32_t id) 
+{
+	__componentsReg[id].push_back(this);
+}
+
+void ISceneNodeComponent::UnRegWithId(uint32_t id)
+{
+	auto v = __componentsReg[id];
 	auto f = std::find_if(v.begin(), v.end(), [this](ISceneNodeComponent* n) { return n == this; });
 	if (f != v.end())
 		v.erase(f);

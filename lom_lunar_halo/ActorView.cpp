@@ -123,10 +123,6 @@ void ActorView::InitAs(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* r
 				sr->Enable = true;
 				sr->SortLayer = Layer;
 				sr->Depth = Depth + sub;
-				if (false) {
-					sr->__debug = true;
-					sr->__debugColor = debugColor[sub];
-				}
 
 				auto resHolder = node.lock()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>();
 

@@ -19,7 +19,7 @@ MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr,
         Mir::GameLayoutW, Mir::GameLayoutH, DpiScale* UserScale);
 
     _camera = _sceneMgr->CreateCameraNode();
-    _camera->SetLocalPosition(Mir::GetCellCenter(400, 400));
+    _camera->SetLocalPosition(Mir::GetCellCenter(422, 429));
     //
     _gridView = _camera->AddComponent<GridViewComponent>().lock();
     _animDB = std::make_unique<AnimDatabase>();

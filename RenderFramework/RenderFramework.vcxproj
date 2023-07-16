@@ -30,6 +30,7 @@
     <ClInclude Include="IRenderer.h" />
     <ClInclude Include="ISceneNodeComponent.h" />
     <ClInclude Include="ISystem.h" />
+    <ClInclude Include="IUpdate.h" />
     <ClInclude Include="LRU.hpp" />
     <ClInclude Include="RenderFramework.h" />
     <ClInclude Include="SceneNode.h" />

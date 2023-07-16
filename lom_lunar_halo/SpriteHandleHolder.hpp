@@ -10,7 +10,7 @@ using std::shared_ptr;
 class SpriteHandleHolder : public ISceneNodeComponent
 {
 public:
-	SCENE_NODE_COMPONENT('shh');
+	_SCENE_NODE_COMPONENT_ID(SpriteHandleHolder);
 	SpriteHandleHolder() :holder{} {}
 	inline void Clear() { holder.clear(); }
 	inline void Add(shared_ptr<SpriteResHandle> handle) { holder.push_back(handle); }

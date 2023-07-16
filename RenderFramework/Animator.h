@@ -13,7 +13,7 @@ using std::string;
 class Animator : public ISceneNodeComponent
 {
 public:
-	SCENE_NODE_COMPONENT('anmr');
+	_SCENE_NODE_COMPONENT_ID(Animator);
 
 	Animator();
 

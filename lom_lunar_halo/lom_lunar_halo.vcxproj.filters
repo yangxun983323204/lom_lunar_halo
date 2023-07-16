@@ -105,6 +105,9 @@
     <ClInclude Include="AnimDatabase.h">
       <Filter>SceneManager</Filter>
     </ClInclude>
+    <ClInclude Include="HeroRenderer.h">
+      <Filter>SceneManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -173,6 +176,9 @@
       <Filter>SceneManager</Filter>
     </ClCompile>
     <ClCompile Include="AnimDatabase.cpp">
+      <Filter>SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="HeroRenderer.cpp">
       <Filter>SceneManager</Filter>
     </ClCompile>
   </ItemGroup>

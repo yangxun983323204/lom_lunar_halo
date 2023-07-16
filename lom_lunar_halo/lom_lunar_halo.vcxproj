@@ -196,6 +196,7 @@
     <ClInclude Include="GUI\Image.h" />
     <ClInclude Include="GUI\LayoutLoader.h" />
     <ClInclude Include="GUI\Text.h" />
+    <ClInclude Include="HeroRenderer.h" />
     <ClInclude Include="IProcess.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="LoginProcess.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="GUI\Image.cpp" />
     <ClCompile Include="GUI\LayoutLoader.cpp" />
     <ClCompile Include="GUI\Text.cpp" />
+    <ClCompile Include="HeroRenderer.cpp" />
     <ClCompile Include="LoginProcess.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MirWorldRenderManager.cpp" />

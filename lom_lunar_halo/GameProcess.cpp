@@ -25,12 +25,12 @@ void GameProcess::StartEnter()
     HeroData hero{};
     hero.NetId = 1;
     hero.Name = "小明";
-    hero.Pos = { 405,414 };
+    hero.Pos = { 422,429 };
     hero.Dir = Mir::Direction::Bottom;
-    hero.Dress = 6;
+    hero.Dress = 8;
     hero.Gender = Mir::ActorType::Woman;
-    hero.Hair = 3;
-    hero.Weapon = 4;
+    hero.Hair = 1;
+    hero.Weapon = 19;
     hero.Horse = 0;
     hero.Motion = Mir::PlayerMotion::Walk;
     _game->GetWorldRenderManager()->SetSelfHero(hero);

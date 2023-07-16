@@ -11,7 +11,7 @@ public:
 		Color,
 	};
 
-	SCENE_NODE_COMPONENT('cmra')
+	_SCENE_NODE_COMPONENT_ID(Camera)
 
 	int Depth = 0;
 	Camera::ClearType ClearType = Camera::ClearType::None;
