@@ -2,10 +2,9 @@
 #include "ISceneNodeComponent.h"
 #include "IGraphic2D.h"
 
-class IRenderer :public ISceneNodeComponent
+class IRenderer
 {
 public:
-	_SCENE_NODE_COMPONENT_ID(IRenderer);
 	IRenderer()
 	{
 		Color = DirectX::XMFLOAT4{ 1,1,1,1 };

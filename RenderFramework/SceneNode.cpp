@@ -147,6 +147,6 @@ void SceneNode::RemoveComponent(weak_ptr<ISceneNodeComponent> component)
         std::swap(*iter, *last);
         _components.pop_back();
         ptr->_node = {};
-        ptr->UnReg();
+        ptr->CallUnReg();
     }
 }

@@ -41,7 +41,7 @@ void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRenderer*)>
 		Clear(camera->ClearColor);
 	}
 
-	auto renderers = ISystem::GetComponentsByType(IRenderer::TypeId);
+	auto renderers = ISystem::GetComponentsByType(_ID_OF(IRenderer));
 	renderers.sort([](ISceneNodeComponent*a, ISceneNodeComponent*b) {
 		auto sa = dynamic_cast<IRenderer*>(a)->SortLayer;
 		auto sb = dynamic_cast<IRenderer*>(b)->SortLayer;
@@ -65,7 +65,7 @@ void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRenderer*)>
 	_draw->Begin(cameraWPos, _dpiScale);
 	for (auto renderer : renderers) {
 		auto sr = dynamic_cast<IRenderer*>(renderer);
-		if (!sr || !sr->Enable)
+		if (!sr || !renderer->Enable)
 			continue;
 
 		if (filter && !filter(sr))

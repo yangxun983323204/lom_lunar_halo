@@ -61,7 +61,7 @@ template<class TComponent>
 weak_ptr<TComponent> SceneNode::AddComponent()
 {
 	auto ptr = std::make_shared<TComponent>();
-	ptr->Reg();
+	ptr->CallReg();
 	ptr->_node = weak_from_this();
 	_components.push_back(ptr);
 	return std::weak_ptr<TComponent>{ptr};

@@ -54,6 +54,9 @@ protected:
 
 	weak_ptr<SceneNode> _node;
 
+	inline void CallReg() { Reg(); };
+	inline void CallUnReg() { UnReg(); };
+
 	virtual void Reg();
 	virtual void UnReg();
 	void RegWithId(uint32_t id);
@@ -70,7 +73,7 @@ TComponent* ISceneNodeComponent::As()
 
 //============================================================================================
 #define _SCENE_NODE_COMPONENT_BEGIN0(T)													\
-class T:public virtual ISceneNodeComponent												\
+class T:public ISceneNodeComponent														\
 {																						\
 public:																					\
 	_SCENE_NODE_COMPONENT_ID(T)															\
@@ -85,15 +88,15 @@ protected:																				\
 	}																					\
 //============================================================================================
 #define _SCENE_NODE_COMPONENT_BEGIN1(T, PARENT1)										\
-class T:public virtual PARENT1															\
+class T:public ISceneNodeComponent, public PARENT1										\
 {																						\
 public:																					\
 	_SCENE_NODE_COMPONENT_ID(T)															\
 protected:																				\
 	virtual void Reg()																	\
 	{																					\
-		ISceneNodeComponent::RegWithId(_ID_OF(T));										\
 		ISceneNodeComponent::RegWithId(_ID_OF(PARENT1));								\
+		ISceneNodeComponent::RegWithId(_ID_OF(T));										\
 	}																					\
 	virtual void UnReg()																\
 	{																					\
@@ -102,36 +105,36 @@ protected:																				\
 	}																					\
 //============================================================================================
 #define _SCENE_NODE_COMPONENT_BEGIN2(T, PARENT1, PARENT2)								\
-class T:public virtual PARENT1, virtual PARENT2 										\
+class T:public ISceneNodeComponent, public PARENT1, public PARENT2 						\
 {																						\
 public:																					\
 	_SCENE_NODE_COMPONENT_ID(T)															\
 protected:																				\
 	virtual void Reg()																	\
 	{																					\
-		ISceneNodeComponent::RegWithId(_ID_OF(T));										\
 		ISceneNodeComponent::RegWithId(_ID_OF(PARENT1));								\
 		ISceneNodeComponent::RegWithId(_ID_OF(PARENT2));								\
+		ISceneNodeComponent::RegWithId(_ID_OF(T));										\
 	}																					\
 	virtual void UnReg()																\
 	{																					\
 		ISceneNodeComponent::UnRegWithId(_ID_OF(T));									\
-		ISceneNodeComponent::UnRegWithId(_ID_OF(PARENT1));								\
 		ISceneNodeComponent::UnRegWithId(_ID_OF(PARENT2));								\
+		ISceneNodeComponent::UnRegWithId(_ID_OF(PARENT1));								\
 	}																					\
 //============================================================================================
 #define _SCENE_NODE_COMPONENT_BEGIN3(T, PARENT1, PARENT2, PARENT3)						\
-class T:public virtual PARENT1, virtual PARENT2, virtual PARENT3						\
+class T:public ISceneNodeComponent, public PARENT1, public PARENT2, public PARENT3		\
 {																						\
 public:																					\
 	_SCENE_NODE_COMPONENT_ID(T)															\
 protected:																				\
 	virtual void Reg()																	\
 	{																					\
-		ISceneNodeComponent::RegWithId(_ID_OF(T));										\
 		ISceneNodeComponent::RegWithId(_ID_OF(PARENT1));								\
 		ISceneNodeComponent::RegWithId(_ID_OF(PARENT2));								\
 		ISceneNodeComponent::RegWithId(_ID_OF(PARENT3));								\
+		ISceneNodeComponent::RegWithId(_ID_OF(T));										\
 	}																					\
 	virtual void UnReg()																\
 	{																					\
