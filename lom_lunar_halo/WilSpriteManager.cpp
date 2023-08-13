@@ -46,9 +46,9 @@ WilSpriteManager::Impl::Impl(ID3D11Device* dev, string dir, WilSpriteManager* pa
 	_imgLibs{}
 {
 	struct _stat buffer;
-	if (_wstat(L"wil.json", &buffer) == 0)
+	if (_wstat(L"./ResDef/wil.json", &buffer) == 0)
 	{
-		std::ifstream cfg(L"wil.json");
+		std::ifstream cfg(L"./ResDef/wil.json");
 		std::string str = std::string((std::istreambuf_iterator<char>(cfg)),
 			std::istreambuf_iterator<char>());
 		cfg.close();

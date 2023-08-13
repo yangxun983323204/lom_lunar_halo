@@ -72,8 +72,8 @@ public:
 		uint16_t Version;
 		int16_t Width;// 宽高的单位是cell
 		int16_t Height;
-		char EventFileIndex;
-		char FogColor;
+		uint8_t EventFileIndex;
+		uint8_t FogColor;
 	};
 
 	struct TileInfo
@@ -92,16 +92,16 @@ public:
 			return true;
 		}
 	};
-
+	// Obj1是下层元素，Obj2是上层元素
 	struct CellInfo
 	{
 		uint8_t Flag;// 障碍层
-		uint8_t Obj1Ani;
-		uint8_t Obj2Ani;
-		uint8_t FileIdx2;
-		uint8_t FileIdx1;
-		uint16_t Obj1;// 房屋及树的左半
-		uint16_t Obj2;// 树的右半
+		uint8_t Obj1Animation;
+		uint8_t Obj2Animation;
+		uint8_t Obj2FileIdx;
+		uint8_t Obj1FileIdx;
+		uint16_t Obj1ImgIdx;
+		uint16_t Obj2ImgIdx;
 		// DoorIndex & 0X80 for whether there is a door
 		// DoorIndex & 0X7F for door index, if non-zero
 		// DoorOffset & 0X80 for open/close the door
@@ -110,18 +110,18 @@ public:
 		uint8_t DoorOffset;
 		uint16_t LightNEvent;
 
-		inline uint32_t FileIndex1() { return FileIdx1 & 0x0f; }
-		inline uint32_t FileIndex2() { return FileIdx2 & 0x0f; }
-		inline bool File1Enable() { return FileIdx1 != 0xff && Obj1 != 65535 && Obj1 > 0 && Obj1 < 0x7fffffff; }
-		inline bool File2Enable() { return FileIdx2 != 0xff && Obj2 != 65535 && Obj2 > 0 && Obj2 < 0x7fffffff; }
-		inline bool HasAnim1() { return Obj1Ani != 255; }
-		inline bool HasAnim2() { return Obj2Ani != 255; }
-		inline bool Obj1Blend() { return Obj1Ani & 0x80 >> 7; }
-		inline bool Obj2Blend() { return Obj2Ani & 0x80 >> 7; }
-		inline unsigned char Obj1AnimTickType() { return Obj1Ani & 0x70 >> 4; }
-		inline unsigned char Obj2AnimTickType() { return Obj2Ani & 0x70 >> 4; }
-		inline short Obj1AnimCount() { return Obj1Ani & 0x0f; }
-		inline short Obj2AnimCount() { return Obj2Ani & 0x0f; }
+		inline uint32_t FileIndex1() { return Obj1FileIdx; }
+		inline uint32_t FileIndex2() { return Obj2FileIdx; }
+		inline bool File1Enable() { return FileIndex1() != 0xff && Obj1ImgIdx != 65535 && Obj1ImgIdx > 0 && Obj1ImgIdx < 0x7fffffff; }
+		inline bool File2Enable() { return FileIndex2() != 0xff && Obj2ImgIdx != 65535 && Obj2ImgIdx > 0 && Obj2ImgIdx < 0x7fffffff; }
+		inline bool HasAnim1() { return Obj1Animation != 255; }
+		inline bool HasAnim2() { return Obj2Animation != 255; }
+		inline bool Obj1Blend() { return Obj1Animation & 0x80 >> 7; }
+		inline bool Obj2Blend() { return Obj2Animation & 0x80 >> 7; }
+		inline unsigned char Obj1AnimTickType() { return Obj1Animation & 0x70 >> 4; }
+		inline unsigned char Obj2AnimTickType() { return Obj2Animation & 0x70 >> 4; }
+		inline short Obj1AnimCount() { return Obj1Animation & 0x0f; }
+		inline short Obj2AnimCount() { return Obj2Animation & 0x0f; }
 		inline bool HasDoor() { return (DoorOffset & 0x80) > 0 && (DoorIndex & 0x7f) > 0; }
 		inline uint32_t DoorImgIdx() { return DoorOffset & 0x7f; }
 		inline bool Walkable() { return Flag & 0x01 ? true : false; }
@@ -136,9 +136,9 @@ public:
 		}
 		inline uint32_t ImgIndexOf(uint8_t idx) {
 			if (idx == 1)
-				return Obj1;
+				return Obj1ImgIdx;
 			else if (idx == 2)
-				return Obj2;
+				return Obj2ImgIdx;
 			else
 				return 0;
 		}
@@ -210,6 +210,17 @@ public:
 	bool Walkable(uint32_t cellX, uint32_t cellY);
 
 private:
+	inline uint32_t GetCellIndex(uint32_t x, uint32_t y)
+	{
+		return y + x * mHeader->Height;
+		//return x + y * mHeader->Width;
+	}
+	inline uint32_t GetTileIndex(uint32_t x, uint32_t y)
+	{
+		return (y / 2) + (x / 2) * mHeader->Height / 2;
+		//return (x / 2) + (y / 2) * mHeader->Width / 2;
+	}
+
 	wstring mPath;
 	MapHeader* mHeader;
 	TileInfo* mTiles;

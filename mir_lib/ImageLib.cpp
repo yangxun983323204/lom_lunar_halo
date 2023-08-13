@@ -49,28 +49,28 @@ struct ImageLib::Impl
 	unique_ptr<FILE, void(*)(FILE*)> _wil;
 
 
-	inline static int WixOffset(int version)
+	inline static int WixHeadOffset(int version)
 	{
 		switch (version) {
 		case 17:
-			return 24;
+			return 24;// wix
 		case 5000:
-			return 28;
+			return 28;// wix
 		case 6000:
-			return 32;
+			return 32;// wtl
 		default:
 			throw "offset == -1";
 		}
 	}
-	inline static int WilOffset(int version)
+	inline static int WilBlockHeadOffset(int version)
 	{
 		switch (version) {
 		case 17:
-			return 17;
+			return sizeof(Mir3TextureHeader_Type1);
 		case 5000:
-			return 21;
+			return sizeof(Mir3TextureHeader_Type2);
 		case 6000:
-			return 21;
+			return sizeof(Mir3TextureHeader_Type3);
 		default:
 			throw "offset == -1";
 		}
@@ -85,21 +85,95 @@ struct ImageLib::Impl
 	}
 
 #pragma pack(1)
-	struct WixHeader3
+	// 6000 = Type3 | 5000 = Type2 | 17 = Type1
+	/*
+	**************************************************************
+	* wix文件头
+	**************************************************************/
+	// 22字节
+	struct Mir3WixHeader_Type1
 	{
 		char Title[20];
-		int32_t ImgCount;
-		int32_t* Data;
+		uint16_t ImgCount;
 	};
-	/* 可以不使用
-	struct WilHeader3
+	// 24字节
+	struct Mir3WixHeader_Type2
 	{
-		int16_t HasCompress;
 		char Title[20];
-		int16_t Version;
-		int32_t ImgCount;
+		uint16_t ImgCount;
+		uint16_t Check;
 	};
-	*/
+	/*
+	**************************************************************
+	* wil文件头
+	**************************************************************/
+	// 26字节
+	struct Mir3WilHeader_Type1
+	{
+		uint16_t Flag;		// 1 or 2
+		char Title[20];		// ILIB v1.0-WEMADE
+		uint16_t Type;		// 
+		uint16_t ImgCount;	// Total Image in this File
+	};
+	// 28字节
+	struct Mir3WilHeader_Type2
+	{
+		uint16_t Flag;		// 1 or 2
+		char Title[20];		// ILIB v1.0-WEMADE
+		uint16_t Type;		// 
+		uint16_t ImgCount;	// Total Image in this File
+		uint16_t Check;		// Checksum
+	};
+	// 28字节
+	struct Mir3WtlHeader_Type3
+	{
+		uint16_t Flag;		// 1 or 2
+		char Title[20];		// ILIB v1.0-WEMADE
+		uint16_t Type;		// 
+		uint16_t ImgCount;	// Total Image in this File
+		uint16_t IdxCount;  // Total Index in this File
+	};
+	/*
+	**************************************************************
+	* wil文件block info
+	**************************************************************/
+	// 17字节
+	struct Mir3TextureHeader_Type1
+	{
+		uint16_t Width;
+		uint16_t Height;
+		int16_t OffsetX;
+		int16_t OffsetY;
+		uint8_t ShadowType;
+		int16_t ShadowOffsetX;
+		int16_t ShadowOffsetY;
+		uint32_t Length;
+	};
+	// 21字节
+	struct Mir3TextureHeader_Type2
+	{
+		uint16_t Width;
+		uint16_t Height;
+		int16_t OffsetX;
+		int16_t OffsetY;
+		uint8_t ShadowType;
+		int16_t ShadowOffsetX;
+		int16_t ShadowOffsetY;
+		uint32_t Length;
+		uint32_t Reserve;
+	};
+	// 17字节,WTL-File
+	struct Mir3TextureHeader_Type3
+	{
+		uint16_t Width;
+		uint16_t Height;
+		int16_t OffsetX;
+		int16_t OffsetY;
+		int16_t ShadowOffsetX;
+		int16_t ShadowOffsetY;
+		uint32_t Length;
+		uint8_t ShadowType;
+	};
 #pragma pack()
 };
 
@@ -134,24 +208,23 @@ void ImageLib::Impl::Open(wstring wixPath, wstring wilPath)
 	if (wix == nullptr)
 		return;
 
-	auto wixHeader = new WixHeader3();
-	fread(reinterpret_cast<void*>(wixHeader), sizeof(WixHeader3) - 4, 1, wix);
-	wixHeader->Data = new int32_t[wixHeader->ImgCount];
-	fseek(wix, WixOffset(_version), SEEK_SET);
-	fread(reinterpret_cast<void*>(wixHeader->Data), sizeof(int32_t), wixHeader->ImgCount, wix);
+	auto wixHeader = new Mir3WixHeader_Type1();
+	fread(reinterpret_cast<void*>(wixHeader), sizeof(Mir3WixHeader_Type1), 1, wix);
+	_blockAddress.clear();
+	_blockAddress.resize(wixHeader->ImgCount);
+	fseek(wix, WixHeadOffset(_version), SEEK_SET);
+	fread(reinterpret_cast<void*>(_blockAddress.data()), sizeof(int32_t), wixHeader->ImgCount, wix);
 	fclose(wix);
 	wil = nullptr;
 	_wfopen_s(&wil, wilPath.c_str(), L"rb");
 	_wil.reset(wil);
 	// 读取ImageInfo
-	_blockAddress.clear();
-	_blockAddress.reserve(wixHeader->ImgCount);
+	
 	_infos.clear();
 	_infos.resize(wixHeader->ImgCount);
 	for (size_t i = 0; i < wixHeader->ImgCount; i++)
 	{
-		auto address = wixHeader->Data[i];
-		_blockAddress.push_back(address);
+		auto address = _blockAddress[i];
 		fseek(_wil.get(), address, SEEK_SET);
 		fread(reinterpret_cast<void*>(&_infos[i]), sizeof(ImageInfo), 1, _wil.get());
 	}
@@ -176,7 +249,7 @@ vector<uint16_t> ImageLib::Impl::GetImageRaw(int idx)
 
 	auto info = _infos[idx];
 	fseek(_wil.get(), address, SEEK_SET);
-	fseek(_wil.get(), WilOffset(_version), SEEK_CUR);
+	fseek(_wil.get(), WilBlockHeadOffset(_version), SEEK_CUR);
 	vector<uint16_t> data(info.ImgLength, 0);
 	fread(reinterpret_cast<void*>(data.data()), 2, info.ImgLength, _wil.get());
 	return data;

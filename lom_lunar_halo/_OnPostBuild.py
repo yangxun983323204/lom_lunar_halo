@@ -1,3 +1,4 @@
+import os
 import sys
 import shutil
 
@@ -7,29 +8,50 @@ isDebug = sys.argv[1]=="Debug"
 
 copyTo = "../x64/"
 if isDebug:
-  copyTo += "Debug/"
+	copyTo += "Debug/"
 else:
-  copyTo += "Release/"
+	copyTo += "Release/"
 
-def CopyFile(src, dst):
-  shutil.copy(src,dst)
-  print("copy:"+src+"->"+dst)
+def Copy(src, dst):
+	if os.path.isdir(src):
+		if os.path.isdir(dst):
+			shutil.rmtree(dst)
+		shutil.copytree(src,dst)
+	elif os.path.isfile(src):
+		shutil.copy(src,dst)
+	else:
+		print("未识别文件或目录:"+src)
+	print("copy:"+src+"->"+dst)
 
+class CopyPair(object):
+	"""docstring for CopyPair"""
+	def __init__(self, src, dst):
+		self.src = src
+		self.dst = dst
+
+copyArray = []
+
+# rml
 rmlUiFrom = "../deps/RmlUi-vs2017-win64/Bin/"
 if isDebug:
-  rmlUiFrom += "Dynamic-Debug/"
+	rmlUiFrom += "Dynamic-Debug/"
 else:
-  rmlUiFrom += "Dynamic-Release/"
+	rmlUiFrom += "Dynamic-Release/"
 
-rmlUiFrom += "RmlCore.dll"
-rmlUiTo = copyTo+"RmlCore.dll"
-CopyFile(rmlUiFrom,rmlUiTo)
+copyArray.append(CopyPair(rmlUiFrom + "RmlCore.dll", copyTo+"RmlCore.dll"))
+copyArray.append(CopyPair(rmlUiFrom + "RmlDebugger.dll", copyTo+"RmlDebugger.dll"))
 
 freeTypeFrom = "../deps/RmlUi-vs2017-win64/Dependencies/freetype-2.10.1/freetype.dll"
 freeTypeTo = copyTo + "freetype.dll"
-CopyFile(freeTypeFrom,freeTypeTo)
+copyArray.append(CopyPair(freeTypeFrom, freeTypeTo))
 
-CopyFile("./config.json",copyTo+"config.json")
-CopyFile("./wil.json",copyTo+"wil.json")
+# config
+copyArray.append(CopyPair("./config.json", copyTo+"config.json"))
+copyArray.append(CopyPair("./ResDef", copyTo+"ResDef"))
+copyArray.append(CopyPair("./UILayout", copyTo+"UILayout"))
+
+# copy all
+for pair in copyArray:
+	Copy(pair.src, pair.dst)
 
 print("OnPostBuild end")

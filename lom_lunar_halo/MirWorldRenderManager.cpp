@@ -19,11 +19,11 @@ MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr,
         Mir::GameLayoutW, Mir::GameLayoutH, DpiScale* UserScale);
 
     _camera = _sceneMgr->CreateCameraNode();
-    _camera->SetLocalPosition(Mir::GetCellCenter(422, 429));
+    _camera->SetLocalPosition(Mir::GetCellCenter(400, 460));
     //
     _gridView = _camera->AddComponent<GridViewComponent>().lock();
     _animDB = std::make_unique<AnimDatabase>();
-    _animDB->LoadFromXml("./AnimData.xml");
+    _animDB->LoadFromXml("./ResDef/AnimData.xml");
 }
 
 void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
@@ -237,11 +237,11 @@ void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
         return;
 
     auto tile = this->_mapData->TileAt(key.x, _mapData->h() - key.y);
-    auto fileIdx = tile.FileIndex;
+    int fileIdx = tile.FileIndex;
     int imgIdx = tile.TileIndex;
-    /*if (!tile.RemapFileIndex(imgIdx))
-        return;*/
-    auto spriteHandle = _mapResMgr->LoadSprite({ fileIdx, (uint32_t)imgIdx });
+    if (!tile.RemapFileIndex(fileIdx))
+        return;
+    auto spriteHandle = _mapResMgr->LoadSprite({ (uint32_t)fileIdx, (uint32_t)imgIdx });
     if (!spriteHandle)
         return;
     auto spRender = this->GetMapStaticSpriteRenderer(_bgUse, key);

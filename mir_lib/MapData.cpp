@@ -61,7 +61,7 @@ void MapData::Load(wstring mapPath)
 		for (size_t j = 0; j < mDoors[i].ImageCount; j++)
 		{
 			auto imgInfo = door.ImageInfo[j];
-			mCellDoorIndices[imgInfo.PosX + imgInfo.PosY * mHeader->Width] = door.Index;
+			mCellDoorIndices[GetCellIndex(imgInfo.PosX, imgInfo.PosY)] = door.Index;
 		}
 	}
 	fclose(f);
@@ -90,24 +90,24 @@ int16_t MapData::h()
 
 MapData::TileInfo MapData::TileAt(uint32_t cellX, uint32_t cellY)
 {
-	auto idx = (cellY / 2) + (cellX / 2) * mHeader->Height / 2;
+	auto idx = GetTileIndex(cellX, cellY);
 	return mTiles[idx];
 }
 
 MapData::CellInfo MapData::CellAt(uint32_t x, uint32_t y)
 {
-	return mCells[y + x * mHeader->Height];
+	return mCells[GetCellIndex(x,y)];
 }
 
 bool MapData::InMap(uint32_t cellX, uint32_t cellY)
 {
-	auto v = cellY + cellX * mHeader->Height;
+	auto v = GetCellIndex(cellX, cellY);
 	return cellX < w() && cellY < h() && v >= 0 && v < mCellCount;
 }
 
 bool MapData::Walkable(uint32_t cellX, uint32_t cellY)
 {
 	if (!InMap(cellX, cellY)) return false;
-	auto v = cellY + cellX * mHeader->Height;
+	auto v = GetCellIndex(cellX, cellY);
 	return v > 0 && v < mCellCount&& mCells[v].Walkable();
 }

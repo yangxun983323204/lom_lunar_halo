@@ -12,7 +12,7 @@ void GameProcess::StartEnter()
     _state = IProcess::State::Entering;
     _game->SetWindowAsGame();
     auto mapData = std::make_shared<MapData>();
-    mapData->Load(_W(_game->GetSetting()->GetMapDir() + "0.map"));
+    mapData->Load(_W(_game->GetSetting()->GetMapDir() + "1.map"));
     if (mapData->IsLoaded()) {
         string sizeStr = "map size:" + std::to_string(mapData->w()) + "," + std::to_string(mapData->h());
         MessageBox(_game->GetDeviceResource()->GetWindow(), _W(sizeStr).c_str(), _W("测试map加载").c_str(), 0);
