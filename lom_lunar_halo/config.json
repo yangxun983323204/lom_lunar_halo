@@ -1,3 +1,4 @@
 {
+	"说明": "可以在同目录下使用名为config.local.json的文件来覆盖配置",
 	"OriginDataDir": "E:\\work\\personal\\mir\\mir3data_bak\\1.45\\"
 }
