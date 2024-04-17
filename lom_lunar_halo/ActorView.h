@@ -52,6 +52,7 @@ public:
 	Mir::ActorType Type;
 	int Layer;
 	int Depth;
+	bool Debug;
 protected:
 };
 

@@ -37,6 +37,7 @@ void SpriteRenderSystem::Render()
 
 void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRenderer*)> filter, bool debugMode)
 {
+	_currCamera = camera;
 	if (camera->ClearType == Camera::ClearType::Color) {
 		Clear(camera->ClearColor);
 	}
@@ -72,44 +73,32 @@ void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRenderer*)>
 			continue;
 
 		sr->OnRender(_draw.get());
+		if (Debug)
+		{
+			sr->OnRenderDebug(this, _draw.get());
+		}
 	}
 	_draw->End();
 }
 
-//void SpriteRenderSystem::DrawDebug(XMINT2 vpos, ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, DirectX::XMFLOAT4 color)
-//{
-//	_draw->SetModeNormal();
-//	// 目地：观察坐标->屏幕坐标
-//	int offsetX = _vw / 2;
-//	int offsetY = -_vh / 2;
-//	// 变换到左上角
-//	viewRect.x += offsetX;
-//	viewRect.y += offsetY;
-//	vpos.x += offsetX; vpos.y += offsetY;
-//	// y轴反向
-//	viewRect.y *= -1;
-//	vpos.y *= -1;
-//	RECT sRect = { viewRect.x, viewRect.y - viewRect.height, viewRect.x + viewRect.width, viewRect.y };
-//
-//	auto centerX = (sRect.right + sRect.left) / 2;
-//	auto centerY = (sRect.bottom + sRect.top) / 2;
-//	auto f4 = DirectX::XMLoadFloat4(&color);
-//	// draw cross
-//	RECT cross = GetDebugRect(vpos.x, vpos.y);
-//	_draw->Draw(_debugImgCross->TextureSRV.Get(), cross, f4);
-//	// draw left top
-//	RECT lt = GetDebugRect(sRect.left, sRect.top);
-//	_draw->Draw(_debugImgLT->TextureSRV.Get(), lt, f4);
-//	// draw right top
-//	RECT rt = GetDebugRect(sRect.right, sRect.top);
-//	_draw->Draw(_debugImgRT->TextureSRV.Get(), rt, f4);
-//	// draw right bottom
-//	RECT rb = GetDebugRect(sRect.right, sRect.bottom);
-//	_draw->Draw(_debugImgRB->TextureSRV.Get(), rb, f4);
-//	// draw left bottom
-//	RECT lb = GetDebugRect(sRect.left, sRect.bottom);
-//	_draw->Draw(_debugImgLB->TextureSRV.Get(), lb, f4);
-//}
+void SpriteRenderSystem::DrawDebug(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color)
+{
+	auto xMin = wRect.x;
+	auto xMax = wRect.x + wRect.width;
+	auto yMin = wRect.y;
+	auto yMax = wRect.y + wRect.height;
+	// 这些小图标都是5*5的大小
+	// draw cross
+	_draw->Draw(_debugImgCross->TextureSRV.Get(), {wpos.x-2, wpos.y-2, 5, 5}, color);
+	// draw left top
+	_draw->Draw(_debugImgLT->TextureSRV.Get(), {xMin, yMax-5, 5, 5}, color);
+	// draw right top
+	_draw->Draw(_debugImgRT->TextureSRV.Get(), {xMax-5, yMax-5, 5, 5}, color);
+	// draw right bottom
+	_draw->Draw(_debugImgRB->TextureSRV.Get(), {xMax-5, yMin, 5, 5 }, color);
+	// draw left bottom
+	_draw->Draw(_debugImgLB->TextureSRV.Get(), {xMin, yMin, 5, 5 }, color);
+}
 
 void SpriteRenderSystem::Clear(DirectX::XMFLOAT4 color)
 {
@@ -186,14 +175,4 @@ void SpriteRenderSystem::CreateDebugRes()
 	};
 	_debugImgRB = GenTexture(rb, 5, 5);
 	_debugImgRB->Pivot = { 1,0 };
-}
-
-RECT SpriteRenderSystem::GetDebugRect(int x, int y)
-{
-	RECT rc{ x - 4, y - 4, x + 4, y + 4 };
-	rc.left *= _dpiScale;
-	rc.right *= _dpiScale;
-	rc.bottom *= _dpiScale;
-	rc.top *= _dpiScale;
-	return rc;
 }

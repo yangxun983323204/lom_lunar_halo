@@ -66,10 +66,10 @@ private:
 	void ClearScreen(XMFLOAT4 color);
 	void Draw(ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, XMFLOAT4 color);
 
-	SpriteRenderLayer _bgUse;
-	SpriteRenderLayer _mid1Use;
-	SpriteRenderLayer _mid2Use;
-	SpriteRenderLayer _topUse;
+	SpriteRenderLayer _bgLayer;
+	SpriteRenderLayer _mid1Layer;
+	SpriteRenderLayer _mid2Layer;
+	SpriteRenderLayer _topLayer;
 
 	int _selfHeroId;
 	unordered_map<int, HeroData> _heros;

@@ -25,7 +25,7 @@ public:
 		ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv,
 		int layoutW, int layoutH, float dpiScale) :
 		_hwnd{ hwnd }, _dev{ dev }, _ctx{ ctx }, _rtv{ rtv }, _dsv{ dsv }, 
-		_vw{ layoutW }, _vh{ layoutH }, _dpiScale{ dpiScale }
+		_vw{ layoutW }, _vh{ layoutH }, _dpiScale{ dpiScale }, Debug{false}
 	{
 		_draw = std::make_unique<SimpleSpriteDraw>(ctx);
 		_shadowColor = { 0,0,0,0.5 };
@@ -35,13 +35,14 @@ public:
 	inline void SetLayout(int w, int h) { _vw = w; _vh = h; }
 	inline void SetDPIScale(float s) { _dpiScale = s; }
 	void Render();
+	void DrawDebug(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color);
 	
+	bool Debug;
 private:
 	void RenderCamera(Camera* camera, function<bool(IRenderer*)> filter, bool debugMode);
 	void Clear(DirectX::XMFLOAT4 color);
 	shared_ptr<Sprite> GenTexture(const byte* source, uint32_t width, uint32_t height);
 	void CreateDebugRes();
-	RECT GetDebugRect(int x, int y);
 
 	HWND _hwnd;
 	ID3D11Device* _dev;
@@ -61,5 +62,6 @@ private:
 	shared_ptr<Sprite> _debugImgLB;
 	shared_ptr<Sprite> _debugImgRB;
 	shared_ptr<Sprite> _debugImgCross;
+	Camera* _currCamera;
 };
 

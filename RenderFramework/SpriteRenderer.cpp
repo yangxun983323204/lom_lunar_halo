@@ -1,5 +1,6 @@
 #include "SpriteRenderer.h"
 #include "SceneNode.h"
+#include "SpriteRenderSystem.h"
 
 DirectX::SimpleMath::Rectangle SpriteRenderer::GetWorldRect()
 {
@@ -39,4 +40,15 @@ void SpriteRenderer::OnRender(IGraphic2D* gfx)
 	auto sprite = Sprite.lock();
 	gfx->SetModeNormal();
 	gfx->Draw(sprite->TextureSRV.Get(), wRect, Color);
+}
+
+void SpriteRenderer::OnRenderDebug(SpriteRenderSystem* renderSystem, IGraphic2D* gfx)
+{
+	if (Sprite.expired() || !Debug)
+		return;
+
+	auto wpos = GetSceneNode()->GetWorldPosition();
+	auto wRect = GetWorldRect();
+	auto sprite = Sprite.lock();
+	renderSystem->DrawDebug(wpos, wRect, DebugColor);
 }

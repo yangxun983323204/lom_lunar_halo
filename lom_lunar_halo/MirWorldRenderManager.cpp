@@ -9,7 +9,7 @@ MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr,
     shared_ptr<WilSpriteManager> actorResMgr,
     shared_ptr<WilSpriteManager> itemResMgr):
     _dr{ dr }, _mapResMgr{ mapResMgr }, _actorResMgr{ actorResMgr }, _itemResMgr{ itemResMgr },
-    _bgUse{0,0}, _mid1Use{1,0}, _mid2Use{1,1}, _topUse{1,2},
+    _bgLayer{0,0}, _mid1Layer{1,0}, _mid2Layer{1,1}, _topLayer{1,2},
     _animDB{}
 {
     _sceneMgr = std::make_unique<SceneManager>();
@@ -18,6 +18,7 @@ MirWorldRenderManager::MirWorldRenderManager(DX::DeviceResources* dr,
         dr->GetRenderTargetView(), dr->GetDepthStencilView(), 
         Mir::GameLayoutW, Mir::GameLayoutH, DpiScale* UserScale);
 
+    _renderSystem->Debug = true;
     _camera = _sceneMgr->CreateCameraNode();
     _camera->SetLocalPosition(Mir::GetCellCenter(400, 460));
     //
@@ -35,10 +36,10 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
             return;
         WilSpriteKey key = { (uint32_t)x,(uint32_t)y };
         WilSpriteKey bgKey = { (uint32_t)x / 2 * 2,(uint32_t)y / 2 * 2 };
-        this->ReleaseMapStaticSpriteRenderer(_bgUse, bgKey);
-        this->ReleaseMapAnimSpriteRenderer(_mid1Use, key);
-        this->ReleaseMapAnimSpriteRenderer(_mid2Use, key);
-        this->ReleaseMapAnimSpriteRenderer(_topUse, key);
+        this->ReleaseMapStaticSpriteRenderer(_bgLayer, bgKey);
+        this->ReleaseMapAnimSpriteRenderer(_mid1Layer, key);
+        this->ReleaseMapAnimSpriteRenderer(_mid2Layer, key);
+        this->ReleaseMapAnimSpriteRenderer(_topLayer, key);
         });
 
     _gridView->GetView()->SetCellShowCallback([this](int x, int y) {
@@ -49,8 +50,8 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
 
         WilSpriteKey key = { (uint32_t)x,(uint32_t)y };
         SetUpBg(key);
-        SetUpMid(key, 1, _mid1Use);// 物体左半
-        SetUpMid(key, 2, _mid2Use);// 物体右半
+        SetUpMid(key, 1, _mid1Layer);// 物体左半
+        SetUpMid(key, 2, _mid2Layer);// 物体右半
         });
 
     _gridView->GetView()->SetCellWillShowCallback([](int x, int y) {
@@ -91,6 +92,7 @@ SpriteRenderer* MirWorldRenderManager::GetMapStaticSpriteRenderer(SpriteRenderLa
     sr->SortLayer = use.Layer;
     sr->Depth = use.Depth;
     sr->Enable = true;
+    sr->Debug = false;
     use.Record[key] = sr;
     return sr;
 }
@@ -106,6 +108,7 @@ SpriteRenderer* MirWorldRenderManager::GetMapAnimSpriteRenderer(SpriteRenderLaye
     sr->SortLayer = use.Layer;
     sr->Depth = use.Depth;
     sr->Enable = true;
+    sr->Debug = false;
     use.Record[key] = sr;
     return sr;
 }
@@ -121,6 +124,7 @@ ActorView* MirWorldRenderManager::GetActorView(int id, function<shared_ptr<Scene
     _actorViews.insert({id, v});
     v->Layer = 1;
     v->Depth = 3;
+    v->Debug = true;
     return v;
 }
 
@@ -233,7 +237,7 @@ void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
 {
     key.x = key.x / 2 * 2;// tile是2*2个cell，所以绘制时cell需对齐到tile
     key.y = key.y / 2 * 2;
-    if (_bgUse.Record.find(key) != _bgUse.Record.end())// 一个tile最多会重复触发4次绘制，检查一下是否已经绘制过了
+    if (_bgLayer.Record.find(key) != _bgLayer.Record.end())// 一个tile最多会重复触发4次绘制，检查一下是否已经绘制过了
         return;
 
     auto tile = this->_mapData->TileAt(key.x, _mapData->h() - key.y);
@@ -244,7 +248,7 @@ void MirWorldRenderManager::SetUpBg(WilSpriteKey key)
     auto spriteHandle = _mapResMgr->LoadSprite({ (uint32_t)fileIdx, (uint32_t)imgIdx });
     if (!spriteHandle)
         return;
-    auto spRender = this->GetMapStaticSpriteRenderer(_bgUse, key);
+    auto spRender = this->GetMapStaticSpriteRenderer(_bgLayer, key);
     spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(key.x, key.y));
     spRender->Sprite = spriteHandle->GetSprite();
     spRender->Sprite.lock()->Pivot = { 0, 0 };
@@ -262,6 +266,8 @@ void MirWorldRenderManager::SetUpMid(WilSpriteKey key,int i, SpriteRenderLayer& 
     spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(key.x, key.y));
     spRender->GetSceneNode()->GetComponent<Animator>().lock()->Enable = false;
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
+    spRender->Debug = true;
+    spRender->DebugColor = { 1,0,0,1 };
 
     int fileIdx = cell.FileIndexOf(i);
     if (!cell.RemapFileIndex(fileIdx))
