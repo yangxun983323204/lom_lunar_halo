@@ -6,9 +6,15 @@
 using std::unique_ptr;
 using std::wstring;
 
-// 原工程的一个地图图集文件变换，不知为何要这样
+// 地图图集文件变换
 inline void ExFileIdx(int& n)
 {
+	// 地图数据以15个单位设置。(来自mir3g的方法)
+	n -= n / 15;
+	return;
+
+	// 下面的旧代码，不用也可以
+
 	int m = n;
 	//__asm
 	//{
@@ -49,6 +55,26 @@ inline void ExFileIdx(int& n)
 	n = m;
 }
 
+inline bool IsMapTileFile(int fileIdx) 
+{
+	if (fileIdx % 14 <=2 && fileIdx<=69)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+inline bool IsMapObjectFile(int fileIdx)
+{
+	if (fileIdx % 14 > 2 && fileIdx <= 69)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 class MapData
 {
 public:
@@ -84,12 +110,7 @@ public:
 		// 文件索引要做个变换，不知为何
 		inline bool RemapFileIndex(int& idx) {
 			ExFileIdx(idx);
-			if ((idx % 14) > 2)
-				return false;
-			if (idx > 69)
-				return false;
-
-			return true;
+			return IsMapTileFile(idx);
 		}
 	};
 	// Obj1是下层元素，Obj2是上层元素
@@ -181,6 +202,11 @@ public:
 				return Obj2AnimCount();
 			else
 				return 0;
+		}
+		inline bool RemapFileIndex(int& idx) 
+		{
+			ExFileIdx(idx);
+			return IsMapObjectFile(idx);
 		}
 	};
 
