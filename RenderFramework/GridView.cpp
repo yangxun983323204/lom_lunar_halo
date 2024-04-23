@@ -5,7 +5,7 @@ using namespace DirectX;
 class GridView::Inner
 {
 public:
-	Inner(XMUINT2 cellSize, XMUINT2 gridSize) :
+	Inner(XMUINT2 cellSize, XMUINT2 gridSize, CellCreateFunctor createFunctor = {}, CellDestroyFunctor destroyFunctor = {}) :
 		_onCellShow{}, _onCellHide{}, _onCellWillShow{},
 		_cellSize{ cellSize }, _gridSize{gridSize},
 		_preViewRect{}, _preRoiRect{},
@@ -28,6 +28,23 @@ public:
 		_border = border;
 
 		UpdateRect(viewPoint);
+	}
+
+	inline int GetRow(int y) 
+	{
+		return y / _cellSize.y; 
+	}
+
+	inline int GetCol(int x)
+	{
+		return x / _cellSize.x;
+	}
+
+	CellView* GetCellView(int x, int y)
+	{
+		x = GetCol(x);
+		y = GetRow(y);
+		return _cells[y * _cols + x];
 	}
 
 	void UpdateRect(XMINT2 viewPoint)
@@ -131,13 +148,18 @@ public:
 
 	XMUINT4 _viewSize;
 	XMUINT2 _border;
+
+	// @todo 重构中
+	uint32_t _cols;
+	uint32_t _rows;
+	CellView** _cells;
 };
 
-GridView::GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols):
+GridView::GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols, CellCreateFunctor createFunctor, CellDestroyFunctor destroyFunctor):
 	_viewPoint{}, _viewSize{}, _viewBorder{},
 	_cellSize{cellWidth, cellHeight}, _cellCount{cols, rows}, _gridSize{cellWidth*cols, cellHeight*rows}
 {
-	_inner = new GridView::Inner(_cellSize, _gridSize);
+	_inner = new GridView::Inner(_cellSize, _gridSize, createFunctor, destroyFunctor);
 }
 
 GridView::~GridView()
@@ -156,6 +178,11 @@ void GridView::UpdateViewPoint(int x, int y)
 	_viewPoint.x = x;
 	_viewPoint.y = y;
 	_inner->UpdateRect(_viewPoint);
+}
+
+CellView* GridView::GetCellView(int x, int y)
+{
+	return _inner->GetCellView(x, y);
 }
 
 void GridView::SetCellShowCallback(CellNotifyCallback func)

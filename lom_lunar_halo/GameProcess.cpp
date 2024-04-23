@@ -4,6 +4,7 @@
 #include "StringCodec.hpp"
 #include "../DirectXTK-main/Inc/Keyboard.h"
 #include "ActorData.h"
+#include <format>
 
 using DirectX::Keyboard;
 
@@ -82,7 +83,8 @@ void GameProcess::Update(DX::StepTimer const& timer)
     float x = (float)vp.x / Mir::CellW;
     float y = (float)vp.y / Mir::CellH;
     auto debug = _game->GetRmlUiAdapter()->GetContext()->GetDocument(0)->GetElementById("debug");
-    debug->SetInnerRML("视点:(" + std::to_string(x) + "," + std::to_string(y) + ")");
+    auto str = std::format("视点:({0},{1}), fps:{2}", x, y, timer.GetFramesPerSecond());
+    debug->SetInnerRML(str);
 }
 
 void GameProcess::GetWindowSize(int& w, int& h)

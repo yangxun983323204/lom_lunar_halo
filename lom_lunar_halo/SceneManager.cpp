@@ -79,6 +79,7 @@ void SceneManager::ReleaseByInnerTag(weak_ptr<SceneNode> ptr)
 void SceneManager::ReleaseStaticSprite(weak_ptr<SceneNode> ptr)
 {
     ptr.lock()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
+    ptr.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Sprite.reset();
     ptr.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Enable = false;
     _staticSpritePool.push_back(ptr.lock());
 }
@@ -103,6 +104,7 @@ void SceneManager::ReleaseAnimSprite(weak_ptr<SceneNode> ptr)
 {
     ptr.lock()->GetComponent<Animator>().lock()->As<Animator>()->Clear();
     ptr.lock()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
+    ptr.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Sprite.reset();
     ptr.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Enable = false;
     _animSpritePool.push_back(ptr.lock());
 }

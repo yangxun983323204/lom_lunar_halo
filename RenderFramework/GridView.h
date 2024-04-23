@@ -6,17 +6,47 @@
 
 using std::function;
 
+class GridView;
+
+class CellView
+{
+public:
+	enum class Status
+	{
+		Hide,
+		WillShow,
+		Show,
+	};
+public:
+	CellView(int rowIdx, int colIdx):
+		_rowIdx{ rowIdx }, _colIdx{ colIdx }, _status{ Status::Hide }
+	{}
+
+	virtual ~CellView() {}
+
+	inline int GetRowIdx() { return _rowIdx; }
+	inline int GetColIdx() { return _colIdx; }
+private:
+	friend GridView;
+	int _rowIdx;
+	int _colIdx;
+	Status _status;
+};
+
 typedef function<void(int, int)> CellNotifyCallback;
+typedef function<CellView*(int, int)> CellCreateFunctor;
+typedef function<void(CellView*)> CellDestroyFunctor;
 
 class GridView
 {
 public:
-	GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols);
+	GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols, CellCreateFunctor createFunctor = {}, CellDestroyFunctor destroyFunctor = {});
 	~GridView();
 	// 设置视口大小和预加载区域
 	void SetView(uint32_t up, uint32_t down, uint32_t left, uint32_t right, uint32_t borderX, uint32_t borderY);
 	// 更新观察点
 	void UpdateViewPoint(int x, int y);
+	CellView* GetCellView(int x, int y);
 
 
 	// 当cell需要显示时的回调

@@ -66,6 +66,7 @@ void ActorView::Clear()
 
 		wptr.lock()->As<Animator>()->Clear();
 		child.lock()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
+		child.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Sprite.reset();
 		child.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Enable = false;
 	}
 }
