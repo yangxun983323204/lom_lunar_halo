@@ -23,6 +23,8 @@ public:
 	virtual void OnRenderDebug(SpriteRenderSystem* renderSystem, IGraphic2D* gfx) override;
 
 	weak_ptr<Sprite> Sprite;
+	int OverrideWidth;
+	int OverrideHeight;
 	DirectX::XMFLOAT4 DebugColor;
 	bool Debug;
 _SCENE_NODE_COMPONENT_END

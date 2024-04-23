@@ -21,19 +21,19 @@ public:
 	Impl(ID3D11Device* dev, string dir, WilSpriteManager* parent);
 	~Impl();
 	void SetCapacity(uint32_t sizeMb);
-	void PreloadSprite(WilSpriteKey key);
-	shared_ptr<SpriteResHandle> LoadSprite(WilSpriteKey key);
+	void PreloadSprite(CellCoord key);
+	shared_ptr<SpriteResHandle> LoadSprite(CellCoord key);
 	void MakeSpace(uint32_t size);
 	void NotifyFreeSpace(uint32_t size);
 	inline uint32_t GetIdleSpace() { return _currentSize >= _capacitySize ? 0 : _capacitySize - _currentSize; }
 	uint32_t GetFileId(string name);
 private:
-	shared_ptr<SpriteResHandle> Find(WilSpriteKey key);
+	shared_ptr<SpriteResHandle> Find(CellCoord key);
 
 	string _dir;
 	WilSpriteManager* _parent;
 	ID3D11Device* _dev;
-	LRUCache<WilSpriteKey, shared_ptr<SpriteResHandle>> _lru;
+	LRUCache<CellCoord, shared_ptr<SpriteResHandle>> _lru;
 	uint32_t _capacitySize;
 	uint32_t _currentSize;
 	unordered_map<uint32_t, string> _fileMap;
@@ -75,11 +75,11 @@ void WilSpriteManager::Impl::SetCapacity(uint32_t sizeMb)
 {
 	_capacitySize = sizeMb * 1024 * 1024;
 }
-void WilSpriteManager::Impl::PreloadSprite(WilSpriteKey key)
+void WilSpriteManager::Impl::PreloadSprite(CellCoord key)
 {
 	// todo
 }
-shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(WilSpriteKey key)
+shared_ptr<SpriteResHandle> WilSpriteManager::Impl::LoadSprite(CellCoord key)
 {
 	auto fileId = key.x;
 	auto imgId = key.y;
@@ -193,7 +193,7 @@ uint32_t WilSpriteManager::Impl::GetFileId(string name)
 	return id;
 }
 
-shared_ptr<SpriteResHandle> WilSpriteManager::Impl::Find(WilSpriteKey key)
+shared_ptr<SpriteResHandle> WilSpriteManager::Impl::Find(CellCoord key)
 {
 	shared_ptr<SpriteResHandle> p = {};
 	_lru.get(key, p);
@@ -226,12 +226,12 @@ void WilSpriteManager::SetCapacity(uint32_t sizeMb)
 	_impl->SetCapacity(sizeMb);
 }
 
-void WilSpriteManager::PreloadSprite(WilSpriteKey key)
+void WilSpriteManager::PreloadSprite(CellCoord key)
 {
 	_impl->PreloadSprite(key);
 }
 
-shared_ptr<SpriteResHandle> WilSpriteManager::LoadSprite(WilSpriteKey key)
+shared_ptr<SpriteResHandle> WilSpriteManager::LoadSprite(CellCoord key)
 {
 	return _impl->LoadSprite(key);
 }

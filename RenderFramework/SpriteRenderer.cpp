@@ -19,14 +19,18 @@ DirectX::SimpleMath::Rectangle SpriteRenderer::GetWorldRect()
 	rect.y *= wScale.y;
 	rect.width *= wScale.x;
 	rect.height *= wScale.y;
+	OverrideWidth *= wScale.x;
+	OverrideHeight *= wScale.y;
 #endif
-	auto w = rect.width;
-	auto h = rect.height;
+	auto w = OverrideWidth <= 0 ? rect.width : OverrideWidth;
+	auto h = OverrideHeight <= 0 ? rect.height : OverrideHeight;
 	auto offsetX = -w * sp->Pivot.x;
 	auto offsetY = -h * sp->Pivot.y;
 
 	rect.x += wPos.x + offsetX;
 	rect.y += wPos.y + offsetY;
+	rect.width = w;
+	rect.height = h;
 	return rect;
 }
 
@@ -50,5 +54,5 @@ void SpriteRenderer::OnRenderDebug(SpriteRenderSystem* renderSystem, IGraphic2D*
 	auto wpos = GetSceneNode()->GetWorldPosition();
 	auto wRect = GetWorldRect();
 	auto sprite = Sprite.lock();
-	renderSystem->DrawDebug(wpos, wRect, DebugColor);
+	renderSystem->DrawDebugBounds(wpos, wRect, DebugColor);
 }

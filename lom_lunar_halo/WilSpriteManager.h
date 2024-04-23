@@ -18,7 +18,7 @@ using std::function;
 using std::wstring;
 using std::string;
 
-typedef DirectX::XMUINT2 WilSpriteKey;
+typedef DirectX::XMUINT2 CellCoord;
 typedef function<void(ComPtr<ID3D11ShaderResourceView>)> WilSpriteLoadCallback;
 
 class WilSpriteManager
@@ -29,9 +29,9 @@ public:
 	~WilSpriteManager();
 	void SetCapacity(uint32_t sizeMb);
 	// 发起加载但不等待完成
-	void PreloadSprite(WilSpriteKey key);
+	void PreloadSprite(CellCoord key);
 	// 发起加载并等待完成
-	shared_ptr<SpriteResHandle> LoadSprite(WilSpriteKey key);
+	shared_ptr<SpriteResHandle> LoadSprite(CellCoord key);
 	uint32_t GetFileId(string name);
 private:
 	class Impl;
@@ -48,7 +48,7 @@ public:
 	inline shared_ptr<Sprite> GetSprite() { return _sprite; }
 private:
 	WilSpriteManager* _mgr;
-	WilSpriteKey _key;
+	CellCoord _key;
 	uint32_t _size;
 	shared_ptr<Sprite> _sprite;
 };

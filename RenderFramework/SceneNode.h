@@ -45,7 +45,9 @@ public:
 	vector<weak_ptr<ISceneNodeComponent>> GetComponents(int typeId);
 	vector<weak_ptr<ISceneNodeComponent>> GetComponentsInChildren(int typeId);
 	void RemoveComponent(weak_ptr<ISceneNodeComponent> component);
+	bool HasTag(string tag);
 
+	vector<string> Tags;
 private:
 	DirectX::XMINT2 _localPosition;
 	float _localAngle;

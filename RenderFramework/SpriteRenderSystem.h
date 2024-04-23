@@ -35,7 +35,8 @@ public:
 	inline void SetLayout(int w, int h) { _vw = w; _vh = h; }
 	inline void SetDPIScale(float s) { _dpiScale = s; }
 	void Render();
-	void DrawDebug(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color);
+	void DrawDebugBounds(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color);
+	void DrawDebugOverlay(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color);
 	
 	bool Debug;
 private:
@@ -50,6 +51,8 @@ private:
 	ID3D11RenderTargetView* _rtv;
 	ID3D11DepthStencilView* _dsv;
 
+	Camera* _currCamera;
+
 	unique_ptr<SimpleSpriteDraw> _draw;
 
 	DirectX::XMFLOAT4 _shadowColor;
@@ -57,11 +60,12 @@ private:
 	int _vw, _vh;
 	float _dpiScale;
 
+public:
 	shared_ptr<Sprite> _debugImgLT;
 	shared_ptr<Sprite> _debugImgRT;
 	shared_ptr<Sprite> _debugImgLB;
 	shared_ptr<Sprite> _debugImgRB;
 	shared_ptr<Sprite> _debugImgCross;
-	Camera* _currCamera;
+	shared_ptr<Sprite> _debugImgWhite;
 };
 

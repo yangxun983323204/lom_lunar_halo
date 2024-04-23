@@ -3,6 +3,12 @@
 #include "SpriteHandleHolder.hpp"
 #include "ActorView.h"
 
+const string SceneManager::TAG_SCENE_NODE_STATIC_SP = "__TAG_SCENE_NODE_STATIC_SP";
+const string SceneManager::TAG_SCENE_NODE_ANIM_SP = "__TAG_SCENE_NODE_STATIC_SP";
+const string SceneManager::TAG_SCENE_NODE_MONSTER = "__TAG_SCENE_NODE_STATIC_SP";
+const string SceneManager::TAG_SCENE_NODE_NPC = "__TAG_SCENE_NODE_STATIC_SP";
+const string SceneManager::TAG_SCENE_NODE_PLAYER = "__TAG_SCENE_NODE_STATIC_SP";
+
 SceneManager::SceneManager():
     _staticSpritePool{}, _animSpritePool{},
     _monsterPool{}, _npcPool{}, _playerPool{}
@@ -52,14 +58,29 @@ shared_ptr<SceneNode> SceneManager::SpawnStaticSprite()
 
     auto node = CreateRawSpriteNode();
     node->AddComponent<SpriteHandleHolder>();
+    node->Tags.push_back(TAG_SCENE_NODE_STATIC_SP);
     return node;
 }
 
-void SceneManager::ReleaseStaticSprite(shared_ptr<SceneNode> ptr)
+void SceneManager::ReleaseByInnerTag(weak_ptr<SceneNode> ptr)
 {
-    ptr->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
-    ptr->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Enable = false;
-    _staticSpritePool.push_back(ptr);
+    if (ptr.lock()->HasTag(TAG_SCENE_NODE_STATIC_SP))
+        ReleaseStaticSprite(ptr);
+    else if (ptr.lock()->HasTag(TAG_SCENE_NODE_ANIM_SP))
+        ReleaseAnimSprite(ptr);
+    else if (ptr.lock()->HasTag(TAG_SCENE_NODE_MONSTER))
+        ReleaseMonster(ptr);
+    else if (ptr.lock()->HasTag(TAG_SCENE_NODE_NPC))
+        ReleaseNpc(ptr);
+    else if (ptr.lock()->HasTag(TAG_SCENE_NODE_PLAYER))
+        ReleasePlayer(ptr);
+}
+
+void SceneManager::ReleaseStaticSprite(weak_ptr<SceneNode> ptr)
+{
+    ptr.lock()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
+    ptr.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Enable = false;
+    _staticSpritePool.push_back(ptr.lock());
 }
 
 shared_ptr<SceneNode> SceneManager::SpawnAnimSprite()
@@ -74,15 +95,16 @@ shared_ptr<SceneNode> SceneManager::SpawnAnimSprite()
     auto node = CreateRawSpriteNode();
     node->AddComponent<SpriteHandleHolder>();
     node->AddComponent<Animator>();
+    node->Tags.push_back(TAG_SCENE_NODE_ANIM_SP);
     return node;
 }
 
-void SceneManager::ReleaseAnimSprite(shared_ptr<SceneNode> ptr)
+void SceneManager::ReleaseAnimSprite(weak_ptr<SceneNode> ptr)
 {
-    ptr->GetComponent<Animator>().lock()->As<Animator>()->Clear();
-    ptr->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
-    ptr->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Enable = false;
-    _animSpritePool.push_back(ptr);
+    ptr.lock()->GetComponent<Animator>().lock()->As<Animator>()->Clear();
+    ptr.lock()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
+    ptr.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>()->Enable = false;
+    _animSpritePool.push_back(ptr.lock());
 }
 
 shared_ptr<SceneNode> SceneManager::SpawnMonster()
@@ -106,13 +128,14 @@ shared_ptr<SceneNode> SceneManager::SpawnMonster()
     actor->Name = Mir::MonsterSubPart::Actor;
     shadow->Name = Mir::MonsterSubPart::Shadow;
     root->AddComponent<ActorView>();
+    root->Tags.push_back(TAG_SCENE_NODE_MONSTER);
     return root;
 }
 
-void SceneManager::ReleaseMonster(shared_ptr<SceneNode> ptr)
+void SceneManager::ReleaseMonster(weak_ptr<SceneNode> ptr)
 {
-    ptr->GetComponent<ActorView>().lock()->As<ActorView>()->Clear();
-    _monsterPool.push_back(ptr);
+    ptr.lock()->GetComponent<ActorView>().lock()->As<ActorView>()->Clear();
+    _monsterPool.push_back(ptr.lock());
 }
 
 shared_ptr<SceneNode> SceneManager::SpawnNpc()
@@ -126,13 +149,14 @@ shared_ptr<SceneNode> SceneManager::SpawnNpc()
 
     auto root = SpawnAnimSprite();
     root->AddComponent<ActorView>();
+    root->Tags.push_back(TAG_SCENE_NODE_NPC);
     return root;
 }
 
-void SceneManager::ReleaseNpc(shared_ptr<SceneNode> ptr)
+void SceneManager::ReleaseNpc(weak_ptr<SceneNode> ptr)
 {
-    ptr->GetComponent<ActorView>().lock()->As<ActorView>()->Clear();
-    _npcPool.push_back(ptr);
+    ptr.lock()->GetComponent<ActorView>().lock()->As<ActorView>()->Clear();
+    _npcPool.push_back(ptr.lock());
 }
 
 shared_ptr<SceneNode> SceneManager::SpawnPlayer()
@@ -167,14 +191,15 @@ shared_ptr<SceneNode> SceneManager::SpawnPlayer()
     shield->Name = Mir::PlayerSubPart::Shield;
 
     root->AddComponent<ActorView>();
+    root->Tags.push_back(TAG_SCENE_NODE_PLAYER);
 
     return root;
 }
 
-void SceneManager::ReleasePlayer(shared_ptr<SceneNode> ptr)
+void SceneManager::ReleasePlayer(weak_ptr<SceneNode> ptr)
 {
-    ptr->GetComponent<ActorView>().lock()->As<ActorView>()->Clear();
-    _playerPool.push_back(ptr);
+    ptr.lock()->GetComponent<ActorView>().lock()->As<ActorView>()->Clear();
+    _playerPool.push_back(ptr.lock());
 }
 
 void SceneManager::Clear()

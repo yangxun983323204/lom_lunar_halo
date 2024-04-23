@@ -81,7 +81,7 @@ void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRenderer*)>
 	_draw->End();
 }
 
-void SpriteRenderSystem::DrawDebug(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color)
+void SpriteRenderSystem::DrawDebugBounds(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color)
 {
 	auto xMin = wRect.x;
 	auto xMax = wRect.x + wRect.width;
@@ -98,6 +98,18 @@ void SpriteRenderSystem::DrawDebug(XMINT2 wpos, DirectX::SimpleMath::Rectangle w
 	_draw->Draw(_debugImgRB->TextureSRV.Get(), {xMax-5, yMin, 5, 5 }, color);
 	// draw left bottom
 	_draw->Draw(_debugImgLB->TextureSRV.Get(), {xMin, yMin, 5, 5 }, color);
+}
+
+void SpriteRenderSystem::DrawDebugOverlay(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color)
+{
+	auto xMin = wRect.x;
+	auto xMax = wRect.x + wRect.width;
+	auto yMin = wRect.y;
+	auto yMax = wRect.y + wRect.height;
+	if (color.w>=0.6)
+		color.w = 0.6;
+
+	_draw->Draw(_debugImgWhite->TextureSRV.Get(), wRect, color);
 }
 
 void SpriteRenderSystem::Clear(DirectX::XMFLOAT4 color)
@@ -175,4 +187,15 @@ void SpriteRenderSystem::CreateDebugRes()
 	};
 	_debugImgRB = GenTexture(rb, 5, 5);
 	_debugImgRB->Pivot = { 1,0 };
+
+
+	byte white[] = {
+		col, col, col, col, col,
+		col, col, col, col, col,
+		col, col, col, col, col,
+		col, col, col, col, col,
+		col, col, col, col, col,
+	};
+	_debugImgWhite = GenTexture(white, 5, 5);
+	_debugImgWhite->Pivot = { 0.5, 0.5};
 }

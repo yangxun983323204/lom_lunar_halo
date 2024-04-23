@@ -6,7 +6,8 @@ SceneNode::SceneNode():
 #ifdef SCENE_NODE_SCALE
     _localScale{1,1},
 #endif
-    _parent{}, _children{}, _components{}
+    _parent{}, _children{}, _components{},
+    Tags{}
 {
 }
 
@@ -149,4 +150,9 @@ void SceneNode::RemoveComponent(weak_ptr<ISceneNodeComponent> component)
         ptr->_node = {};
         ptr->CallUnReg();
     }
+}
+
+bool SceneNode::HasTag(string tag)
+{
+    return std::find(Tags.begin(), Tags.end(), tag) != Tags.end();
 }

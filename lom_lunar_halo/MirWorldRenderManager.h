@@ -18,7 +18,7 @@ using std::vector;
 using std::unordered_map;
 using std::function;
 
-typedef DirectX::XMUINT2 WilSpriteKey;
+typedef DirectX::XMUINT2 CellCoord;
 
 class MirWorldRenderManager
 {
@@ -27,12 +27,11 @@ public:
 	{
 	public:
 		SpriteRenderLayer(int layer, int depth) :
-			Layer{ layer }, Depth{depth}, Record{}
+			Layer{ layer }, Depth{depth}
 		{}
 
 		int Layer;
 		int Depth;
-		unordered_map<WilSpriteKey, SpriteRenderer*> Record;
 	};
 
 	MirWorldRenderManager(DX::DeviceResources* dr, 
@@ -51,17 +50,18 @@ public:
 	void SetSelfHero(HeroData& data);
 	void SetSelfHeroDirection(Mir::Direction dir);
 	void SetSelfHeroMotion(Mir::PlayerMotion motion);
+	/// <summary>
+	/// 显示障碍
+	/// </summary>
+	bool DebugBarrier;
 private:
-	SpriteRenderer* GetMapStaticSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
-	SpriteRenderer* GetMapAnimSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
+	SpriteRenderer* GetMapStaticSpriteRenderer(SpriteRenderLayer& use, CellCoord key);
+	SpriteRenderer* GetMapAnimSpriteRenderer(SpriteRenderLayer& use, CellCoord key);
 	ActorView* GetActorView(int id, function<shared_ptr<SceneNode>()> createFunc);
 
-	void ReleaseMapStaticSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
-	void ReleaseMapAnimSpriteRenderer(SpriteRenderLayer& use, WilSpriteKey key);
-	void ReleaseActor(int id);
-
-	void SetUpBg(WilSpriteKey key);
-	void SetUpMid(WilSpriteKey key, int i, SpriteRenderLayer& use);
+	void SetUpBg(CellCoord key);
+	void SetUpMid(CellCoord key, int i);
+	void SetUpDebug(CellCoord key);
 
 	void ClearScreen(XMFLOAT4 color);
 	void Draw(ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, XMFLOAT4 color);
@@ -70,6 +70,8 @@ private:
 	SpriteRenderLayer _mid1Layer;
 	SpriteRenderLayer _mid2Layer;
 	SpriteRenderLayer _topLayer;
+	SpriteRenderLayer _debugLayer;
+	unordered_map<CellCoord, vector<weak_ptr<SceneNode>>> _usedSceneNodes;
 
 	int _selfHeroId;
 	unordered_map<int, HeroData> _heros;

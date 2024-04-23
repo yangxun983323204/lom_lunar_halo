@@ -22,21 +22,21 @@ public:
 
 	shared_ptr<SceneNode> CreateNode();
 	shared_ptr<SceneNode> CreateCameraNode();
+
 	// 为mir对象提供支持
 	shared_ptr<SceneNode> SpawnStaticSprite();
-	void ReleaseStaticSprite(shared_ptr<SceneNode> ptr);
-
 	shared_ptr<SceneNode> SpawnAnimSprite();
-	void ReleaseAnimSprite(shared_ptr<SceneNode> ptr);
-
 	shared_ptr<SceneNode> SpawnMonster();
-	void ReleaseMonster(shared_ptr<SceneNode> ptr);
-
 	shared_ptr<SceneNode> SpawnNpc();
-	void ReleaseNpc(shared_ptr<SceneNode> ptr);
-
 	shared_ptr<SceneNode> SpawnPlayer();
-	void ReleasePlayer(shared_ptr<SceneNode> ptr);
+
+	void ReleaseByInnerTag(weak_ptr<SceneNode> ptr);
+	
+	void ReleaseStaticSprite(weak_ptr<SceneNode> ptr);
+	void ReleaseAnimSprite(weak_ptr<SceneNode> ptr);
+	void ReleaseMonster(weak_ptr<SceneNode> ptr);
+	void ReleaseNpc(weak_ptr<SceneNode> ptr);
+	void ReleasePlayer(weak_ptr<SceneNode> ptr);
 
 	void Clear();
 
@@ -56,5 +56,11 @@ private:
 	function<shared_ptr<SceneNode>()> _spawnMonsterFunc;
 	function<shared_ptr<SceneNode>()> _spawnPlayerFunc;
 	function<shared_ptr<SceneNode>()> _spawnNpcFunc;
+
+	const static string TAG_SCENE_NODE_STATIC_SP;
+	const static string TAG_SCENE_NODE_ANIM_SP;
+	const static string TAG_SCENE_NODE_MONSTER;
+	const static string TAG_SCENE_NODE_NPC;
+	const static string TAG_SCENE_NODE_PLAYER;
 };
 
