@@ -26,21 +26,26 @@ public:
 
 	inline int GetRowIdx() { return _rowIdx; }
 	inline int GetColIdx() { return _colIdx; }
-private:
+	inline Status GetStatus() { return _status; }
+
+protected:
+	virtual void OnWillShow() {};
+	virtual void OnShow() {};
+	virtual void OnHide() {};
+
 	friend GridView;
 	int _rowIdx;
 	int _colIdx;
 	Status _status;
 };
 
-typedef function<void(int, int)> CellNotifyCallback;
-typedef function<CellView*(int, int)> CellCreateFunctor;
-typedef function<void(CellView*)> CellDestroyFunctor;
+typedef function<void(CellView*)> CellNotifyCallback;
+typedef function<CellView*(int rowIdx, int colIdx)> CellCreateFunctor;
 
 class GridView
 {
 public:
-	GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols, CellCreateFunctor createFunctor = {}, CellDestroyFunctor destroyFunctor = {});
+	GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols, CellCreateFunctor createFunctor = {});
 	~GridView();
 	// 设置视口大小和预加载区域
 	void SetView(uint32_t up, uint32_t down, uint32_t left, uint32_t right, uint32_t borderX, uint32_t borderY);

@@ -201,6 +201,7 @@
     <ClInclude Include="IProcess.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="LoginProcess.h" />
+    <ClInclude Include="MirCellView.h" />
     <ClInclude Include="MirWorldRenderManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProcessManager.h" />
@@ -233,6 +234,7 @@
     <ClCompile Include="HeroRenderer.cpp" />
     <ClCompile Include="LoginProcess.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MirCellView.cpp" />
     <ClCompile Include="MirWorldRenderManager.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

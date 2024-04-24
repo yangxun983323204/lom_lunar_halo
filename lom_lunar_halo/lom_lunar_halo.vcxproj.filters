@@ -108,6 +108,9 @@
     <ClInclude Include="HeroRenderer.h">
       <Filter>SceneManager</Filter>
     </ClInclude>
+    <ClInclude Include="MirCellView.h">
+      <Filter>SceneManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -179,6 +182,9 @@
       <Filter>SceneManager</Filter>
     </ClCompile>
     <ClCompile Include="HeroRenderer.cpp">
+      <Filter>SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="MirCellView.cpp">
       <Filter>SceneManager</Filter>
     </ClCompile>
   </ItemGroup>

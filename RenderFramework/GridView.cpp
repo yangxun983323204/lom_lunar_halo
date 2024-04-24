@@ -5,14 +5,39 @@ using namespace DirectX;
 class GridView::Inner
 {
 public:
-	Inner(XMUINT2 cellSize, XMUINT2 gridSize, CellCreateFunctor createFunctor = {}, CellDestroyFunctor destroyFunctor = {}) :
+	Inner(XMUINT2 cellSize, XMUINT2 gridSize, CellCreateFunctor createFunctor = {}) :
 		_onCellShow{}, _onCellHide{}, _onCellWillShow{},
 		_cellSize{ cellSize }, _gridSize{gridSize},
 		_preViewRect{}, _preRoiRect{},
 		_viewRect{}, _roiRect{},
 		_viewSize{}, _border{}
 	{
+		_cols = gridSize.x / cellSize.x;
+		_rows = gridSize.y / cellSize.y;
+
 		_gridRect = { 0,0,(long)gridSize.x, (long)gridSize.y };
+		_cells = new CellView*[_cols * _rows];
+		for (size_t x = 0; x < _cols; x++)
+		{
+			for (size_t y = 0; y < _rows; y++)
+			{
+				_cells[y * _cols + x] = createFunctor ? createFunctor(y, x) : new CellView(y, x);
+			}
+		}
+	}
+
+	~Inner() 
+	{
+		for (size_t x = 0; x < _cols; x++)
+		{
+			for (size_t y = 0; y < _rows; y++)
+			{
+				delete _cells[y * _cols + x];
+			}
+		}
+
+		delete[] _cells;
+		_cells = nullptr;
 	}
 
 	inline uint32_t ViewUp() { return _viewSize.x; }
@@ -42,9 +67,9 @@ public:
 
 	CellView* GetCellView(int x, int y)
 	{
-		x = GetCol(x);
-		y = GetRow(y);
-		return _cells[y * _cols + x];
+		auto col = GetCol(x);
+		auto row = GetRow(y);
+		return _cells[row * _cols + col];
 	}
 
 	void UpdateRect(XMINT2 viewPoint)
@@ -101,8 +126,16 @@ public:
 				if (intersectView.Contains(x, y))
 					continue;
 
-				if (_preViewRect.Contains(x, y))
-					_onCellHide(x / _cellSize.x, y / _cellSize.y);
+				if (_preViewRect.Contains(x, y)) 
+				{
+					auto* cellView = GetCellView(x, y);
+					if (cellView->_status != CellView::Status::Hide)
+					{
+						cellView->_status = CellView::Status::Hide;
+						cellView->OnHide();
+						_onCellHide(cellView);
+					}
+				}
 			}
 		}
 
@@ -121,9 +154,23 @@ public:
 				if (intersectView.Contains(x, y))
 					continue;
 
-				_onCellWillShow(x / _cellSize.x, y / _cellSize.y);
-				if (_viewRect.Contains(x, y))
-					_onCellShow(x / _cellSize.x, y / _cellSize.y);
+				auto* cellView = GetCellView(x, y);
+				if (cellView->_status != CellView::Status::WillShow)
+				{
+					cellView->_status = CellView::Status::WillShow;
+					cellView->OnWillShow();
+					_onCellWillShow(cellView);
+				}
+				
+				if (_viewRect.Contains(x, y)) 
+				{
+					if (cellView->_status != CellView::Status::Show)
+					{
+						cellView->_status = CellView::Status::Show;
+						cellView->OnShow();
+						_onCellShow(cellView);
+					}
+				}
 			}
 		}
 		//
@@ -155,11 +202,11 @@ public:
 	CellView** _cells;
 };
 
-GridView::GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols, CellCreateFunctor createFunctor, CellDestroyFunctor destroyFunctor):
+GridView::GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols, CellCreateFunctor createFunctor):
 	_viewPoint{}, _viewSize{}, _viewBorder{},
 	_cellSize{cellWidth, cellHeight}, _cellCount{cols, rows}, _gridSize{cellWidth*cols, cellHeight*rows}
 {
-	_inner = new GridView::Inner(_cellSize, _gridSize, createFunctor, destroyFunctor);
+	_inner = new GridView::Inner(_cellSize, _gridSize, createFunctor);
 }
 
 GridView::~GridView()

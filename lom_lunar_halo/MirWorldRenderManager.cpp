@@ -31,10 +31,10 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
 {
     _mapData = mapData;
     _gridView->Init(Mir::CellW, Mir::CellH, _mapData->h(), _mapData->w());
-    _gridView->GetView()->SetCellHideCallback([this](int x, int y) {
-        if (x < 0 || y < 0)
+    _gridView->GetView()->SetCellHideCallback([this](CellView* cell) {
+        if (cell->GetColIdx() < 0 || cell->GetRowIdx() < 0)
             return;
-        CellCoord key = { (uint32_t)x,(uint32_t)y };
+        CellCoord key = { (uint32_t)cell->GetColIdx(),(uint32_t)cell->GetRowIdx() };
         //CellCoord bgKey = { (uint32_t)x / 2 * 2,(uint32_t)y / 2 * 2 };
         auto& nodes = _usedSceneNodes[key];
         for (auto i : nodes)
@@ -44,21 +44,21 @@ void MirWorldRenderManager::SetMapData(shared_ptr<MapData> mapData)
         nodes.clear();
         });
 
-    _gridView->GetView()->SetCellShowCallback([this](int x, int y) {
-        if (x < 0 || y < 0)
+    _gridView->GetView()->SetCellShowCallback([this](CellView* cell) {
+        if (cell->GetColIdx() < 0 || cell->GetRowIdx() < 0)
             return;
         //auto log = L"{" + std::to_wstring(x) + L"," + std::to_wstring(y) + L"}";
         //OutputDebugString(log.c_str());
 
-        CellCoord key = { (uint32_t)x,(uint32_t)y };
+        CellCoord key = { (uint32_t)cell->GetColIdx(),(uint32_t)cell->GetRowIdx() };
         SetUpBg(key);
         SetUpMid(key, 1);// 物体左半
         SetUpMid(key, 2);// 物体右半
         SetUpDebug(key);
         });
 
-    _gridView->GetView()->SetCellWillShowCallback([](int x, int y) {
-        if (x < 0 || y < 0)
+    _gridView->GetView()->SetCellWillShowCallback([](CellView* cell) {
+        if (cell->GetColIdx() < 0 || cell->GetRowIdx() < 0)
             return;
         });
 
