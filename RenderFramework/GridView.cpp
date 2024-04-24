@@ -1,6 +1,42 @@
 #include "GridView.h"
+#include <format>
 
 using namespace DirectX;
+
+void CellView::SetStatus(Status newStatus)
+{
+	auto old = _status;
+	_status = newStatus;
+	switch (_status)
+	{
+	case CellView::Status::Unload:
+		if (old != _status)
+		{
+			OnUnload();
+		}
+		break;
+	case CellView::Status::Hide:
+		if (old == CellView::Status::Show)
+		{
+			OnHide();
+		}
+		break;
+	case CellView::Status::Load:
+		if (old == CellView::Status::Unload)
+		{
+			OnLoad();
+		}
+		break;
+	case CellView::Status::Show:
+		if (old != CellView::Status::Unload && old != _status)
+		{
+			OnShow();
+		}
+		break;
+	default:
+		break;
+	}
+}
 
 class GridView::Inner
 {
@@ -72,6 +108,11 @@ public:
 		return _cells[row * _cols + col];
 	}
 
+	CellView* GetCellViewDirect(int col, int row)
+	{
+		return _cells[row * _cols + col];
+	}
+
 	void UpdateRect(XMINT2 viewPoint)
 	{
 		_preViewRect = _viewRect;
@@ -87,88 +128,116 @@ public:
 		_roiRect.width = ViewWidth() + _border.x * 2;
 		_roiRect.height = ViewHeight() + _border.y * 2;
 
-		AlignRect(_viewRect);
-		AlignRect(_roiRect);
 		TryTriggerEvent();
 	}
-	// 使rect范围向外扩充，与格子边框对齐
-	void AlignRect(SimpleMath::Rectangle& rect)
+
+	// 得到使rect范围向外扩充，与格子边框对齐后的cell范围
+	SimpleMath::Rectangle GetAlignCellRect(SimpleMath::Rectangle rect)
 	{
-		auto newX = (long)(floor((float)rect.x / _cellSize.x) * _cellSize.x);
-		auto newY = (long)(floor((float)rect.y / _cellSize.y) * _cellSize.y);
-		rect.width += rect.x - newX;
-		rect.height += rect.y - newY;
-		rect.x = newX;
-		rect.y = newY;
-		rect.width += _cellSize.x - rect.width % _cellSize.x;
-		rect.height += _cellSize.y - rect.height % _cellSize.y;
+		auto minX = rect.x;
+		auto maxX = rect.x + rect.width;
+		auto minY = rect.y;
+		auto maxY = rect.y + rect.height;
+
+		minX = (long)floor((float)minX / _cellSize.x);
+		minY = (long)floor((float)minY / _cellSize.y);
+		maxX = (long)ceil((float)maxX / _cellSize.x);
+		maxY = (long)ceil((float)maxY / _cellSize.y);
+
+		if (minX < 0) minX = 0;
+		else if (minX > _cols) minX = _cols;
+
+		if (maxX < 0) maxX = 0;
+		else if (maxX > _cols) maxX = _cols;
+
+		if (minY < 0) minY = 0;
+		else if (minY > _rows) minY = _rows;
+
+		if (maxY < 0) maxY = 0;
+		else if (maxY > _rows) maxY = _rows;
+
+		return { minX, minY, maxX-minX, maxY-minY };
 	}
 
 	void TryTriggerEvent()
 	{
-		if (_preViewRect == _viewRect)// 区域覆盖的格子未变化
+		auto preCellViewRect = GetAlignCellRect(_preViewRect);
+		auto cellViewRect = GetAlignCellRect(_viewRect);
+
+		if (preCellViewRect == cellViewRect)// 区域覆盖的格子未变化
 			return;
 
-		auto intersectView = SimpleMath::Rectangle::Intersect(_preViewRect, _viewRect);
-		// 计算更新
-		long startY = _preRoiRect.y;
-		long stopY = _preRoiRect.y + _preRoiRect.height;
-		long startX = _preRoiRect.x;
-		long stopX = _preRoiRect.x + _preRoiRect.width;
+		auto intersectView = SimpleMath::Rectangle::Intersect(preCellViewRect, cellViewRect);
 
-		for (long y = startY; y < stopY; y+=_cellSize.y)
+		auto gridCellRect = GetAlignCellRect(_gridRect);
+		auto preCellRoiRect = GetAlignCellRect(_preRoiRect);
+		auto cellRoiRect = GetAlignCellRect(_roiRect);
+		// 计算更新
+		long startY = preCellRoiRect.y;
+		long stopY = preCellRoiRect.y + preCellRoiRect.height;
+		long startX = preCellRoiRect.x;
+		long stopX = preCellRoiRect.x + preCellRoiRect.width;
+
+		__hideCnt = 0;
+		__loadCnt = 0;
+		__showCnt = 0;
+
+		for (long y = startY; y < stopY; y++)
 		{
-			for (long x = startX; x < stopX; x+=_cellSize.x)
+			for (long x = startX; x < stopX; x++)
 			{
-				if (!_gridRect.Contains(x, y))
+				if (!gridCellRect.Contains(x, y))
 					continue;
 
 				if (intersectView.Contains(x, y))
 					continue;
 
-				if (_preViewRect.Contains(x, y)) 
+				if (preCellViewRect.Contains(x, y)) 
 				{
-					auto* cellView = GetCellView(x, y);
+					auto* cellView = GetCellViewDirect(x, y);
 					if (cellView->_status != CellView::Status::Hide)
 					{
 						cellView->_status = CellView::Status::Hide;
 						cellView->OnHide();
 						_onCellHide(cellView);
+						__hideCnt++;
 					}
 				}
 			}
 		}
 
-		startY = _roiRect.y;
-		stopY = _roiRect.y + _roiRect.height;
-		startX = _roiRect.x;
-		stopX = _roiRect.x + _roiRect.width;
+		startY = cellRoiRect.y;
+		stopY = cellRoiRect.y + cellRoiRect.height;
+		startX = cellRoiRect.x;
+		stopX = cellRoiRect.x + cellRoiRect.width;
 
-		for (long y = _roiRect.y; y < stopY; y += _cellSize.y)
+		for (long y = cellRoiRect.y; y < stopY; y++)
 		{
-			for (long x = _roiRect.x; x < stopX; x += _cellSize.x)
+			for (long x = cellRoiRect.x; x < stopX; x++)
 			{
-				if (!_gridRect.Contains(x, y))
+				if (!gridCellRect.Contains(x, y))
 					continue;
 
 				if (intersectView.Contains(x, y))
 					continue;
 
-				auto* cellView = GetCellView(x, y);
-				if (cellView->_status != CellView::Status::WillShow)
+				auto* cellView = GetCellViewDirect(x, y);
+				if (cellView->_status != CellView::Status::Load)
 				{
-					cellView->_status = CellView::Status::WillShow;
-					cellView->OnWillShow();
+					cellView->_status = CellView::Status::Load;
+					cellView->OnLoad();
 					_onCellWillShow(cellView);
+					__loadCnt++;
 				}
 				
-				if (_viewRect.Contains(x, y)) 
+				if (cellViewRect.Contains(x, y)) 
 				{
 					if (cellView->_status != CellView::Status::Show)
 					{
 						cellView->_status = CellView::Status::Show;
 						cellView->OnShow();
 						_onCellShow(cellView);
+						__showCnt++;
 					}
 				}
 			}
@@ -200,6 +269,11 @@ public:
 	uint32_t _cols;
 	uint32_t _rows;
 	CellView** _cells;
+
+	int __hideCnt;
+	int __loadCnt;
+	int __showCnt;
+	int __unloadCnt;
 };
 
 GridView::GridView(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols, CellCreateFunctor createFunctor):
@@ -245,4 +319,9 @@ void GridView::SetCellHideCallback(CellNotifyCallback func)
 void GridView::SetCellWillShowCallback(CellNotifyCallback func)
 {
 	_inner->_onCellWillShow = func;
+}
+
+std::string GridView::GetDebugInfo()
+{
+	return std::format("unload:{0}, load:{1}, show:{2}, hide:{3}", _inner->__unloadCnt, _inner->__loadCnt, _inner->__showCnt, _inner->__hideCnt);
 }

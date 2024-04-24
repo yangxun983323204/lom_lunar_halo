@@ -22,6 +22,8 @@ public:
 		auto wpos = GetSceneNode()->GetWorldPosition();
 		_gridView->UpdateViewPoint(wpos.x, wpos.y);
 	}
+
+	inline std::string GetDebugInfo() { return _gridView->GetDebugInfo(); }
 private:
 	unique_ptr<GridView> _gridView;
 };

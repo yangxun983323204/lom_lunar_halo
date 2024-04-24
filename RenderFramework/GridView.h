@@ -3,6 +3,7 @@
 #include <functional>
 #include <DirectXMath.h>
 #include "../DirectXTK-main/Inc/SimpleMath.h"
+#include <string>
 
 using std::function;
 
@@ -13,13 +14,14 @@ class CellView
 public:
 	enum class Status
 	{
+		Unload,
+		Load,
 		Hide,
-		WillShow,
 		Show,
 	};
 public:
 	CellView(int rowIdx, int colIdx):
-		_rowIdx{ rowIdx }, _colIdx{ colIdx }, _status{ Status::Hide }
+		_rowIdx{ rowIdx }, _colIdx{ colIdx }, _status{ Status::Unload }
 	{}
 
 	virtual ~CellView() {}
@@ -29,11 +31,15 @@ public:
 	inline Status GetStatus() { return _status; }
 
 protected:
-	virtual void OnWillShow() {};
-	virtual void OnShow() {};
-	virtual void OnHide() {};
-
 	friend GridView;
+
+	void SetStatus(Status newStatus);
+
+	virtual void OnUnload() {};
+	virtual void OnLoad() {};
+	virtual void OnHide() {};
+	virtual void OnShow() {};
+	
 	int _rowIdx;
 	int _colIdx;
 	Status _status;
@@ -60,8 +66,8 @@ public:
 	void SetCellHideCallback(CellNotifyCallback func);
 	// 当cell处于预加载区域时的回调
 	void SetCellWillShowCallback(CellNotifyCallback func);
-
-
+	
+	std::string GetDebugInfo();
 private:
 	DirectX::XMINT2 _viewPoint;
 	DirectX::XMUINT4 _viewSize;

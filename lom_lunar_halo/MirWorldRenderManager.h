@@ -50,6 +50,8 @@ public:
 	void SetSelfHero(HeroData& data);
 	void SetSelfHeroDirection(Mir::Direction dir);
 	void SetSelfHeroMotion(Mir::PlayerMotion motion);
+
+	inline std::string GetDebugInfo() { return _gridView->GetDebugInfo(); }
 	/// <summary>
 	/// 显示障碍
 	/// </summary>

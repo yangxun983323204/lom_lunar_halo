@@ -83,7 +83,7 @@ void GameProcess::Update(DX::StepTimer const& timer)
     float x = (float)vp.x / Mir::CellW;
     float y = (float)vp.y / Mir::CellH;
     auto debug = _game->GetRmlUiAdapter()->GetContext()->GetDocument(0)->GetElementById("debug");
-    auto str = std::format("视点:({0},{1}), fps:{2}", x, y, timer.GetFramesPerSecond());
+    auto str = std::format("视点:({0},{1}), fps:{2}, mapinfo:{3}", x, y, timer.GetFramesPerSecond(), _game->GetWorldRenderManager()->GetDebugInfo());
     debug->SetInnerRML(str);
 }
 
