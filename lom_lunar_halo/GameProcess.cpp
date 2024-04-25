@@ -18,6 +18,8 @@ void GameProcess::StartEnter()
         string sizeStr = "map size:" + std::to_string(mapData->w()) + "," + std::to_string(mapData->h());
         MessageBox(_game->GetDeviceResource()->GetWindow(), _W(sizeStr).c_str(), _W("测试map加载").c_str(), 0);
         _game->GetWorldRenderManager()->SetMapData(mapData);
+        _game->GetWorldRenderManager()->DebugBarrier = true;
+        _game->GetWorldRenderManager()->DebugGrid = true;
     }
     else {
         MessageBox(_game->GetDeviceResource()->GetWindow(), _W("加载map失败").c_str(), _W("测试map加载").c_str(), 0);
@@ -26,7 +28,7 @@ void GameProcess::StartEnter()
     HeroData hero{};
     hero.NetId = 1;
     hero.Name = "小明";
-    hero.Pos = { 422,429 };
+    hero.Pos = { 399,471 };
     hero.Dir = Mir::Direction::Bottom;
     hero.Dress = 8;
     hero.Gender = Mir::ActorType::Woman;
@@ -83,7 +85,10 @@ void GameProcess::Update(DX::StepTimer const& timer)
     float x = (float)vp.x / Mir::CellW;
     float y = (float)vp.y / Mir::CellH;
     auto debug = _game->GetRmlUiAdapter()->GetContext()->GetDocument(0)->GetElementById("debug");
-    auto str = std::format("视点:({0},{1}), fps:{2}, mapinfo:{3}", x, y, timer.GetFramesPerSecond(), _game->GetWorldRenderManager()->GetDebugInfo());
+    auto str = std::format("fps:{2}<br/>视点:({0:.1f},{1:.1f})<br/>地图格:{3}", 
+        x, y, timer.GetFramesPerSecond(), 
+        _game->GetWorldRenderManager()->GetGridDebugInfo());
+
     debug->SetInnerRML(str);
 }
 

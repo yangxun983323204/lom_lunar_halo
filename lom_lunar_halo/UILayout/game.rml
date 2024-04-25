@@ -7,7 +7,7 @@
 </head>
 <body>
   <div id="layout" class="ui_root_layout">
-    <h1 id="debug">用来debug</h1>
+    <p id="debug">用来debug</p>
   </div>
 </body>
 </rml>

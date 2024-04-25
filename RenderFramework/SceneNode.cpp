@@ -156,3 +156,22 @@ bool SceneNode::HasTag(string tag)
 {
     return std::find(Tags.begin(), Tags.end(), tag) != Tags.end();
 }
+
+bool SceneNode::IsActive()
+{
+    if (!SelfActive)
+    {
+        return false;
+    }
+    bool s = SelfActive;
+    auto p = GetParent();
+    while (!p.expired())
+    {
+        if (!p.lock()->SelfActive)
+            return false;
+        
+        p = p.lock()->GetParent();
+    }
+
+    return true;
+}

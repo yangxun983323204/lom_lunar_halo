@@ -25,7 +25,8 @@ public:
 		ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv,
 		int layoutW, int layoutH, float dpiScale) :
 		_hwnd{ hwnd }, _dev{ dev }, _ctx{ ctx }, _rtv{ rtv }, _dsv{ dsv }, 
-		_vw{ layoutW }, _vh{ layoutH }, _dpiScale{ dpiScale }, Debug{false}
+		_vw{ layoutW }, _vh{ layoutH }, _dpiScale{ dpiScale }, Debug{false},
+		_tmpIRendererArray{}
 	{
 		_draw = std::make_unique<SimpleSpriteDraw>(ctx);
 		_shadowColor = { 0,0,0,0.5 };
@@ -60,6 +61,7 @@ private:
 	int _vw, _vh;
 	float _dpiScale;
 
+	vector<ISceneNodeComponent*> _tmpIRendererArray;
 public:
 	shared_ptr<Sprite> _debugImgLT;
 	shared_ptr<Sprite> _debugImgRT;

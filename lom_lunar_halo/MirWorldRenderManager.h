@@ -51,19 +51,19 @@ public:
 	void SetSelfHeroDirection(Mir::Direction dir);
 	void SetSelfHeroMotion(Mir::PlayerMotion motion);
 
-	inline std::string GetDebugInfo() { return _gridView->GetDebugInfo(); }
 	/// <summary>
-	/// 显示障碍
+	/// 获取地图格加载情况
 	/// </summary>
-	bool DebugBarrier;
-private:
-	SpriteRenderer* GetMapStaticSpriteRenderer(SpriteRenderLayer& use, CellCoord key);
-	SpriteRenderer* GetMapAnimSpriteRenderer(SpriteRenderLayer& use, CellCoord key);
-	ActorView* GetActorView(int id, function<shared_ptr<SceneNode>()> createFunc);
+	inline std::string GetGridDebugInfo() { return _gridView->GetDebugInfo(); }
 
-	void SetUpBg(CellCoord key);
-	void SetUpMid(CellCoord key, int i);
-	void SetUpDebug(CellCoord key);
+	// 显示障碍
+	bool DebugBarrier;
+	// 显示格子
+	bool DebugGrid;
+private:
+	friend class MirCellView;
+
+	ActorView* GetActorView(int id, function<shared_ptr<SceneNode>()> createFunc);
 
 	void ClearScreen(XMFLOAT4 color);
 	void Draw(ID3D11ShaderResourceView* srv, DirectX::SimpleMath::Rectangle viewRect, XMFLOAT4 color);
@@ -73,7 +73,6 @@ private:
 	SpriteRenderLayer _mid2Layer;
 	SpriteRenderLayer _topLayer;
 	SpriteRenderLayer _debugLayer;
-	unordered_map<CellCoord, vector<weak_ptr<SceneNode>>> _usedSceneNodes;
 
 	int _selfHeroId;
 	unordered_map<int, HeroData> _heros;

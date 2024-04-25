@@ -24,7 +24,40 @@ void SpriteRenderSystem::Render()
 		cout << "no camera!";
 		return;
 	}
+	// 筛选活动的组件
+	_tmpIRendererArray.clear();
+	auto renderers = ISystem::GetComponentsByType(_ID_OF(IRenderer));
+	for (auto renderer : renderers) {
+		if (!renderer->GetSceneNode()->IsActive())
+			continue;
 
+		auto sr = dynamic_cast<IRenderer*>(renderer);
+		if (!sr || !renderer->Enable)
+			continue;
+
+		_tmpIRendererArray.push_back(renderer);
+	}
+	std::sort(_tmpIRendererArray.begin(), _tmpIRendererArray.end(), [](ISceneNodeComponent* a, ISceneNodeComponent* b) {
+		auto ra = dynamic_cast<IRenderer*>(a);
+		auto rb = dynamic_cast<IRenderer*>(b);
+		auto sa = ra->SortLayer;
+		auto sb = rb->SortLayer;
+		if (sa == sb) {
+			auto wposA = a->GetSceneNode()->GetWorldPosition();
+			auto wposB = b->GetSceneNode()->GetWorldPosition();
+			if (wposA.y == wposB.y) {
+				if (wposA.x == wposB.x)
+					return ra->Depth < rb->Depth;
+				else
+					return wposA.x < wposB.x;
+			}
+			else
+				return wposA.y > wposB.y;
+		}
+		else
+			return sa < sb;
+		});
+	//
 	cameras.sort([](ISceneNodeComponent* a, ISceneNodeComponent* b) {
 		return dynamic_cast<Camera*>(a)->Depth < dynamic_cast<Camera*>(b)->Depth;
 		});
@@ -42,29 +75,12 @@ void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRenderer*)>
 		Clear(camera->ClearColor);
 	}
 
-	auto renderers = ISystem::GetComponentsByType(_ID_OF(IRenderer));
-	renderers.sort([](ISceneNodeComponent*a, ISceneNodeComponent*b) {
-		auto sa = dynamic_cast<IRenderer*>(a)->SortLayer;
-		auto sb = dynamic_cast<IRenderer*>(b)->SortLayer;
-		if (sa == sb) {
-			auto wposA = a->GetSceneNode()->GetWorldPosition();
-			auto wposB = b->GetSceneNode()->GetWorldPosition();
-			if (wposA.y == wposB.y) {
-				if (wposA.x == wposB.x)
-					return dynamic_cast<IRenderer*>(a)->Depth < dynamic_cast<IRenderer*>(b)->Depth;
-				else
-					return wposA.x < wposB.x;
-			}
-			else
-				return wposA.y > wposB.y;
-		}
-		else
-			return sa < sb;
-		});
-
 	auto cameraWPos = camera->GetSceneNode()->GetWorldPosition();
 	_draw->Begin(cameraWPos, _dpiScale);
-	for (auto renderer : renderers) {
+	for (auto renderer : _tmpIRendererArray) {
+		if (!renderer->GetSceneNode()->IsActive())
+			continue;
+
 		auto sr = dynamic_cast<IRenderer*>(renderer);
 		if (!sr || !renderer->Enable)
 			continue;

@@ -45,7 +45,7 @@ public:
 		_onCellShow{}, _onCellHide{}, _onCellWillShow{},
 		_cellSize{ cellSize }, _gridSize{gridSize},
 		_preViewRect{}, _preRoiRect{},
-		_viewRect{}, _roiRect{},
+		_viewRect{}, _roiRect{}, _persistRect{},
 		_viewSize{}, _border{}
 	{
 		_cols = gridSize.x / cellSize.x;
@@ -128,6 +128,11 @@ public:
 		_roiRect.width = ViewWidth() + _border.x * 2;
 		_roiRect.height = ViewHeight() + _border.y * 2;
 
+		_persistRect.x = viewPoint.x - ViewLeft() - _border.x * 3;
+		_persistRect.y = viewPoint.y - ViewDown() - _border.y * 3;
+		_persistRect.width = ViewWidth() + _border.x * 2 * 3;
+		_persistRect.height = ViewHeight() + _border.y * 2 * 3;
+
 		TryTriggerEvent();
 	}
 
@@ -172,16 +177,15 @@ public:
 		auto gridCellRect = GetAlignCellRect(_gridRect);
 		auto preCellRoiRect = GetAlignCellRect(_preRoiRect);
 		auto cellRoiRect = GetAlignCellRect(_roiRect);
+		auto persistRect = GetAlignCellRect(_persistRect);
+
 		// 计算更新
 		long startY = preCellRoiRect.y;
 		long stopY = preCellRoiRect.y + preCellRoiRect.height;
 		long startX = preCellRoiRect.x;
 		long stopX = preCellRoiRect.x + preCellRoiRect.width;
 
-		__hideCnt = 0;
-		__loadCnt = 0;
-		__showCnt = 0;
-
+		// 处理旧矩形
 		for (long y = startY; y < stopY; y++)
 		{
 			for (long x = startX; x < stopX; x++)
@@ -192,17 +196,23 @@ public:
 				if (intersectView.Contains(x, y))
 					continue;
 
-				if (preCellViewRect.Contains(x, y)) 
+				auto* cellView = GetCellViewDirect(x, y);
+				cellView->SetStatus(CellView::Status::Hide);
+				if (!persistRect.Contains(x, y))
 				{
-					auto* cellView = GetCellViewDirect(x, y);
-					if (cellView->_status != CellView::Status::Hide)
-					{
-						cellView->_status = CellView::Status::Hide;
-						cellView->OnHide();
-						_onCellHide(cellView);
-						__hideCnt++;
-					}
+					cellView->SetStatus(CellView::Status::Unload);
 				}
+
+				//if (preCellViewRect.Contains(x, y)) 
+				//{
+				//	if (cellView->_status != CellView::Status::Hide)
+				//	{
+				//		cellView->_status = CellView::Status::Hide;
+				//		cellView->OnHide();
+				//		_onCellHide(cellView);
+				//		__hideCnt++;
+				//	}
+				//}
 			}
 		}
 
@@ -210,7 +220,7 @@ public:
 		stopY = cellRoiRect.y + cellRoiRect.height;
 		startX = cellRoiRect.x;
 		stopX = cellRoiRect.x + cellRoiRect.width;
-
+		// 处理新矩形
 		for (long y = cellRoiRect.y; y < stopY; y++)
 		{
 			for (long x = cellRoiRect.x; x < stopX; x++)
@@ -221,8 +231,14 @@ public:
 				if (intersectView.Contains(x, y))
 					continue;
 
-				auto* cellView = GetCellViewDirect(x, y);
-				if (cellView->_status != CellView::Status::Load)
+				auto* cellView = GetCellViewDirect(x, y); 
+				cellView->SetStatus(CellView::Status::Load);
+				if (cellViewRect.Contains(x, y))
+				{
+					cellView->SetStatus(CellView::Status::Show);
+				}
+
+				/*if (cellView->_status != CellView::Status::Load)
 				{
 					cellView->_status = CellView::Status::Load;
 					cellView->OnLoad();
@@ -239,12 +255,41 @@ public:
 						_onCellShow(cellView);
 						__showCnt++;
 					}
-				}
+				}*/
 			}
 		}
 		//
 		_preViewRect = _viewRect;
 		_preRoiRect = _roiRect;
+		// 统计信息
+		__unloadCnt = 0;
+		__hideCnt = 0;
+		__loadCnt = 0;
+		__showCnt = 0;
+		for (size_t x = 0; x < _cols; x++)
+		{
+			for (size_t y = 0; y < _rows; y++)
+			{
+				auto s = _cells[y * _cols + x]->_status;
+				switch (s)
+				{
+				case CellView::Status::Unload:
+					__unloadCnt++;
+					break;
+				case CellView::Status::Load:
+					__loadCnt++;
+					break;
+				case CellView::Status::Hide:
+					__hideCnt++;
+					break;
+				case CellView::Status::Show:
+					__showCnt++;
+					break;
+				default:
+					break;
+				}
+			}
+		}
 	}
 
 public:
@@ -257,10 +302,16 @@ public:
 
 	SimpleMath::Rectangle _gridRect;
 
+	// 上一帧可视区
 	SimpleMath::Rectangle _preViewRect;
+	// 上一帧预加载视区
 	SimpleMath::Rectangle _preRoiRect;
+	// 可视视区
 	SimpleMath::Rectangle _viewRect;
+	// 预加载视区
 	SimpleMath::Rectangle _roiRect;
+	// 资源保持视区
+	SimpleMath::Rectangle _persistRect;
 
 	XMUINT4 _viewSize;
 	XMUINT2 _border;
@@ -323,5 +374,10 @@ void GridView::SetCellWillShowCallback(CellNotifyCallback func)
 
 std::string GridView::GetDebugInfo()
 {
-	return std::format("unload:{0}, load:{1}, show:{2}, hide:{3}", _inner->__unloadCnt, _inner->__loadCnt, _inner->__showCnt, _inner->__hideCnt);
+	return std::format("unload:{0}, load:{1}, show:{2}, hide:{3}, total:{4}",
+		_inner->__unloadCnt,
+		_inner->__loadCnt,
+		_inner->__showCnt,
+		_inner->__hideCnt,
+		_inner->__unloadCnt + _inner->__loadCnt + _inner->__showCnt + _inner->__hideCnt);
 }
