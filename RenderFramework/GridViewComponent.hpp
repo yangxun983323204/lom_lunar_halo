@@ -24,6 +24,13 @@ public:
 	}
 
 	inline std::string GetDebugInfo() { return _gridView->GetDebugInfo(); }
+
+protected:
+	virtual void FillTypeIds(std::set<uint32_t>& set) override 
+	{
+		ISceneNodeComponent::FillTypeIds(set);
+		set.insert(GridViewComponent::TypeId);
+	}
 private:
 	unique_ptr<GridView> _gridView;
 };

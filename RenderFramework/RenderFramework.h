@@ -3,7 +3,7 @@
 #include "HashSupport.h"
 #include "SceneNode.h"
 #include "Sprite.hpp"
-#include "SpriteRenderer.h"
+#include "SpriteRendererComponent.h"
 #include "Camera.h"
 #include "SpriteRenderSystem.h"
 #include "GridView.h"

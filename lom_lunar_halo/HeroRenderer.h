@@ -3,7 +3,7 @@
 #include "../mir_lib/MirConst.h"
 #include "../RenderFramework/ISceneNodeComponent.h"
 #include "../RenderFramework/Sprite.hpp"
-#include "../RenderFramework/IRenderer.h"
+#include "../RenderFramework/IRendererComponent.h"
 #include "../RenderFramework/IUpdate.h"
 #include "../RenderFramework/Animation.h"
 #include "ActorData.h"
@@ -25,11 +25,13 @@ namespace Mir {
 	};
 }
 
-_SCENE_NODE_COMPONENT_BEGIN2(HeroRenderer, IRenderer, IUpdate)
+class HeroRenderer : public IRendererComponent
+{
 public:
+	_SCENE_NODE_COMPONENT_ID(HeroRenderer)
 	void Init(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* resMgr);
 	virtual void OnRender(IGraphic2D* gfx) override;
-
+	virtual void FillTypeIds(std::set<uint32_t>& set) override;
 private:
 	Animation _anims[(int)Mir::HeroSubPart::MAX][(int)Mir::Direction::MAX];
-_SCENE_NODE_COMPONENT_END
+};

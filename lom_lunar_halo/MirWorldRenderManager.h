@@ -41,6 +41,7 @@ public:
 
 	void SetMapData(shared_ptr<MapData> mapData);
 	DirectX::XMINT2 GetViewPoint();
+	CellView* GetViewPointCell();
 	void SetViewPoint(DirectX::XMINT2 coor);
 	void Update(DX::StepTimer const& timer);
 	void Render();

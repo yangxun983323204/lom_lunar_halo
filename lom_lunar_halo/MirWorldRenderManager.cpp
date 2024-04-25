@@ -49,6 +49,12 @@ DirectX::XMINT2 MirWorldRenderManager::GetViewPoint()
         return _gridView->GetSceneNode()->GetLocalPosition();
 }
 
+CellView* MirWorldRenderManager::GetViewPointCell()
+{
+    auto p = GetViewPoint();
+    return _gridView->GetView()->GetCellView(p.x, p.y);
+}
+
 void MirWorldRenderManager::SetViewPoint(DirectX::XMINT2 coor)
 {
     if (!_gridView)
@@ -107,7 +113,10 @@ void MirWorldRenderManager::SetSelfHero(HeroData& data)
     s->GetSceneNode()->SetParent(_camera);
     s->GetSceneNode()->ResetTRS();
     s->GetSceneNode()->SetLocalPosition({ -Mir::CellWHalf, -Mir::CellHHalf });
+    SetSelfHeroDirection(data.Dir);
     _selfHeroId = data.NetId;
+    auto cPos = data.Pos;
+    SetViewPoint(Mir::GetCellCenter(cPos.x, cPos.y));
 }
 
 void MirWorldRenderManager::SetSelfHeroDirection(Mir::Direction dir)

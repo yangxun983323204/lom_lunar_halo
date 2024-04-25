@@ -1,8 +1,8 @@
-#include "SpriteRenderer.h"
+#include "SpriteRendererComponent.h"
 #include "SceneNode.h"
 #include "SpriteRenderSystem.h"
 
-DirectX::SimpleMath::Rectangle SpriteRenderer::GetWorldRect()
+DirectX::SimpleMath::Rectangle SpriteRendererComponent::GetWorldRect()
 {
 	if (GetSceneNode() == nullptr)
 		return DirectX::SimpleMath::Rectangle();
@@ -34,7 +34,7 @@ DirectX::SimpleMath::Rectangle SpriteRenderer::GetWorldRect()
 	return rect;
 }
 
-void SpriteRenderer::OnRender(IGraphic2D* gfx)
+void SpriteRendererComponent::OnRender(IGraphic2D* gfx)
 {
 	if (Sprite.expired())
 		return;
@@ -46,7 +46,7 @@ void SpriteRenderer::OnRender(IGraphic2D* gfx)
 	gfx->Draw(sprite->TextureSRV.Get(), wRect, Color);
 }
 
-void SpriteRenderer::OnRenderDebug(SpriteRenderSystem* renderSystem, IGraphic2D* gfx)
+void SpriteRendererComponent::OnRenderDebug(SpriteRenderSystem* renderSystem, IGraphic2D* gfx)
 {
 	if (Sprite.expired() || !Debug)
 		return;
@@ -55,4 +55,10 @@ void SpriteRenderer::OnRenderDebug(SpriteRenderSystem* renderSystem, IGraphic2D*
 	auto wRect = GetWorldRect();
 	auto sprite = Sprite.lock();
 	renderSystem->DrawDebugBounds(wpos, wRect, DebugColor);
+}
+
+void SpriteRendererComponent::FillTypeIds(std::set<uint32_t>& set)
+{
+	IRendererComponent::FillTypeIds(set);
+	set.insert(SpriteRendererComponent::TypeId);
 }

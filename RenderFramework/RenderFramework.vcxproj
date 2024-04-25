@@ -27,7 +27,7 @@
     <ClInclude Include="GridViewComponent.hpp" />
     <ClInclude Include="HashSupport.h" />
     <ClInclude Include="IGraphic2D.h" />
-    <ClInclude Include="IRenderer.h" />
+    <ClInclude Include="IRendererComponent.h" />
     <ClInclude Include="ISceneNodeComponent.h" />
     <ClInclude Include="ISystem.h" />
     <ClInclude Include="IUpdate.h" />
@@ -36,7 +36,7 @@
     <ClInclude Include="SceneNode.h" />
     <ClInclude Include="SimpleSpriteDraw.h" />
     <ClInclude Include="Sprite.hpp" />
-    <ClInclude Include="SpriteRenderer.h" />
+    <ClInclude Include="SpriteRendererComponent.h" />
     <ClInclude Include="SpriteRenderSystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -45,11 +45,12 @@
     <ClCompile Include="AnimatorSystem.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GridView.cpp" />
+    <ClCompile Include="IRendererComponent.cpp" />
     <ClCompile Include="ISceneNodeComponent.cpp" />
     <ClCompile Include="ISystem.cpp" />
     <ClCompile Include="SceneNode.cpp" />
     <ClCompile Include="SimpleSpriteDraw.cpp" />
-    <ClCompile Include="SpriteRenderer.cpp" />
+    <ClCompile Include="SpriteRendererComponent.cpp" />
     <ClCompile Include="SpriteRenderSystem.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

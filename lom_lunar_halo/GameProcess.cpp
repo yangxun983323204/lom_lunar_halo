@@ -84,10 +84,12 @@ void GameProcess::Update(DX::StepTimer const& timer)
     auto vp = _game->GetWorldRenderManager()->GetViewPoint();
     float x = (float)vp.x / Mir::CellW;
     float y = (float)vp.y / Mir::CellH;
+    auto cell = _game->GetWorldRenderManager()->GetViewPointCell();
     auto debug = _game->GetRmlUiAdapter()->GetContext()->GetDocument(0)->GetElementById("debug");
-    auto str = std::format("fps:{2}<br/>视点:({0:.1f},{1:.1f})<br/>地图格:{3}", 
+    auto str = std::format("fps:{2}<br/>视点:({0:.1f},{1:.1f})，格坐标：({4},{5})<br/>地图格:{3}", 
         x, y, timer.GetFramesPerSecond(), 
-        _game->GetWorldRenderManager()->GetGridDebugInfo());
+        _game->GetWorldRenderManager()->GetGridDebugInfo(),
+        cell->GetColIdx(), cell->GetRowIdx());
 
     debug->SetInnerRML(str);
 }

@@ -2,7 +2,7 @@
 #include <memory>
 #include "SceneNode.h"
 #include "ISceneNodeComponent.h"
-#include "SpriteRenderer.h"
+#include "SpriteRendererComponent.h"
 #include "Sprite.hpp"
 #include "ISystem.h"
 #include "Camera.h"
@@ -41,7 +41,7 @@ public:
 	
 	bool Debug;
 private:
-	void RenderCamera(Camera* camera, function<bool(IRenderer*)> filter, bool debugMode);
+	void RenderCamera(Camera* camera, function<bool(IRendererComponent*)> filter, bool debugMode);
 	void Clear(DirectX::XMFLOAT4 color);
 	shared_ptr<Sprite> GenTexture(const byte* source, uint32_t width, uint32_t height);
 	void CreateDebugRes();
@@ -61,7 +61,7 @@ private:
 	int _vw, _vh;
 	float _dpiScale;
 
-	vector<ISceneNodeComponent*> _tmpIRendererArray;
+	vector<IRendererComponent*> _tmpIRendererArray;
 public:
 	shared_ptr<Sprite> _debugImgLT;
 	shared_ptr<Sprite> _debugImgRT;

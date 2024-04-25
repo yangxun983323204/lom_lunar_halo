@@ -54,3 +54,9 @@ int Animator::SetCurrent(string name)
     _currIdx = _hashHelper(name);
     return _currIdx;
 }
+
+void Animator::FillTypeIds(std::set<uint32_t>& set)
+{
+    ISceneNodeComponent::FillTypeIds(set);
+    set.insert(Animator::TypeId);
+}

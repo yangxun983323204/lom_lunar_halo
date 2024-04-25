@@ -26,6 +26,9 @@ public:
 	Animation* GetCurrent();
 	int SetCurrent(string name);
 
+protected:
+	virtual void FillTypeIds(std::set<uint32_t>& set) override;
+
 private:
 	unordered_map<int, Animation> _anims;
 	int _currIdx;

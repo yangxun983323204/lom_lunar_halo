@@ -78,7 +78,7 @@ void MirCellView::SetUpBg()
 	if (!spriteHandle)
 		return;
 
-	auto spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
+	auto spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
 	spRender->SortLayer = _mirWorldMgr->_bgLayer.Layer;
 	spRender->Depth = _mirWorldMgr->_bgLayer.Depth;
 	spRender->Enable = true;
@@ -102,7 +102,7 @@ void MirCellView::SetUpMid()
 		if (!cell.FileEnableOf(i))
 			continue;
 
-        auto spRender = _mirWorldMgr->_sceneMgr->SpawnAnimSprite()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
+        auto spRender = _mirWorldMgr->_sceneMgr->SpawnAnimSprite()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
         spRender->GetSceneNode()->GetComponent<Animator>().lock()->As<Animator>()->Enable = true;
         spRender->Enable = true;
         spRender->Debug = false;
@@ -179,7 +179,7 @@ void MirCellView::SetUpMid()
 
 void MirCellView::SetUpDebugBarrier()
 {
-    auto spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
+    auto spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
     spRender->SortLayer = _mirWorldMgr->_debugLayer.Layer;
     spRender->Depth = _mirWorldMgr->_debugLayer.Depth;
     spRender->Enable = true;
@@ -199,7 +199,7 @@ void MirCellView::SetUpDebugBarrier()
 void MirCellView::SetUpDebugFrame()
 {
     // 左边框
-    auto spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
+    auto spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
     spRender->SortLayer = _mirWorldMgr->_debugLayer.Layer;
     spRender->Depth = _mirWorldMgr->_debugLayer.Depth;
     spRender->Enable = true;
@@ -216,7 +216,7 @@ void MirCellView::SetUpDebugFrame()
     _frameLeftTex = spRender->GetSceneNodeWeakPtr();
 
     // 下边框
-    spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
+    spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
     spRender->SortLayer = _mirWorldMgr->_debugLayer.Layer;
     spRender->Depth = _mirWorldMgr->_debugLayer.Depth;
     spRender->Enable = true;

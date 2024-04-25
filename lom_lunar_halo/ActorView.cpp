@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ActorView.h"
 #include "../RenderFramework/Animator.h"
-#include "../RenderFramework/SpriteRenderer.h"
+#include "../RenderFramework/SpriteRendererComponent.h"
 #include "SpriteHandleHolder.hpp"
 #include "../mir_lib/MirConst.h"
 
@@ -34,10 +34,10 @@ void ActorView::SetSubPartRenderOrder(vector<string> names)
 		auto node = GetSceneNode()->FindChild(names[i]);
 		if (node)
 		{
-			auto wptr = node->GetComponent<SpriteRenderer>();
+			auto wptr = node->GetComponent<SpriteRendererComponent>();
 			if (!wptr.expired())
 			{
-				wptr.lock()->As<SpriteRenderer>()->Depth = i;
+				wptr.lock()->As<SpriteRendererComponent>()->Depth = i;
 			}
 		}
 	}
@@ -118,7 +118,7 @@ void ActorView::InitAs(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* r
 					continue;
 
 				auto animator = node.lock()->GetComponent<Animator>().lock()->As<Animator>();
-				auto sr = node.lock()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
+				auto sr = node.lock()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
 				sr->Enable = true;
 				sr->SortLayer = Layer;
 				sr->Depth = Depth + sub;

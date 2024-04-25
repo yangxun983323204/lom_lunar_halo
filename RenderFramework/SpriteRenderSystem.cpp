@@ -1,7 +1,7 @@
 #include "SpriteRenderSystem.h"
 #include "Camera.h"
 #include "Sprite.hpp"
-#include "SpriteRenderer.h"
+#include "SpriteRendererComponent.h"
 #include <iostream>
 #include <algorithm>
 #include <DirectXMath.h>
@@ -26,28 +26,26 @@ void SpriteRenderSystem::Render()
 	}
 	// 筛选活动的组件
 	_tmpIRendererArray.clear();
-	auto renderers = ISystem::GetComponentsByType(_ID_OF(IRenderer));
+	auto renderers = ISystem::GetComponentsByType(_ID_OF(IRendererComponent));
 	for (auto renderer : renderers) {
 		if (!renderer->GetSceneNode()->IsActive())
 			continue;
 
-		auto sr = dynamic_cast<IRenderer*>(renderer);
+		auto sr = static_cast<IRendererComponent*>(renderer);
 		if (!sr || !renderer->Enable)
 			continue;
 
-		_tmpIRendererArray.push_back(renderer);
+		_tmpIRendererArray.push_back(sr);
 	}
-	std::sort(_tmpIRendererArray.begin(), _tmpIRendererArray.end(), [](ISceneNodeComponent* a, ISceneNodeComponent* b) {
-		auto ra = dynamic_cast<IRenderer*>(a);
-		auto rb = dynamic_cast<IRenderer*>(b);
-		auto sa = ra->SortLayer;
-		auto sb = rb->SortLayer;
+	std::sort(_tmpIRendererArray.begin(), _tmpIRendererArray.end(), [](IRendererComponent* a, IRendererComponent* b) {
+		auto sa = a->SortLayer;
+		auto sb = b->SortLayer;
 		if (sa == sb) {
 			auto wposA = a->GetSceneNode()->GetWorldPosition();
 			auto wposB = b->GetSceneNode()->GetWorldPosition();
 			if (wposA.y == wposB.y) {
 				if (wposA.x == wposB.x)
-					return ra->Depth < rb->Depth;
+					return a->Depth < b->Depth;
 				else
 					return wposA.x < wposB.x;
 			}
@@ -68,7 +66,7 @@ void SpriteRenderSystem::Render()
 	}
 }
 
-void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRenderer*)> filter, bool debugMode)
+void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRendererComponent*)> filter, bool debugMode)
 {
 	_currCamera = camera;
 	if (camera->ClearType == Camera::ClearType::Color) {
@@ -81,17 +79,16 @@ void SpriteRenderSystem::RenderCamera(Camera* camera, function<bool(IRenderer*)>
 		if (!renderer->GetSceneNode()->IsActive())
 			continue;
 
-		auto sr = dynamic_cast<IRenderer*>(renderer);
-		if (!sr || !renderer->Enable)
+		if (!renderer->Enable)
 			continue;
 
-		if (filter && !filter(sr))
+		if (filter && !filter(renderer))
 			continue;
 
-		sr->OnRender(_draw.get());
-		if (Debug)
+		renderer->OnRender(_draw.get());
+		if (Debug && renderer->Debug)
 		{
-			sr->OnRenderDebug(this, _draw.get());
+			renderer->OnRenderDebug(this, _draw.get());
 		}
 	}
 	_draw->End();

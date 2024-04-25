@@ -9,3 +9,9 @@ void HeroRenderer::Init(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* 
 void HeroRenderer::OnRender(IGraphic2D* gfx)
 {
 }
+
+void HeroRenderer::FillTypeIds(std::set<uint32_t>& set)
+{
+	IRendererComponent::FillTypeIds(set);
+	set.insert(HeroRenderer::TypeId);
+}

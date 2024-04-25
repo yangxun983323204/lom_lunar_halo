@@ -32,7 +32,7 @@ shared_ptr<SceneNode> SceneManager::CreateRawSpriteNode()
     auto node = std::make_shared<SceneNode>();
     node->SetLocalPosition({ 0,0 });
     auto sp = std::make_shared<Sprite>();
-    auto spRenderer = node->AddComponent<SpriteRenderer>().lock();
+    auto spRenderer = node->AddComponent<SpriteRendererComponent>().lock();
     spRenderer->Sprite = sp;
     node->SetParent(weak_ptr<SceneNode>(_root));
     return node;

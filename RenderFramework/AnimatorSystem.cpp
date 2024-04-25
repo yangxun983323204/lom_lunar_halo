@@ -1,7 +1,7 @@
 #include "AnimatorSystem.h"
 #include "Animation.h"
 #include "Animator.h"
-#include "SpriteRenderer.h"
+#include "SpriteRendererComponent.h"
 
 void AnimatorSystem::Update(uint64_t totalMs, uint32_t deltaMs)
 {
@@ -20,7 +20,7 @@ void AnimatorSystem::Update(uint64_t totalMs, uint32_t deltaMs)
 				auto sp = anim->GetCurrentFrame();
 				if (!sp.expired())
 				{
-					auto renderer = i->GetSceneNode()->GetComponent<SpriteRenderer>().lock()->As<SpriteRenderer>();
+					auto renderer = i->GetSceneNode()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
 					if (renderer)
 					{
 						renderer->Sprite = sp;

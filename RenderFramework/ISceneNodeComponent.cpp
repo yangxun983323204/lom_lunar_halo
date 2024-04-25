@@ -3,14 +3,29 @@
 
 std::map<int, list<ISceneNodeComponent*>> ISceneNodeComponent::__componentsReg{};
 
-void ISceneNodeComponent::Reg()
+void ISceneNodeComponent::CallReg()
 {
-	__componentsReg[GetTypeId()].push_back(this);
+	std::set<uint32_t> types{};
+	FillTypeIds(types);
+	for (auto t:types)
+	{
+		RegWithId(t);
+	}
 }
 
-void ISceneNodeComponent::UnReg()
+void ISceneNodeComponent::CallUnReg()
 {
-	UnRegWithId(GetTypeId());
+	std::set<uint32_t> types{};
+	FillTypeIds(types);
+	for (auto t : types)
+	{
+		UnRegWithId(t);
+	}
+}
+
+void ISceneNodeComponent::FillTypeIds(std::set<uint32_t>& set)
+{
+	set.insert(ISceneNodeComponent::TypeId);
 }
 
 void ISceneNodeComponent::RegWithId(uint32_t id) 
