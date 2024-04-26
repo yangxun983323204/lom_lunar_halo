@@ -25,9 +25,10 @@ public:
 	Animation* Get(int hash);
 	Animation* GetCurrent();
 	int SetCurrent(string name);
+	virtual void Tick(uint64_t totalMs, uint32_t deltaMs) override;
 
 protected:
-	virtual void FillTypeIds(std::set<uint32_t>& set) override;
+	virtual void FillTypeIds(std::vector<uint32_t>& typeIds) override;
 
 private:
 	unordered_map<int, Animation> _anims;

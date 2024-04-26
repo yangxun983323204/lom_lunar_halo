@@ -110,7 +110,9 @@ weak_ptr<ISceneNodeComponent> SceneNode::GetComponent(int typeId)
 {
     for(auto i : _components) 
     {
-        if (i->GetTypeId() == typeId)
+        _tmpTypes.clear();
+        i->FillTypeIds(_tmpTypes);
+        if (std::find(_tmpTypes.begin(), _tmpTypes.end(), typeId) != _tmpTypes.end())
             return weak_ptr<ISceneNodeComponent>(i);
     }
 
@@ -122,15 +124,29 @@ vector<weak_ptr<ISceneNodeComponent>> SceneNode::GetComponents(int typeId)
     vector<weak_ptr<ISceneNodeComponent>> ret;
     for (auto i : _components)
     {
-        if (i->GetTypeId() == typeId)
+        _tmpTypes.clear();
+        i->FillTypeIds(_tmpTypes);
+        if (std::find(_tmpTypes.begin(), _tmpTypes.end(), typeId) != _tmpTypes.end())
             ret.push_back(weak_ptr<ISceneNodeComponent>(i));
     }
 
     return ret;
 }
 
+void SceneNode::GetComponentsNoAlloc(int typeId, vector<weak_ptr<ISceneNodeComponent>>& outCpts)
+{
+    for (auto i : _components)
+    {
+        _tmpTypes.clear();
+        i->FillTypeIds(_tmpTypes);
+        if (std::find(_tmpTypes.rbegin(), _tmpTypes.rend(), typeId) != _tmpTypes.rend())
+            outCpts.push_back(weak_ptr<ISceneNodeComponent>(i));
+    }
+}
+
 vector<weak_ptr<ISceneNodeComponent>> SceneNode::GetComponentsInChildren(int typeId)
 {
+    // @TODO
     return vector<weak_ptr<ISceneNodeComponent>>();
 }
 

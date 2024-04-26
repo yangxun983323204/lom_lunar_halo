@@ -4,11 +4,18 @@
 #include "SpriteHandleHolder.hpp"
 #include "../mir_lib/MirConst.h"
 #include "../mir_lib/MirUtility.h"
+#include "../RenderFramework/IGraphic2D.h"
+
+vector<weak_ptr<ISceneNodeComponent>> MirCellView::_tmpCpts{};
 
 MirCellView::MirCellView(int rowIdx, int colIdx, MirWorldRenderManager* mgr):
 	CellView(rowIdx, colIdx),
-    _actors{}, _mirWorldMgr{ mgr }, _barrierTex{}
+    _layeredActors{}, _mirWorldMgr{ mgr }
 {
+    for (size_t i = 0; i < (int)MirWorldRenderManager::Layer::Max; i++)
+    {
+        _layeredActors.push_back({});
+    }
 }
 
 MirCellView::~MirCellView()
@@ -18,15 +25,15 @@ MirCellView::~MirCellView()
 
 void MirCellView::OnUnload()
 {
-    for (auto actor : _actors)
+    for (auto& actors : _layeredActors)
     {
-        _mirWorldMgr->_sceneMgr->ReleaseByInnerTag(actor);
-    }
-    _actors.clear();
+        for (auto a : actors)
+        {
+            _mirWorldMgr->_sceneMgr->ReleaseByInnerTag(a);
+        }
 
-    _mirWorldMgr->_sceneMgr->ReleaseByInnerTag(_barrierTex);
-    _mirWorldMgr->_sceneMgr->ReleaseByInnerTag(_frameLeftTex);
-    _mirWorldMgr->_sceneMgr->ReleaseByInnerTag(_frameBottomTex);
+        actors.clear();
+    }
 }
 
 void MirCellView::OnLoad()
@@ -34,33 +41,54 @@ void MirCellView::OnLoad()
     SetUpBg();
     SetUpMid();
     SetUpDebugBarrier();
-    SetUpDebugFrame();
 }
 
 void MirCellView::OnHide()
 {
-    for (auto actor : _actors)
+    for (auto& actors : _layeredActors)
     {
-        if(!actor.expired())
-            actor.lock()->SelfActive = false;
+        for (auto a : actors)
+        {
+            a.lock()->SelfActive = false;
+        }
     }
-
-    _barrierTex.lock()->SelfActive = false;
-    _frameLeftTex.lock()->SelfActive = false;
-    _frameBottomTex.lock()->SelfActive = false;
 }
 
 void MirCellView::OnShow()
 {
-    for (auto actor : _actors)
+    for (auto& actors : _layeredActors)
     {
-        if (!actor.expired())
-            actor.lock()->SelfActive = true;
+        for (auto a : actors)
+        {
+            a.lock()->SelfActive = true;
+        }
     }
+}
 
-    _barrierTex.lock()->SelfActive = _mirWorldMgr->DebugBarrier && !_mirWorldMgr->_mapData->CellAt(_colIdx, _mirWorldMgr->_mapData->h() - _rowIdx).Walkable();;
-    _frameLeftTex.lock()->SelfActive = _mirWorldMgr->DebugGrid;
-    _frameBottomTex.lock()->SelfActive = _mirWorldMgr->DebugGrid;
+void MirCellView::DrawLayer(int layer, CellView* inst, IGraphic2D* graphic)
+{
+     auto cell = static_cast<MirCellView*>(inst);
+     auto& actors = cell->_layeredActors[layer];
+     for (auto a : actors)
+     {
+         auto actor = a.lock();
+         if (!actor->IsActive())
+             continue;
+
+         _tmpCpts.clear();
+         actor->GetComponentsNoAlloc(IRendererComponent::TypeId, _tmpCpts);
+         for (auto r : _tmpCpts)
+         {
+             if (!r.lock()->Enable)
+                 continue;
+
+             auto renderer = static_cast<IRendererComponent*>(r.lock().get());
+             if (renderer)
+             {
+                 renderer->OnRender(graphic);
+             }
+         }
+     }
 }
 
 void MirCellView::SetUpBg()
@@ -79,8 +107,7 @@ void MirCellView::SetUpBg()
 		return;
 
 	auto spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
-	spRender->SortLayer = _mirWorldMgr->_bgLayer.Layer;
-	spRender->Depth = _mirWorldMgr->_bgLayer.Depth;
+	spRender->SortLayer = (int)MirWorldRenderManager::Layer::Bg_0;
 	spRender->Enable = true;
 	spRender->Debug = false;
 
@@ -91,7 +118,7 @@ void MirCellView::SetUpBg()
 	spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Add(spriteHandle);
 
     spRender->GetSceneNode()->SelfActive = false;
-	_actors.push_back(spRender->GetSceneNodeWeakPtr());
+    _layeredActors[spRender->SortLayer].push_back(spRender->GetSceneNodeWeakPtr());
 }
 
 void MirCellView::SetUpMid()
@@ -151,7 +178,6 @@ void MirCellView::SetUpMid()
             }
             animator->Add("0", anim);
             animator->SetCurrent("0");
-            continue;
         }
         // 地表物体图片的原点是左下角,对齐的也是cell的左下角
         auto spriteHandle = _mirWorldMgr->_mapResMgr->LoadSprite({ (uint32_t)fileIdx, (uint32_t)imgIdx });
@@ -163,24 +189,26 @@ void MirCellView::SetUpMid()
         spRender->Sprite.lock()->Pivot = { 0, 0 };
 
         if (sp->Rect.width == 48 && sp->Rect.height == 32) {
-            spRender->SortLayer = _mirWorldMgr->_mid1Layer.Layer;// 对于地图上的装饰，如果它巧好是一个cell大小时，它相当于第二层背景。
-            spRender->Depth = _mirWorldMgr->_mid1Layer.Depth;
+            spRender->SortLayer = (int)MirWorldRenderManager::Layer::Bg_1;// 对于地图上的装饰，如果它巧好是一个cell大小时，它相当于第二层背景。
         }
         else {
-            spRender->SortLayer = _mirWorldMgr->_topLayer.Layer;// 否则它是覆盖层
-            spRender->Depth = _mirWorldMgr->_topLayer.Depth;
+            spRender->SortLayer = (int)MirWorldRenderManager::Layer::Overlay;// 否则它是覆盖层
         }
         spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Add(spriteHandle);
 
         spRender->GetSceneNode()->SelfActive = false;
-        _actors.push_back(spRender->GetSceneNodeWeakPtr());
+        _layeredActors[spRender->SortLayer].push_back(spRender->GetSceneNodeWeakPtr());
 	}
 }
 
 void MirCellView::SetUpDebugBarrier()
 {
+    auto b = _mirWorldMgr->_mapData->CellAt(_colIdx, _mirWorldMgr->_mapData->h() - _rowIdx).Walkable();
+    if (b)
+        return;
+
     auto spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
-    spRender->SortLayer = _mirWorldMgr->_debugLayer.Layer;
+    spRender->SortLayer = (int)MirWorldRenderManager::Layer::Debug_0;
     spRender->Depth = _mirWorldMgr->_debugLayer.Depth;
     spRender->Enable = true;
     spRender->Debug = false;
@@ -193,42 +221,5 @@ void MirCellView::SetUpDebugBarrier()
     spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
 
     spRender->GetSceneNode()->SelfActive = false;
-    _barrierTex = spRender->GetSceneNodeWeakPtr();
-}
-
-void MirCellView::SetUpDebugFrame()
-{
-    // 左边框
-    auto spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
-    spRender->SortLayer = _mirWorldMgr->_debugLayer.Layer;
-    spRender->Depth = _mirWorldMgr->_debugLayer.Depth;
-    spRender->Enable = true;
-    spRender->Debug = false;
-    spRender->Color = { 1,0,0,0.2 };
-
-    spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(_colIdx, _rowIdx));
-    spRender->OverrideWidth = 1;
-    spRender->OverrideHeight = 32;
-    spRender->Sprite = _mirWorldMgr->_renderSystem->_debugImgWhite;
-    spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
-
-    spRender->GetSceneNode()->SelfActive = false;
-    _frameLeftTex = spRender->GetSceneNodeWeakPtr();
-
-    // 下边框
-    spRender = _mirWorldMgr->_sceneMgr->SpawnStaticSprite()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
-    spRender->SortLayer = _mirWorldMgr->_debugLayer.Layer;
-    spRender->Depth = _mirWorldMgr->_debugLayer.Depth;
-    spRender->Enable = true;
-    spRender->Debug = false;
-    spRender->Color = { 1,0,0,0.2 };
-
-    spRender->GetSceneNode()->SetLocalPosition(Mir::GetCellMin(_colIdx, _rowIdx));
-    spRender->OverrideWidth = 48;
-    spRender->OverrideHeight = 1;
-    spRender->Sprite = _mirWorldMgr->_renderSystem->_debugImgWhite;
-    spRender->GetSceneNode()->GetComponent<SpriteHandleHolder>().lock()->As<SpriteHandleHolder>()->Clear();
-
-    spRender->GetSceneNode()->SelfActive = false;
-    _frameBottomTex = spRender->GetSceneNodeWeakPtr();
+    _layeredActors[spRender->SortLayer].push_back(spRender->GetSceneNodeWeakPtr());
 }

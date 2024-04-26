@@ -6,6 +6,9 @@
 class IGraphic2D
 {
 public:
+	virtual void Begin(DirectX::XMINT2 viewPoint, float dpiScale) = 0;
+	virtual void End() = 0;
+
 	virtual void Draw(ID3D11ShaderResourceView* texture, DirectX::SimpleMath::Rectangle const& rect, DirectX::XMFLOAT4 color) = 0;
 
 	virtual void SetModeNormal() = 0;

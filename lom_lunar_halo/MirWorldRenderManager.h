@@ -23,6 +23,23 @@ typedef DirectX::XMUINT2 CellCoord;
 class MirWorldRenderManager
 {
 public:
+	enum class Layer
+	{
+		Bg_0,
+		Bg_1,
+		Object,
+		Actor,
+		Overlay,
+		Fx_0,
+		Fx_1,
+		Fx_2,
+		Debug_0,
+		Debug_1,
+		Debug_2,
+
+		Max
+	};
+
 	class SpriteRenderLayer
 	{
 	public:
@@ -57,10 +74,7 @@ public:
 	/// </summary>
 	inline std::string GetGridDebugInfo() { return _gridView->GetDebugInfo(); }
 
-	// 显示障碍
-	bool DebugBarrier;
-	// 显示格子
-	bool DebugGrid;
+	bool DebugLayerDrawEnable[(int)Layer::Max]{ true };
 private:
 	friend class MirCellView;
 

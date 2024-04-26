@@ -10,8 +10,8 @@ void HeroRenderer::OnRender(IGraphic2D* gfx)
 {
 }
 
-void HeroRenderer::FillTypeIds(std::set<uint32_t>& set)
+void HeroRenderer::FillTypeIds(std::vector<uint32_t>& typeIds)
 {
-	IRendererComponent::FillTypeIds(set);
-	set.insert(HeroRenderer::TypeId);
+	IRendererComponent::FillTypeIds(typeIds);
+	typeIds.push_back(HeroRenderer::TypeId);
 }

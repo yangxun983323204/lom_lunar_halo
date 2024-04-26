@@ -13,7 +13,7 @@ public:
 
 	_SCENE_NODE_COMPONENT_ID(Camera)
 
-	virtual void FillTypeIds(std::set<uint32_t>& set) override;
+	virtual void FillTypeIds(std::vector<uint32_t>& typeIds) override;
 
 	int Depth = 0;
 	Camera::ClearType ClearType = Camera::ClearType::None;

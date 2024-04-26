@@ -18,8 +18,8 @@ class SimpleSpriteDraw: public IGraphic2D
 {
 public:
 	SimpleSpriteDraw(ID3D11DeviceContext* context);
-	void Begin(DirectX::XMINT2 viewPoint, float dpiScale);
-	void End();
+	virtual void Begin(DirectX::XMINT2 viewPoint, float dpiScale) override;
+	virtual void End() override;
 	virtual void Draw(ID3D11ShaderResourceView* texture, DirectX::SimpleMath::Rectangle const& rect, DirectX::XMFLOAT4 color) override;
 	virtual void SetModeNormal() override;
 	virtual void SetModeShadowOrth() override;

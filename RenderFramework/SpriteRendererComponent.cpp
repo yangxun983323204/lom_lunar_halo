@@ -57,8 +57,8 @@ void SpriteRendererComponent::OnRenderDebug(SpriteRenderSystem* renderSystem, IG
 	renderSystem->DrawDebugBounds(wpos, wRect, DebugColor);
 }
 
-void SpriteRendererComponent::FillTypeIds(std::set<uint32_t>& set)
+void SpriteRendererComponent::FillTypeIds(std::vector<uint32_t>& typeIds)
 {
-	IRendererComponent::FillTypeIds(set);
-	set.insert(SpriteRendererComponent::TypeId);
+	IRendererComponent::FillTypeIds(typeIds);
+	typeIds.push_back(SpriteRendererComponent::TypeId);
 }

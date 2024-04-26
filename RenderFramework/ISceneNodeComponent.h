@@ -42,11 +42,14 @@ class ISceneNodeComponent
 {
 public:
 	_SCENE_NODE_COMPONENT_ID(ISceneNodeComponent)
-	bool Enable;
+	bool Enable = true;
 	inline SceneNode* GetSceneNode() { return _node.expired() ? nullptr : _node.lock().get(); }
 	inline weak_ptr<SceneNode> GetSceneNodeWeakPtr() { return _node; }
 	template<typename TComponent>
 	TComponent* As();
+	virtual void Tick(uint64_t totalMs, uint32_t deltaMs);
+
+	bool bEnableTick = false;
 protected:
 	friend class SceneNode;
 	friend class ISystem;
@@ -61,7 +64,7 @@ protected:
 	/// 提交类的类型信息
 	/// </summary>
 	/// <param name="set"></param>
-	virtual void FillTypeIds(std::set<uint32_t>& set);
+	virtual void FillTypeIds(std::vector<uint32_t>& typeIds);
 
 	void RegWithId(uint32_t id);
 	void UnRegWithId(uint32_t id);
@@ -72,5 +75,5 @@ protected:
 template<typename TComponent>
 TComponent* ISceneNodeComponent::As()
 {
-	return dynamic_cast<TComponent*>(this);
+	return static_cast<TComponent*>(this);
 }

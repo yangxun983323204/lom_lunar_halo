@@ -66,6 +66,9 @@ public:
 	void SetCellHideCallback(CellNotifyCallback func);
 	// 当cell处于预加载区域时的回调
 	void SetCellWillShowCallback(CellNotifyCallback func);
+
+	//遍历可视单元格
+	void ViewCellForeach(CellNotifyCallback func);
 	
 	std::string GetDebugInfo();
 private:

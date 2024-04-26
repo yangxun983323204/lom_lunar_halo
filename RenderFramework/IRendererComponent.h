@@ -14,7 +14,7 @@ public:
 	}
 	virtual void OnRender(IGraphic2D* gfx) = 0;
 	inline virtual void OnRenderDebug(SpriteRenderSystem* renderSystem, IGraphic2D* gfx) {};
-	virtual void FillTypeIds(std::set<uint32_t>& set) override;
+	virtual void FillTypeIds(std::vector<uint32_t>& typeIds) override;
 
 	DirectX::XMFLOAT4 Color;
 	int SortLayer = 0;

@@ -1,5 +1,6 @@
 #pragma once
 #include "IProcess.h"
+#include "RmlUi/Core.h"
 
 class Game;
 namespace YX {
@@ -20,5 +21,6 @@ public:
 
 private:
 	//std::shared_ptr<YX::GUI::Canvas> _testUI;
+	Rml::ElementDocument* _ui;
 };
 

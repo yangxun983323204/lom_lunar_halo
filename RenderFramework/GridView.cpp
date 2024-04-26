@@ -292,6 +292,23 @@ public:
 		}
 	}
 
+	void ViewCellForeach(CellNotifyCallback func)
+	{
+		auto cellViewRect = GetAlignCellRect(_viewRect);
+		auto startY = cellViewRect.y;
+		auto stopY = cellViewRect.y + cellViewRect.height;
+		auto startX = cellViewRect.x;
+		auto stopX = cellViewRect.x + cellViewRect.width;
+
+		for (long y = cellViewRect.y; y < stopY; y++)
+		{
+			for (long x = cellViewRect.x; x < stopX; x++)
+			{
+				auto* cellView = GetCellViewDirect(x, y);
+				func(cellView);
+			}
+		}
+	}
 public:
 	CellNotifyCallback _onCellShow;
 	CellNotifyCallback _onCellHide;
@@ -370,6 +387,11 @@ void GridView::SetCellHideCallback(CellNotifyCallback func)
 void GridView::SetCellWillShowCallback(CellNotifyCallback func)
 {
 	_inner->_onCellWillShow = func;
+}
+
+void GridView::ViewCellForeach(CellNotifyCallback func)
+{
+	_inner->ViewCellForeach(func);
 }
 
 std::string GridView::GetDebugInfo()

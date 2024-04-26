@@ -116,7 +116,7 @@ namespace YX {
 
 		uint32_t _geometryIdGen;
 
-		unordered_map<uint32_t, shared_ptr<GeometryData>> _geometries;
+		unordered_map<Rml::CompiledGeometryHandle, shared_ptr<GeometryData>> _geometries;
 
 		LoadTextureFunc _loadTexFunc;
 		GenTextureFunc _genTexFunc;

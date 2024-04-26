@@ -7,7 +7,42 @@
 </head>
 <body>
   <div id="layout" class="ui_root_layout">
-    <p id="debug">用来debug</p>
+    <div id="debug_root">
+      <p id="debug">用来debug</p>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Bg_0" checked/>
+      <label class="LayerDrawLbl">背景0</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Bg_1" checked/>
+      <label class="LayerDrawLbl">背景1</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Object" checked/>
+      <label class="LayerDrawLbl">物体</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Actor" checked/>
+      <label class="LayerDrawLbl">角色</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Overlay" checked/>
+      <label class="LayerDrawLbl">覆层</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Fx_0" checked/>
+      <label class="LayerDrawLbl">特效0</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Fx_1" checked/>
+      <label class="LayerDrawLbl">特效1</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Fx_2" checked/>
+      <label class="LayerDrawLbl">特效2</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Debug_0" checked/>
+      <label class="LayerDrawLbl">调试0</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Debug_1" checked/>
+      <label class="LayerDrawLbl">调试1</label>
+
+      <input type="checkbox" class="LayerDrawCtrl" id="LayerDraw_Debug_2" checked/>
+      <label class="LayerDrawLbl">调试2</label>
+    </div>
   </div>
 </body>
 </rml>

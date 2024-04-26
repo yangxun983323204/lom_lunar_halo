@@ -2,8 +2,10 @@
 #include "../RenderFramework/GridView.h"
 #include "../RenderFramework/SceneNode.h"
 #include <vector>
+#include <map>
 
 class MirWorldRenderManager;
+class IGraphic2D;
 
 class MirCellView : public CellView
 {
@@ -11,6 +13,7 @@ public:
 	MirCellView(int rowIdx, int colIdx, MirWorldRenderManager* mgr);
 	virtual ~MirCellView() override;
 
+	static void DrawLayer(int layer, CellView* inst, IGraphic2D* graphic);
 protected:
 	virtual void OnUnload() override;
 	virtual void OnLoad() override;
@@ -23,10 +26,8 @@ private:
 	void SetUpBg();
 	void SetUpMid();
 	void SetUpDebugBarrier();
-	void SetUpDebugFrame();
 
-	std::vector<weak_ptr<SceneNode>> _actors;
-	weak_ptr<SceneNode> _barrierTex;
-	weak_ptr<SceneNode> _frameLeftTex;
-	weak_ptr<SceneNode> _frameBottomTex;
+	std::vector<std::vector<weak_ptr<SceneNode>>> _layeredActors;
+
+	static vector<weak_ptr<ISceneNodeComponent>> _tmpCpts;
 };

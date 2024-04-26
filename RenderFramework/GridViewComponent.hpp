@@ -10,11 +10,12 @@ public:
 	inline void Init(uint32_t cellWidth, uint32_t cellHeight, uint32_t rows, uint32_t cols, CellCreateFunctor createFunctor = {})
 	{
 		_gridView = std::make_unique<GridView>(cellWidth, cellHeight, rows, cols, createFunctor);
+		bEnableTick = true;
 	}
 
 	inline GridView* GetView() { return _gridView.get(); }
 
-	inline void SyncNodePos()
+	virtual void Tick(uint64_t totalMs, uint32_t deltaMs) override
 	{
 		if (!_gridView)
 			return;
@@ -26,10 +27,10 @@ public:
 	inline std::string GetDebugInfo() { return _gridView->GetDebugInfo(); }
 
 protected:
-	virtual void FillTypeIds(std::set<uint32_t>& set) override 
+	virtual void FillTypeIds(std::vector<uint32_t>& typeIds) override 
 	{
-		ISceneNodeComponent::FillTypeIds(set);
-		set.insert(GridViewComponent::TypeId);
+		ISceneNodeComponent::FillTypeIds(typeIds);
+		typeIds.push_back(GridViewComponent::TypeId);
 	}
 private:
 	unique_ptr<GridView> _gridView;

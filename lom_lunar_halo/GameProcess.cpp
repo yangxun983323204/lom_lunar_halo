@@ -18,8 +18,6 @@ void GameProcess::StartEnter()
         string sizeStr = "map size:" + std::to_string(mapData->w()) + "," + std::to_string(mapData->h());
         MessageBox(_game->GetDeviceResource()->GetWindow(), _W(sizeStr).c_str(), _W("测试map加载").c_str(), 0);
         _game->GetWorldRenderManager()->SetMapData(mapData);
-        _game->GetWorldRenderManager()->DebugBarrier = true;
-        _game->GetWorldRenderManager()->DebugGrid = true;
     }
     else {
         MessageBox(_game->GetDeviceResource()->GetWindow(), _W("加载map失败").c_str(), _W("测试map加载").c_str(), 0);
@@ -28,7 +26,7 @@ void GameProcess::StartEnter()
     HeroData hero{};
     hero.NetId = 1;
     hero.Name = "小明";
-    hero.Pos = { 399,471 };
+    hero.Pos = Mir::GetCellCenter(399, 471);
     hero.Dir = Mir::Direction::Bottom;
     hero.Dress = 8;
     hero.Gender = Mir::ActorType::Woman;
@@ -39,7 +37,8 @@ void GameProcess::StartEnter()
     _game->GetWorldRenderManager()->SetSelfHero(hero);
     //
     string rmlPath = _game->GetSetting()->GetUILayoutDir() + "game.rml";
-    _game->GetRmlUiAdapter()->GetContext()->LoadDocument(rmlPath)->Show();
+    _ui = _game->GetRmlUiAdapter()->GetContext()->LoadDocument(rmlPath);
+    _ui->Show();
 
 	_state = IProcess::State::Entered;
 }
@@ -47,7 +46,8 @@ void GameProcess::StartEnter()
 void GameProcess::StartExit()
 {
     _state = IProcess::State::Exiting;
-    _game->GetRmlUiAdapter()->GetContext()->UnloadAllDocuments();
+    _game->GetRmlUiAdapter()->GetContext()->UnloadDocument(_ui);
+    _ui = nullptr;
     _game->GetWorldRenderManager()->Clear();
 	_state = IProcess::State::Exited;
 }
@@ -85,13 +85,16 @@ void GameProcess::Update(DX::StepTimer const& timer)
     float x = (float)vp.x / Mir::CellW;
     float y = (float)vp.y / Mir::CellH;
     auto cell = _game->GetWorldRenderManager()->GetViewPointCell();
-    auto debug = _game->GetRmlUiAdapter()->GetContext()->GetDocument(0)->GetElementById("debug");
-    auto str = std::format("fps:{2}<br/>视点:({0:.1f},{1:.1f})，格坐标：({4},{5})<br/>地图格:{3}", 
-        x, y, timer.GetFramesPerSecond(), 
-        _game->GetWorldRenderManager()->GetGridDebugInfo(),
-        cell->GetColIdx(), cell->GetRowIdx());
+    auto debug = _ui->GetElementById("debug");
+    if (debug)
+    {
+        auto str = std::format("fps:{2}<br/>视点:({0:.1f},{1:.1f})，格坐标：({4},{5})<br/>地图格:{3}",
+            x, y, timer.GetFramesPerSecond(),
+            _game->GetWorldRenderManager()->GetGridDebugInfo(),
+            cell->GetColIdx(), cell->GetRowIdx());
 
-    debug->SetInnerRML(str);
+        debug->SetInnerRML(str);
+    }
 }
 
 void GameProcess::GetWindowSize(int& w, int& h)

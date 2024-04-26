@@ -22,7 +22,7 @@ public:
 	DirectX::SimpleMath::Rectangle GetWorldRect();
 	virtual void OnRender(IGraphic2D* gfx) override;
 	virtual void OnRenderDebug(SpriteRenderSystem* renderSystem, IGraphic2D* gfx) override;
-	virtual void FillTypeIds(std::set<uint32_t>& set) override;
+	virtual void FillTypeIds(std::vector<uint32_t>& typeIds) override;
 
 	weak_ptr<Sprite> Sprite;
 	int OverrideWidth;

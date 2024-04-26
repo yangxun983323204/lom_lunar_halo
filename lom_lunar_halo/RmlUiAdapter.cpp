@@ -6,11 +6,13 @@
 #include <sstream>
 #include <vector>
 #include <functional>
+#include "../DirectXTK-main/Inc/Keyboard.h"
 
 using std::string;
 using std::stringstream;
 using std::vector;
 using namespace YX;
+using DirectX::Keyboard;
 
 RmlUiAdapter::RmlUiAdapter(Game* game):
 	_game{game}, _textureIdGen {0},
@@ -49,8 +51,7 @@ RmlUiAdapter::RmlUiAdapter(Game* game):
 		throw L"Rml::CreateContext失败";
 	}
 	// debugger
-	//Rml::Debugger::Initialise(_rmlCtx);
-	//Rml::Debugger::SetVisible(true);
+	Rml::Debugger::Initialise(_rmlCtx);
 
 	Rml::LoadFontFace("./font/NotoEmoji-Regular.ttf");
 	Rml::LoadFontFace("./font/LatoLatin-Bold.ttf");
@@ -67,7 +68,12 @@ RmlUiAdapter::~RmlUiAdapter()
 
 void YX::RmlUiAdapter::Update()
 {
-
+	auto state = Keyboard::Get().GetState();
+	if (state.IsKeyDown(Keyboard::Keys::F8))
+	{
+		auto s = Rml::Debugger::IsVisible();
+		Rml::Debugger::SetVisible(!s);
+	}
 	_rmlCtx->Update();
 }
 

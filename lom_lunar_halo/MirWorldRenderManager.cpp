@@ -85,7 +85,30 @@ void MirWorldRenderManager::Update(DX::StepTimer const& timer)
 
 void MirWorldRenderManager::Render()
 {
-    _renderSystem->Render();
+    //_renderSystem->Render();// 不需要使用精灵排序，因此手动渲染。
+    auto grid = _gridView->GetView();
+    if (!grid)
+        return;
+
+    auto cameraCpt = _camera->GetComponent<Camera>().lock()->As<Camera>();
+    if (cameraCpt->ClearType == Camera::ClearType::Color) {
+        _renderSystem->Clear(cameraCpt->ClearColor);
+    }
+
+    auto cameraWPos = _camera->GetWorldPosition();
+    auto _draw = _renderSystem->GetGraphic2D();
+
+    _draw->Begin(cameraWPos, DpiScale * UserScale);
+
+    
+    for (int i = 0; i < (int)Layer::Max; i++)
+    {
+        grid->ViewCellForeach([i, _draw](CellView* cell) {
+            MirCellView::DrawLayer(i, cell, _draw);
+            });
+    }
+    
+    _draw->End();
 }
 
 void MirWorldRenderManager::Clear()
@@ -115,8 +138,7 @@ void MirWorldRenderManager::SetSelfHero(HeroData& data)
     s->GetSceneNode()->SetLocalPosition({ -Mir::CellWHalf, -Mir::CellHHalf });
     SetSelfHeroDirection(data.Dir);
     _selfHeroId = data.NetId;
-    auto cPos = data.Pos;
-    SetViewPoint(Mir::GetCellCenter(cPos.x, cPos.y));
+    SetViewPoint(data.Pos);
 }
 
 void MirWorldRenderManager::SetSelfHeroDirection(Mir::Direction dir)

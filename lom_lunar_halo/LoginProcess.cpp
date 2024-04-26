@@ -15,13 +15,15 @@ void LoginProcess::StartEnter()
 	_game->SetWindowAsLogin();
 	//_testUI = YX::GUI::LayoutLoader::Parse(_W(_game->GetSetting()->GetUILayoutDir() + "login.xml"));
 	string rmlPath = _game->GetSetting()->GetUILayoutDir() + "login.rml";
-	_game->GetRmlUiAdapter()->GetContext()->LoadDocument(rmlPath)->Show();
+	_ui = _game->GetRmlUiAdapter()->GetContext()->LoadDocument(rmlPath);
+	_ui->Show();
 	_state = IProcess::State::Entered;
 }
 
 void LoginProcess::StartExit()
 {
-	_game->GetRmlUiAdapter()->GetContext()->UnloadAllDocuments();
+	_game->GetRmlUiAdapter()->GetContext()->UnloadDocument(_ui);
+	_ui = nullptr;
 	//_testUI.reset();
 	_state = IProcess::State::Exited;
 }

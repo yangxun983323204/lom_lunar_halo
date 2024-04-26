@@ -43,8 +43,8 @@ namespace YX {
 		unique_ptr<DX11RmlRenderer> _renderer;
 		unique_ptr<SystemInterface_Win32> _system;
 		// 加载的图片，由UiSpriteManager管理
-		unordered_map<uint32_t, shared_ptr<SpriteResHandle>> _textures;
+		unordered_map<Rml::TextureHandle, shared_ptr<SpriteResHandle>> _textures;
 		// 从像素生成的图片，自己管理
-		unordered_map<uint32_t, shared_ptr<Sprite>> _dynamicTextures;
+		unordered_map<Rml::TextureHandle, shared_ptr<Sprite>> _dynamicTextures;
 	};
 }

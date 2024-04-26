@@ -43,6 +43,7 @@ public:
 	weak_ptr<ISceneNodeComponent> GetComponent();
 	weak_ptr<ISceneNodeComponent> GetComponent(int typeId);
 	vector<weak_ptr<ISceneNodeComponent>> GetComponents(int typeId);
+	void GetComponentsNoAlloc(int typeId, vector<weak_ptr<ISceneNodeComponent>>& outCpts);
 	vector<weak_ptr<ISceneNodeComponent>> GetComponentsInChildren(int typeId);
 	void RemoveComponent(weak_ptr<ISceneNodeComponent> component);
 	bool HasTag(string tag);
@@ -59,6 +60,8 @@ private:
 	weak_ptr<SceneNode> _parent;
 	vector<shared_ptr<SceneNode>> _children;
 	vector<shared_ptr<ISceneNodeComponent>> _components;
+
+	std::vector<uint32_t> _tmpTypes{};
 };
 
 template<class TComponent>

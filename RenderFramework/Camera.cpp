@@ -1,7 +1,7 @@
 #include "Camera.h"
 
-void Camera::FillTypeIds(std::set<uint32_t>& set)
+void Camera::FillTypeIds(std::vector<uint32_t>& typeIds)
 {
-	ISceneNodeComponent::FillTypeIds(set);
-	set.insert(Camera::TypeId);
+	ISceneNodeComponent::FillTypeIds(typeIds);
+	typeIds.push_back(Camera::TypeId);
 }

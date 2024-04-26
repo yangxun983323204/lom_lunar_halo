@@ -1,8 +1,10 @@
 #include "Animator.h"
+#include "SpriteRendererComponent.h"
 
 Animator::Animator():
     _anims{}, _currIdx{0}
 {
+    bEnableTick = true;
     _hashHelper = std::hash<string>();
 }
 
@@ -55,8 +57,29 @@ int Animator::SetCurrent(string name)
     return _currIdx;
 }
 
-void Animator::FillTypeIds(std::set<uint32_t>& set)
+void Animator::Tick(uint64_t totalMs, uint32_t deltaMs)
 {
-    ISceneNodeComponent::FillTypeIds(set);
-    set.insert(Animator::TypeId);
+    auto anim = GetCurrent();
+    if (anim)
+    {
+        anim->Update(totalMs);
+        if (anim->FrameChanged()) {
+            anim->ResetFlag();
+            auto sp = anim->GetCurrentFrame();
+            if (!sp.expired())
+            {
+                auto renderer = GetSceneNode()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
+                if (renderer)
+                {
+                    renderer->Sprite = sp;
+                }
+            }
+        }
+    }
+}
+
+void Animator::FillTypeIds(std::vector<uint32_t>& typeIds)
+{
+    ISceneNodeComponent::FillTypeIds(typeIds);
+    typeIds.push_back(Animator::TypeId);
 }

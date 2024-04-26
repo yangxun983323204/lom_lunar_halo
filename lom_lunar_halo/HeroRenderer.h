@@ -31,7 +31,7 @@ public:
 	_SCENE_NODE_COMPONENT_ID(HeroRenderer)
 	void Init(HeroData& hero, AnimDatabase& animDB, WilSpriteManager* resMgr);
 	virtual void OnRender(IGraphic2D* gfx) override;
-	virtual void FillTypeIds(std::set<uint32_t>& set) override;
+	virtual void FillTypeIds(std::vector<uint32_t>& typeIds) override;
 private:
 	Animation _anims[(int)Mir::HeroSubPart::MAX][(int)Mir::Direction::MAX];
 };

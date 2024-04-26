@@ -6,5 +6,18 @@
 p {
     color: #000000;
     font-size: 1em;
+}
+
+#debug_root{
     background-color: rgb(33, 248, 255);
+}
+
+.LayerDrawCtrl {
+    color: #000000;
+    visibility: visible;
+    display: inline-block;
+}
+
+.LayerDrawLbl {
+    color: #000000;
 }

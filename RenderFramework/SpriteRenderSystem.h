@@ -36,13 +36,14 @@ public:
 	inline void SetLayout(int w, int h) { _vw = w; _vh = h; }
 	inline void SetDPIScale(float s) { _dpiScale = s; }
 	void Render();
+	void Clear(DirectX::XMFLOAT4 color);
 	void DrawDebugBounds(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color);
 	void DrawDebugOverlay(XMINT2 wpos, DirectX::SimpleMath::Rectangle wRect, DirectX::XMFLOAT4 color);
-	
+	inline IGraphic2D* GetGraphic2D() { return _draw.get(); }
+
 	bool Debug;
 private:
 	void RenderCamera(Camera* camera, function<bool(IRendererComponent*)> filter, bool debugMode);
-	void Clear(DirectX::XMFLOAT4 color);
 	shared_ptr<Sprite> GenTexture(const byte* source, uint32_t width, uint32_t height);
 	void CreateDebugRes();
 

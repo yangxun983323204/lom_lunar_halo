@@ -5,28 +5,15 @@
 
 void AnimatorSystem::Update(uint64_t totalMs, uint32_t deltaMs)
 {
-	auto animators = ISystem::GetComponentsByType(Animator::TypeId);
-	for (auto i : animators) {
+	auto updater = ISystem::GetComponentsByType(ISceneNodeComponent::TypeId);
+	for (auto i : updater) {
+		if (!i->GetSceneNode()->IsActive())
+			continue;
+
 		if (!i->Enable)
 			continue;
 
-		auto animator = i->As<Animator>();
-		auto anim = animator->GetCurrent();
-		if (anim)
-		{
-			anim->Update(totalMs);
-			if (anim->FrameChanged()) {
-				anim->ResetFlag();
-				auto sp = anim->GetCurrentFrame();
-				if (!sp.expired())
-				{
-					auto renderer = i->GetSceneNode()->GetComponent<SpriteRendererComponent>().lock()->As<SpriteRendererComponent>();
-					if (renderer)
-					{
-						renderer->Sprite = sp;
-					}
-				}
-			}
-		}
+		if(i->bEnableTick)
+			i->Tick(totalMs, deltaMs);
 	}
 }
